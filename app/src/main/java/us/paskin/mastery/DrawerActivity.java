@@ -1,5 +1,6 @@
 package us.paskin.mastery;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -80,13 +82,13 @@ public class DrawerActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.view_skills) {
+            startActivity(new Intent(this, SkillListActivity.class));
+        } else if (id == R.id.view_skill_groups) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.view_schedules) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.view_preferences) {
 
         }
 
