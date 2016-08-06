@@ -50,8 +50,11 @@ public class SkillListActivity extends DrawerActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Start the detail activity with no ARG_ITEM_ID to create a new one.
+                Context context = view.getContext();
+                Intent intent = new Intent(context, SkillDetailActivity.class);
+                intent.removeExtra(SkillDetailFragment.ARG_ITEM_ID);
+                context.startActivity(intent);
             }
         });
 

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 /**
  * An activity representing a single Skill detail screen. This
@@ -30,8 +31,11 @@ public class SkillDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (saveSkill(view)) {
+                    SkillDetailActivity activity = SkillDetailActivity.this;
+                    NavUtils.navigateUpTo(activity,
+                            new Intent(activity, SkillListActivity.class));
+                }
             }
         });
 
@@ -54,8 +58,10 @@ public class SkillDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(SkillDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(SkillDetailFragment.ARG_ITEM_ID));
+            if (getIntent().hasExtra(SkillDetailFragment.ARG_ITEM_ID)) {
+                arguments.putString(SkillDetailFragment.ARG_ITEM_ID,
+                        getIntent().getStringExtra(SkillDetailFragment.ARG_ITEM_ID));
+            }
             SkillDetailFragment fragment = new SkillDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -79,5 +85,11 @@ public class SkillDetailActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // Returns true on success.
+    boolean saveSkill(View view) {
+        Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
+        return true;
     }
 }

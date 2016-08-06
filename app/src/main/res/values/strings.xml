@@ -11,4 +11,5 @@
     <string name="Preferences">Preferences</string>
     <string name="title_skill_list">Skills</string>
     <string name="title_skill_detail">Skill Detail</string>
+    <string name="saved_skill">Skill updated</string>
 </resources>
