@@ -10,4 +10,5 @@ option java_outer_classname = "Proto";
 // protoc us/paskin/mastery/skill.proto --java_out=.
 message Skill {
   optional string name = 1;
+  optional uint64 date_last_practiced = 2;
 }

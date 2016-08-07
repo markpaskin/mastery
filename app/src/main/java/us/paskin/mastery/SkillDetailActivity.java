@@ -1,17 +1,25 @@
 package us.paskin.mastery;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import us.paskin.mastery.Proto.Skill;
@@ -23,12 +31,41 @@ import us.paskin.mastery.Proto.Skill;
  * in a {@link SkillListActivity}.
  */
 public class SkillDetailActivity extends AppCompatActivity {
+    /**
+     * The fragment argument representing the item ID that this fragment
+     * represents.
+     */
+    public static final String ARG_SKILL_INDEX = "skill_index";
 
-    protected SkillDetailFragment fragment;
+    public static final int SKILL_EDITED_RESULT = 1;
+
+    public static final String RESULT_EDITED_SKILL_INDEX = "edited_skill_index";
+
+    /**
+     * The dummy content this fragment is presenting.
+     */
+    private Proto.Skill skill;
+
+    /**
+     * This is true if there have been changes that weren't committed.
+     */
+    private boolean unsavedChanges = false;
+
+    /**
+     * This is true if there were changes saved.
+     */
+    private boolean savedChanges = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getIntent().hasExtra(ARG_SKILL_INDEX)) {
+            final int skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
+            skill = SkillData.getInstance().getSkillByIndex(skillIndex);
+            assert skill != null;
+        }
+
         setContentView(R.layout.activity_skill_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
@@ -37,9 +74,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (saveSkill(view)) {
-                    NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
-                }
+                if (saveSkill(view)) finish();
             }
         });
 
@@ -49,31 +84,27 @@ public class SkillDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
-        // (e.g. when rotating the screen from portrait to landscape).
-        // In this case, the fragment will automatically be re-added
-        // to its container so we don't need to manually add it.
-        // For more information, see the Fragments API guide at:
-        //
-        // http://developer.android.com/guide/components/fragments.html
-        //
-        if (savedInstanceState != null) {
-            // TODO
-        } else if (fragment == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            Bundle arguments = new Bundle();
-            if (getIntent().hasExtra(SkillDetailFragment.ARG_ITEM_ID)) {
-                arguments.putString(SkillDetailFragment.ARG_ITEM_ID,
-                        getIntent().getStringExtra(SkillDetailFragment.ARG_ITEM_ID));
-            }
-            fragment = new SkillDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.skill_detail_container, fragment)
-                    .commit();
+        EditText nameEditText = ((EditText) findViewById(R.id.skill_name));
+        if (skill != null) {
+            updateTitle(skill.getName());
+            nameEditText.setText(skill.getName());
         }
+
+        nameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                unsavedChanges = true;
+                updateTitle(editable);
+            }
+        });
     }
 
     @Override
@@ -93,11 +124,18 @@ public class SkillDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    void updateTitle(CharSequence title) {
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null) appBarLayout.setTitle(title);
+    }
+
     // Returns true on success.
     boolean saveSkill(View view) {
-        if (!fragment.hasChanges()) return true;
+        if (!unsavedChanges) return true;
         SkillData data = new SkillData();
         data.addSkill(Skill.newBuilder().setName("foo").build());
+        unsavedChanges = false;
+        savedChanges = true;
         Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         return true;
     }
@@ -106,10 +144,11 @@ public class SkillDetailActivity extends AppCompatActivity {
      * Determines if it is safe to exit.
      */
     private void maybeExit() {
-        if (!fragment.hasChanges()) {
-            NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
+        if (!unsavedChanges) {
+            finish();
             return;
         }
+        // TODO: i18n
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.discard_edits_title)
@@ -117,11 +156,21 @@ public class SkillDetailActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
+                        SkillDetailActivity.this.finish();
                     }
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
+    }
+
+    @Override
+    public void finish() {
+        Intent intent = new Intent();
+        if (savedChanges) {
+            intent.putExtra(RESULT_EDITED_SKILL_INDEX, 1);  // TODO
+            setResult(SKILL_EDITED_RESULT, intent);
+        }
+        super.finish();
     }
 
     // Confirms if it is safe to exit before doing so.

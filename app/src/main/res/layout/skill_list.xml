@@ -10,4 +10,4 @@
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="us.paskin.mastery.SkillListActivity"
-    tools:listitem="@layout/skill_list_content" />
+    tools:listitem="@layout/skill_list_item" />

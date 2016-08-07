@@ -39,7 +39,14 @@
         android:id="@+id/skill_detail_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <include
+            layout="@layout/skill_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -47,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_menu_save"
+        android:src="@drawable/ic_done_black_24dp"
         android:tint="@android:color/white"
         app:layout_anchor="@+id/skill_detail_container"
         app:layout_anchorGravity="top|end" />
