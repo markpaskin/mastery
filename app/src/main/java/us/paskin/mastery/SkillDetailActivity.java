@@ -1,9 +1,11 @@
 package us.paskin.mastery;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +22,8 @@ import android.widget.Toast;
  */
 public class SkillDetailActivity extends AppCompatActivity {
 
+    protected SkillDetailFragment fragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,9 +36,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (saveSkill(view)) {
-                    SkillDetailActivity activity = SkillDetailActivity.this;
-                    NavUtils.navigateUpTo(activity,
-                            new Intent(activity, SkillListActivity.class));
+                    NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
                 }
             }
         });
@@ -54,7 +56,9 @@ public class SkillDetailActivity extends AppCompatActivity {
         //
         // http://developer.android.com/guide/components/fragments.html
         //
-        if (savedInstanceState == null) {
+        if (savedInstanceState != null) {
+            // TODO
+        } else if (fragment == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
@@ -62,7 +66,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                 arguments.putString(SkillDetailFragment.ARG_ITEM_ID,
                         getIntent().getStringExtra(SkillDetailFragment.ARG_ITEM_ID));
             }
-            SkillDetailFragment fragment = new SkillDetailFragment();
+            fragment = new SkillDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.skill_detail_container, fragment)
@@ -81,7 +85,12 @@ public class SkillDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            NavUtils.navigateUpTo(this, new Intent(this, SkillListActivity.class));
+            maybeExit(new Runnable() {
+                @Override
+                public void run() {
+                    NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
+                }
+            });
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -89,7 +98,43 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     // Returns true on success.
     boolean saveSkill(View view) {
+        if (!fragment.hasChanges()) return true;
         Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         return true;
+    }
+
+    /**
+     * Determines if it is safe to exit.
+     *
+     * @param onExit If it is determined to be safe to exit, then run onExit.
+     */
+    private void maybeExit(final Runnable onExit) {
+        if (!fragment.hasChanges()) {
+            onExit.run();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.discard_edits_title)
+                .setMessage(R.string.discard_edits_question)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onExit.run();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
+    }
+
+    // Confirms if it is safe to exit before doing so.
+    @Override
+    public void onBackPressed() {
+        maybeExit(new Runnable() {
+            @Override
+            public void run() {
+                SkillDetailActivity.this.onBackPressed();
+            }
+        });
     }
 }

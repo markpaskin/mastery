@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import us.paskin.mastery.dummy.DummyContent;
@@ -30,10 +33,22 @@ public class SkillDetailFragment extends Fragment {
     private DummyContent.DummyItem mItem;
 
     /**
+     * This is true if there have been changes that weren't committed.
+     */
+    private boolean changed = false;
+
+    /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public SkillDetailFragment() {
+    }
+
+    /**
+     * @return true if there have been changes made
+     */
+    public boolean hasChanges() {
+        return changed;
     }
 
     @Override
@@ -45,12 +60,14 @@ public class SkillDetailFragment extends Fragment {
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
             mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+        }
+    }
 
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.content);
-            }
+    void updateTitle(CharSequence title) {
+        Activity activity = this.getActivity();
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null) {
+            appBarLayout.setTitle(title);
         }
     }
 
@@ -59,10 +76,28 @@ public class SkillDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.skill_detail, container, false);
 
+        EditText nameEditText = ((EditText) rootView.findViewById(R.id.skill_name));
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.skill_detail)).setText(mItem.details);
+            updateTitle(mItem.content);
+            nameEditText.setText(mItem.details);
         }
+
+        nameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                SkillDetailFragment.this.changed = true;
+                updateTitle(editable);
+            }
+        });
 
         return rootView;
     }

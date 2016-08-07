@@ -11,5 +11,17 @@
     <string name="Preferences">Preferences</string>
     <string name="title_skill_list">Skills</string>
     <string name="title_skill_detail">Skill Detail</string>
+    <string name="add_skill">Add Skill</string>
+    <string name="name">Name:</string>
     <string name="saved_skill">Skill updated</string>
+    <string name="skill_name">Skill name</string>
+
+
+    <string name="discard_edits_title">Discard changes?</string>
+    <string name="discard_edits_question">You have unsaved changes.  Do you want to discard them?</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+
 </resources>
