@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package us.paskin.mastery;
+
+option java_package = "us.paskin.mastery";
+
+option java_outer_classname = "Proto";
+
+// cd /Users/baq/AndroidStudioProjects/Mastery/app/src/main/java/
+// protoc us/paskin/mastery/skill.proto --java_out=.
+message Skill {
+  optional string name = 1;
+}

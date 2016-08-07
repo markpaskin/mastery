@@ -14,6 +14,8 @@ import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import us.paskin.mastery.Proto.Skill;
+
 /**
  * An activity representing a single Skill detail screen. This
  * activity is only used narrow width devices. On tablet-size devices,
@@ -85,12 +87,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            maybeExit(new Runnable() {
-                @Override
-                public void run() {
-                    NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
-                }
-            });
+            maybeExit();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -99,18 +96,18 @@ public class SkillDetailActivity extends AppCompatActivity {
     // Returns true on success.
     boolean saveSkill(View view) {
         if (!fragment.hasChanges()) return true;
+        SkillData data = new SkillData();
+        data.addSkill(Skill.newBuilder().setName("foo").build());
         Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         return true;
     }
 
     /**
      * Determines if it is safe to exit.
-     *
-     * @param onExit If it is determined to be safe to exit, then run onExit.
      */
-    private void maybeExit(final Runnable onExit) {
+    private void maybeExit() {
         if (!fragment.hasChanges()) {
-            onExit.run();
+            NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
             return;
         }
         new AlertDialog.Builder(this)
@@ -120,7 +117,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        onExit.run();
+                        NavUtils.navigateUpTo(SkillDetailActivity.this, new Intent(SkillDetailActivity.this, SkillListActivity.class));
                     }
                 })
                 .setNegativeButton(R.string.no, null)
@@ -130,11 +127,6 @@ public class SkillDetailActivity extends AppCompatActivity {
     // Confirms if it is safe to exit before doing so.
     @Override
     public void onBackPressed() {
-        maybeExit(new Runnable() {
-            @Override
-            public void run() {
-                SkillDetailActivity.this.onBackPressed();
-            }
-        });
+        maybeExit();
     }
 }
