@@ -42,6 +42,10 @@ public class SkillData {
         return index;
     }
 
+    public void updateSkill(int index, Skill skill) {
+        skills.set(index, skill);
+    }
+
     public String timeSinceLastPracticedText(Skill skill) {
         // TODO: i18n
         if (!skill.hasDateLastPracticed()) {

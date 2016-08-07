@@ -1,7 +1,6 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,18 +10,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import us.paskin.mastery.Proto.Skill;
 
 /**
  * An activity representing a single Skill detail screen. This
@@ -32,19 +25,32 @@ import us.paskin.mastery.Proto.Skill;
  */
 public class SkillDetailActivity extends AppCompatActivity {
     /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
+     * The intent argument representing the index of the skill being edited/added.
+     * It is both an input and output argument.
      */
     public static final String ARG_SKILL_INDEX = "skill_index";
 
-    public static final int SKILL_EDITED_RESULT = 1;
-
-    public static final String RESULT_EDITED_SKILL_INDEX = "edited_skill_index";
 
     /**
-     * The dummy content this fragment is presenting.
+     * These are intent request types.
+     */
+    public static final int REQ_EDIT_SKILL = 1;
+    public static final int REQ_ADD_SKILL = 2;
+
+    /**
+     * The index of the skill being edited.  If this is -1, it's a new skill.
+     */
+    private int skillIndex = -1;
+
+    /**
+     * The skill before any updates.  This is null if a new skill is being created.
      */
     private Proto.Skill skill;
+
+    /**
+     * The builder that is used to update the skill.
+     */
+    private Proto.Skill.Builder skillBuilder;
 
     /**
      * This is true if there have been changes that weren't committed.
@@ -56,14 +62,28 @@ public class SkillDetailActivity extends AppCompatActivity {
      */
     private boolean savedChanges = false;
 
+    /**
+     * This is true if a new skill was added.
+     */
+    private boolean addedSkill = false;
+
+    /**
+     * Sets up the activity.
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize this object from the intent arguments.
         if (getIntent().hasExtra(ARG_SKILL_INDEX)) {
-            final int skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
+            skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
             skill = SkillData.getInstance().getSkillByIndex(skillIndex);
             assert skill != null;
+            skillBuilder = skill.toBuilder();
+        } else {
+            skillBuilder = Proto.Skill.newBuilder();
         }
 
         setContentView(R.layout.activity_skill_detail);
@@ -74,7 +94,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (saveSkill(view)) finish();
+                if (saveSkill()) finish();
             }
         });
 
@@ -102,11 +122,17 @@ public class SkillDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 unsavedChanges = true;
+                skillBuilder.setName(editable.toString());
                 updateTitle(editable);
             }
         });
     }
 
+    /**
+     * This is invoked if an option is select, e.g., the left arrow to return.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -118,32 +144,46 @@ public class SkillDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            maybeExit();
+            maybeFinish();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Updates the title.
+     * @param title
+     */
     void updateTitle(CharSequence title) {
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) appBarLayout.setTitle(title);
     }
 
-    // Returns true on success.
-    boolean saveSkill(View view) {
+    /**
+     * If there are unsaved changes, they are saved.
+     *
+     * @return true if no failures occur
+     */
+    boolean saveSkill() {
         if (!unsavedChanges) return true;
-        SkillData data = new SkillData();
-        data.addSkill(Skill.newBuilder().setName("foo").build());
+        SkillData data = SkillData.getInstance();
+        if (skillIndex != -1) {
+            data.updateSkill(skillIndex, skillBuilder.build());
+            Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
+        } else {
+            skillIndex = data.addSkill(skillBuilder.build());
+            addedSkill = true;
+            Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
+        }
         unsavedChanges = false;
         savedChanges = true;
-        Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         return true;
     }
 
     /**
-     * Determines if it is safe to exit.
+     *  Finishes if there are no unsaved changes (or the user discards them).
      */
-    private void maybeExit() {
+    private void maybeFinish() {
         if (!unsavedChanges) {
             finish();
             return;
@@ -163,12 +203,17 @@ public class SkillDetailActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Exits this activity, populating the intent results.
+     */
     @Override
     public void finish() {
         Intent intent = new Intent();
         if (savedChanges) {
-            intent.putExtra(RESULT_EDITED_SKILL_INDEX, 1);  // TODO
-            setResult(SKILL_EDITED_RESULT, intent);
+            intent.putExtra(ARG_SKILL_INDEX, skillIndex);
+            setResult(Activity.RESULT_OK, intent);
+        } else {
+            setResult(Activity.RESULT_CANCELED, intent);
         }
         super.finish();
     }
@@ -176,6 +221,6 @@ public class SkillDetailActivity extends AppCompatActivity {
     // Confirms if it is safe to exit before doing so.
     @Override
     public void onBackPressed() {
-        maybeExit();
+        maybeFinish();
     }
 }
