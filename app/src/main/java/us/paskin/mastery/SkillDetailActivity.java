@@ -15,6 +15,7 @@ import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
@@ -23,6 +24,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Inflater;
 
@@ -184,15 +186,33 @@ public class SkillDetailActivity extends AppCompatActivity {
         setupParentGroupLayout(parentGroupLayout);
     }
 
-    void setupParentGroupLayout(TableLayout parentGroupLayout) {
+    private void removeFromSkillGroup(long skillGroupId) {
+        unsavedChanges = true;
+        LinkedList<Long> groupIds = new LinkedList<Long>(skillBuilder.getGroupIdList());
+        if (!groupIds.remove(Long.valueOf(skillGroupId))) {
+            throw new InternalError("Could not remove " + skillGroupId);
+        }
+        skillBuilder.clearGroupId().addAllGroupId(groupIds);
+    }
+
+    void setupParentGroupLayout(final TableLayout parentGroupLayout) {
         if (skill == null) return;
         LayoutInflater inflater = LayoutInflater.from(parentGroupLayout.getContext());
-        for (long groupId : data.getAllSkillGroupIds(skill)) {
+        for (final long groupId : skill.getGroupIdList()) {
             Proto.SkillGroup skillGroup = data.getSkillGroupById(groupId);
-            TableRow row = (TableRow) inflater.inflate(R.layout.parent_group_item, parentGroupLayout, false);
+            final TableRow row = (TableRow) inflater.inflate(R.layout.parent_group_item, parentGroupLayout, false);
             TextView textView = (TextView) row.findViewById(R.id.parent_group_name);
             textView.setText(skillGroup.getName());
             parentGroupLayout.addView(row);
+            View removeButton = row.findViewById(R.id.remove_parent_group_button);
+            removeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    removeFromSkillGroup(groupId);
+                    parentGroupLayout.removeView(row);
+                }
+            });
+
         }
         parentGroupLayout.requestLayout();
     }
@@ -254,7 +274,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     boolean saveSkill() {
         if (!unsavedChanges) return true;
         if (!validate()) return false;
-        if (skillIndex != -1) {
+        if (!addingSkill) {
             data.updateSkill(skillId, skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         } else {
