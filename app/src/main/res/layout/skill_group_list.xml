@@ -2,12 +2,12 @@
 <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/skill_list"
-    android:name="us.paskin.mastery.SkillListFragment"
+    android:id="@+id/skill_group_list"
+    android:name="us.paskin.mastery.SkillGroupListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/activity_horizontal_margin"
     android:layout_marginRight="@dimen/activity_horizontal_margin"
     app:layoutManager="LinearLayoutManager"
-    tools:context="us.paskin.mastery.SkillListActivity"
-    tools:listitem="@layout/skill_list_item" />
+    tools:context="us.paskin.mastery.SkillGroupListActivity"
+    tools:listitem="@layout/skill_group_list_item" />

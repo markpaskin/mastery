@@ -110,7 +110,7 @@ public class DrawerActivity extends AppCompatActivity
         if (id == R.id.view_skills) {
             startActivity(new Intent(this, SkillListActivity.class));
         } else if (id == R.id.view_skill_groups) {
-
+            startActivity(new Intent(this, SkillGroupListActivity.class));
         } else if (id == R.id.view_schedules) {
 
         } else if (id == R.id.view_preferences) {

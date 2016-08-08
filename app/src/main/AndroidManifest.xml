@@ -13,10 +13,10 @@
             android:label="@string/title_skill_list"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".SkillDetailActivity"
@@ -26,6 +26,19 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="us.paskin.mastery.SkillListActivity" />
+        </activity>
+        <activity
+            android:name=".SkillGroupListActivity"
+            android:label="@string/title_skill_group_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".SkillGroupDetailActivity"
+            android:label="@string/title_skill_group_detail"
+            android:parentActivityName=".SkillGroupListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="us.paskin.mastery.SkillGroupListActivity" />
         </activity>
     </application>
 
