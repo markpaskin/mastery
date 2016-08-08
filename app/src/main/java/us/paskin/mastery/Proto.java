@@ -40,11 +40,25 @@ public final class Proto {
      * <code>optional int32 priority = 3;</code>
      */
     boolean hasPriority();
-
     /**
      * <code>optional int32 priority = 3;</code>
      */
     int getPriority();
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    java.util.List<java.lang.Long> getGroupIdList();
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    int getGroupIdCount();
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    long getGroupId(int index);
   }
   /**
    * Protobuf type {@code us.paskin.mastery.Skill}
@@ -57,7 +71,7 @@ public final class Proto {
   public static final class Skill extends
           com.google.protobuf.GeneratedMessage implements
           // @@protoc_insertion_point(message_implements:us.paskin.mastery.Skill)
-          SkillOrBuilder {
+      SkillOrBuilder {
     // Use Skill.newBuilder() to construct.
     private Skill(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -66,6 +80,7 @@ public final class Proto {
       name_ = "";
       dateLastPracticed_ = 0L;
       priority_ = 0;
+      groupId_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -112,6 +127,27 @@ public final class Proto {
               priority_ = input.readInt32();
               break;
             }
+            case 32: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                groupId_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              groupId_.add(input.readInt64());
+              break;
+            }
+            case 34: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+                groupId_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                groupId_.add(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -121,6 +157,9 @@ public final class Proto {
                 new com.google.protobuf.InvalidProtocolBufferException(
                         e.getMessage()).setUnfinishedMessage(this));
       } finally {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          groupId_ = java.util.Collections.unmodifiableList(groupId_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -197,19 +236,42 @@ public final class Proto {
 
     public static final int PRIORITY_FIELD_NUMBER = 3;
     private int priority_;
-
     /**
      * <code>optional int32 priority = 3;</code>
      */
     public boolean hasPriority() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-
     /**
      * <code>optional int32 priority = 3;</code>
      */
     public int getPriority() {
       return priority_;
+    }
+
+    public static final int GROUP_ID_FIELD_NUMBER = 4;
+    private java.util.List<java.lang.Long> groupId_;
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    public java.util.List<java.lang.Long>
+    getGroupIdList() {
+      return groupId_;
+    }
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    public int getGroupIdCount() {
+      return groupId_.size();
+    }
+
+    /**
+     * <code>repeated int64 group_id = 4;</code>
+     */
+    public long getGroupId(int index) {
+      return groupId_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -233,6 +295,9 @@ public final class Proto {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, priority_);
       }
+      for (int i = 0; i < groupId_.size(); i++) {
+        output.writeInt64(4, groupId_.get(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -251,6 +316,15 @@ public final class Proto {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
                 .computeInt32Size(3, priority_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < groupId_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+                  .computeInt64SizeNoTag(groupId_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getGroupIdList().size();
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -280,34 +354,34 @@ public final class Proto {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(
             java.io.InputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
     public static us.paskin.mastery.Proto.Skill parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
     public static us.paskin.mastery.Proto.Skill parseDelimitedFrom(
             java.io.InputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(
             com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
@@ -347,7 +421,7 @@ public final class Proto {
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internalGetFieldAccessorTable() {
+          internalGetFieldAccessorTable() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_fieldAccessorTable
                 .ensureFieldAccessorsInitialized(
                         us.paskin.mastery.Proto.Skill.class, us.paskin.mastery.Proto.Skill.Builder.class);
@@ -375,11 +449,13 @@ public final class Proto {
         bitField0_ = (bitField0_ & ~0x00000002);
         priority_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        groupId_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
       public com.google.protobuf.Descriptors.Descriptor
-      getDescriptorForType() {
+          getDescriptorForType() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_descriptor;
       }
 
@@ -411,6 +487,11 @@ public final class Proto {
           to_bitField0_ |= 0x00000004;
         }
         result.priority_ = priority_;
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          groupId_ = java.util.Collections.unmodifiableList(groupId_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.groupId_ = groupId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -438,6 +519,16 @@ public final class Proto {
         if (other.hasPriority()) {
           setPriority(other.getPriority());
         }
+        if (!other.groupId_.isEmpty()) {
+          if (groupId_.isEmpty()) {
+            groupId_ = other.groupId_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureGroupIdIsMutable();
+            groupId_.addAll(other.groupId_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -450,7 +541,7 @@ public final class Proto {
       public Builder mergeFrom(
               com.google.protobuf.CodedInputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          throws java.io.IOException {
         us.paskin.mastery.Proto.Skill parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
@@ -499,7 +590,7 @@ public final class Proto {
         if (ref instanceof String) {
           com.google.protobuf.ByteString b =
                   com.google.protobuf.ByteString.copyFromUtf8(
-                          (java.lang.String) ref);
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
@@ -510,9 +601,9 @@ public final class Proto {
        * <code>optional string name = 1;</code>
        */
       public Builder setName(
-              java.lang.String value) {
+          java.lang.String value) {
         if (value == null) {
-          throw new NullPointerException();
+    throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
         name_ = value;
@@ -534,7 +625,7 @@ public final class Proto {
       public Builder setNameBytes(
               com.google.protobuf.ByteString value) {
         if (value == null) {
-          throw new NullPointerException();
+    throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
         name_ = value;
@@ -574,22 +665,19 @@ public final class Proto {
         return this;
       }
 
-      private int priority_;
-
+      private int priority_ ;
       /**
        * <code>optional int32 priority = 3;</code>
        */
       public boolean hasPriority() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-
       /**
        * <code>optional int32 priority = 3;</code>
        */
       public int getPriority() {
         return priority_;
       }
-
       /**
        * <code>optional int32 priority = 3;</code>
        */
@@ -599,13 +687,86 @@ public final class Proto {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int32 priority = 3;</code>
        */
       public Builder clearPriority() {
         bitField0_ = (bitField0_ & ~0x00000004);
         priority_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<java.lang.Long> groupId_ = java.util.Collections.emptyList();
+
+      private void ensureGroupIdIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          groupId_ = new java.util.ArrayList<java.lang.Long>(groupId_);
+          bitField0_ |= 0x00000008;
+        }
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public java.util.List<java.lang.Long>
+      getGroupIdList() {
+        return java.util.Collections.unmodifiableList(groupId_);
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public int getGroupIdCount() {
+        return groupId_.size();
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public long getGroupId(int index) {
+        return groupId_.get(index);
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public Builder setGroupId(
+              int index, long value) {
+        ensureGroupIdIsMutable();
+        groupId_.set(index, value);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public Builder addGroupId(long value) {
+        ensureGroupIdIsMutable();
+        groupId_.add(value);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public Builder addAllGroupId(
+              java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureGroupIdIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, groupId_);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 group_id = 4;</code>
+       */
+      public Builder clearGroupId() {
+        groupId_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -623,12 +784,11 @@ public final class Proto {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated
-    public static final com.google.protobuf.Parser<Skill>
-        PARSER = new com.google.protobuf.AbstractParser<Skill>() {
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Skill>
+            PARSER = new com.google.protobuf.AbstractParser<Skill>() {
       public Skill parsePartialFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
         try {
           return new Skill(input, extensionRegistry);
@@ -658,14 +818,783 @@ public final class Proto {
 
   }
 
+  public interface SkillGroupOrBuilder extends
+          // @@protoc_insertion_point(interface_extends:us.paskin.mastery.SkillGroup)
+          com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional int64 id = 1;</code>
+     */
+    boolean hasId();
+
+    /**
+     * <code>optional int64 id = 1;</code>
+     */
+    long getId();
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    boolean hasName();
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    java.lang.String getName();
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    com.google.protobuf.ByteString
+    getNameBytes();
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    java.util.List<java.lang.Long> getParentIdList();
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    int getParentIdCount();
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    long getParentId(int index);
+  }
+
+  /**
+   * Protobuf type {@code us.paskin.mastery.SkillGroup}
+   */
+  public static final class SkillGroup extends
+          com.google.protobuf.GeneratedMessage implements
+          // @@protoc_insertion_point(message_implements:us.paskin.mastery.SkillGroup)
+          SkillGroupOrBuilder {
+    // Use SkillGroup.newBuilder() to construct.
+    private SkillGroup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+
+    private SkillGroup() {
+      id_ = 0L;
+      name_ = "";
+      parentId_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+
+    private SkillGroup(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+      this();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+              com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                      extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readInt64();
+              break;
+            }
+            case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000002;
+              name_ = bs;
+              break;
+            }
+            case 24: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                parentId_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              parentId_.add(input.readInt64());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
+                parentId_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                parentId_.add(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw new RuntimeException(e.setUnfinishedMessage(this));
+      } catch (java.io.IOException e) {
+        throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                        e.getMessage()).setUnfinishedMessage(this));
+      } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          parentId_ = java.util.Collections.unmodifiableList(parentId_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+    getDescriptor() {
+      return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    internalGetFieldAccessorTable() {
+      return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                      us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int ID_FIELD_NUMBER = 1;
+    private long id_;
+
+    /**
+     * <code>optional int64 id = 1;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+
+    /**
+     * <code>optional int64 id = 1;</code>
+     */
+    public long getId() {
+      return id_;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object name_;
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+    getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b =
+                com.google.protobuf.ByteString.copyFromUtf8(
+                        (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARENT_ID_FIELD_NUMBER = 3;
+    private java.util.List<java.lang.Long> parentId_;
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    public java.util.List<java.lang.Long>
+    getParentIdList() {
+      return parentId_;
+    }
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    public int getParentIdCount() {
+      return parentId_.size();
+    }
+
+    /**
+     * <code>repeated int64 parent_id = 3;</code>
+     */
+    public long getParentId(int index) {
+      return parentId_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+            throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt64(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 2, name_);
+      }
+      for (int i = 0; i < parentId_.size(); i++) {
+        output.writeInt64(3, parentId_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+                .computeInt64Size(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(2, name_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < parentId_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+                  .computeInt64SizeNoTag(parentId_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getParentIdList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+
+    public static Builder newBuilder(us.paskin.mastery.Proto.SkillGroup prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+              ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+
+    /**
+     * Protobuf type {@code us.paskin.mastery.SkillGroup}
+     */
+    public static final class Builder extends
+            com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:us.paskin.mastery.SkillGroup)
+            us.paskin.mastery.Proto.SkillGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+        return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                        us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
+      }
+
+      // Construct using us.paskin.mastery.Proto.SkillGroup.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        parentId_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+      getDescriptorForType() {
+        return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
+      }
+
+      public us.paskin.mastery.Proto.SkillGroup getDefaultInstanceForType() {
+        return us.paskin.mastery.Proto.SkillGroup.getDefaultInstance();
+      }
+
+      public us.paskin.mastery.Proto.SkillGroup build() {
+        us.paskin.mastery.Proto.SkillGroup result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public us.paskin.mastery.Proto.SkillGroup buildPartial() {
+        us.paskin.mastery.Proto.SkillGroup result = new us.paskin.mastery.Proto.SkillGroup(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.name_ = name_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          parentId_ = java.util.Collections.unmodifiableList(parentId_);
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.parentId_ = parentId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof us.paskin.mastery.Proto.SkillGroup) {
+          return mergeFrom((us.paskin.mastery.Proto.SkillGroup) other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(us.paskin.mastery.Proto.SkillGroup other) {
+        if (other == us.paskin.mastery.Proto.SkillGroup.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000002;
+          name_ = other.name_;
+          onChanged();
+        }
+        if (!other.parentId_.isEmpty()) {
+          if (parentId_.isEmpty()) {
+            parentId_ = other.parentId_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureParentIdIsMutable();
+            parentId_.addAll(other.parentId_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+        us.paskin.mastery.Proto.SkillGroup parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (us.paskin.mastery.Proto.SkillGroup) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private int bitField0_;
+
+      private long id_;
+
+      /**
+       * <code>optional int64 id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+
+      /**
+       * <code>optional int64 id = 1;</code>
+       */
+      public long getId() {
+        return id_;
+      }
+
+      /**
+       * <code>optional int64 id = 1;</code>
+       */
+      public Builder setId(long value) {
+        bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional int64 id = 1;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+                  (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+      getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b =
+                  com.google.protobuf.ByteString.copyFromUtf8(
+                          (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder setName(
+              java.lang.String value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder setNameBytes(
+              com.google.protobuf.ByteString value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<java.lang.Long> parentId_ = java.util.Collections.emptyList();
+
+      private void ensureParentIdIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          parentId_ = new java.util.ArrayList<java.lang.Long>(parentId_);
+          bitField0_ |= 0x00000004;
+        }
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public java.util.List<java.lang.Long>
+      getParentIdList() {
+        return java.util.Collections.unmodifiableList(parentId_);
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public int getParentIdCount() {
+        return parentId_.size();
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public long getParentId(int index) {
+        return parentId_.get(index);
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public Builder setParentId(
+              int index, long value) {
+        ensureParentIdIsMutable();
+        parentId_.set(index, value);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public Builder addParentId(long value) {
+        ensureParentIdIsMutable();
+        parentId_.add(value);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public Builder addAllParentId(
+              java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureParentIdIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, parentId_);
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>repeated int64 parent_id = 3;</code>
+       */
+      public Builder clearParentId() {
+        parentId_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:us.paskin.mastery.SkillGroup)
+    }
+
+    // @@protoc_insertion_point(class_scope:us.paskin.mastery.SkillGroup)
+    private static final us.paskin.mastery.Proto.SkillGroup DEFAULT_INSTANCE;
+
+    static {
+      DEFAULT_INSTANCE = new us.paskin.mastery.Proto.SkillGroup();
+    }
+
+    public static us.paskin.mastery.Proto.SkillGroup getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<SkillGroup>
+            PARSER = new com.google.protobuf.AbstractParser<SkillGroup>() {
+      public SkillGroup parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+        try {
+          return new SkillGroup(input, extensionRegistry);
+        } catch (RuntimeException e) {
+          if (e.getCause() instanceof
+                  com.google.protobuf.InvalidProtocolBufferException) {
+            throw (com.google.protobuf.InvalidProtocolBufferException)
+                    e.getCause();
+          }
+          throw e;
+        }
+      }
+    };
+
+    public static com.google.protobuf.Parser<SkillGroup> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SkillGroup> getParserForType() {
+      return PARSER;
+    }
+
+    public us.paskin.mastery.Proto.SkillGroup getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
           internal_static_us_paskin_mastery_Skill_descriptor;
   private static
   com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_us_paskin_mastery_Skill_fieldAccessorTable;
+          internal_static_us_paskin_mastery_Skill_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+          internal_static_us_paskin_mastery_SkillGroup_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
+  getDescriptor() {
     return descriptor;
   }
 
@@ -675,28 +1604,36 @@ public final class Proto {
   static {
     java.lang.String[] descriptorData = {
             "\n\035us/paskin/mastery/skill.proto\022\021us.pask" +
-                    "in.mastery\"D\n\005Skill\022\014\n\004name\030\001 \001(\t\022\033\n\023dat" +
+                    "in.mastery\"V\n\005Skill\022\014\n\004name\030\001 \001(\t\022\033\n\023dat" +
                     "e_last_practiced\030\002 \001(\004\022\020\n\010priority\030\003 \001(\005" +
-      "B\032\n\021us.paskin.masteryB\005Proto"
+                    "\022\020\n\010group_id\030\004 \003(\003\"9\n\nSkillGroup\022\n\n\002id\030\001" +
+      " \001(\003\022\014\n\004name\030\002 \001(\t\022\021\n\tparent_id\030\003 \003(\003B\032\n" +
+                    "\021us.paskin.masteryB\005Proto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-            new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+            new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
               public com.google.protobuf.ExtensionRegistry assignDescriptors(
                       com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
+                descriptor = root;
+                return null;
               }
             };
     com.google.protobuf.Descriptors.FileDescriptor
-            .internalBuildGeneratedFileFrom(descriptorData,
-                    new com.google.protobuf.Descriptors.FileDescriptor[] {
-                    }, assigner);
+      .internalBuildGeneratedFileFrom(descriptorData,
+        new com.google.protobuf.Descriptors.FileDescriptor[] {
+        }, assigner);
     internal_static_us_paskin_mastery_Skill_descriptor =
-      getDescriptor().getMessageTypes().get(0);
+            getDescriptor().getMessageTypes().get(0);
     internal_static_us_paskin_mastery_Skill_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
             internal_static_us_paskin_mastery_Skill_descriptor,
-        new java.lang.String[] { "Name", "DateLastPracticed", "Priority", });
+            new java.lang.String[]{"Name", "DateLastPracticed", "Priority", "GroupId",});
+    internal_static_us_paskin_mastery_SkillGroup_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+    internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_us_paskin_mastery_SkillGroup_descriptor,
+        new java.lang.String[] { "Id", "Name", "ParentId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

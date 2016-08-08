@@ -12,4 +12,11 @@ message Skill {
   optional string name = 1;
   optional uint64 date_last_practiced = 2;
   optional int32 priority = 3;
+  repeated int64 group_id = 4;
+}
+
+message SkillGroup {
+  optional int64 id = 1;
+  optional string name = 2;
+  repeated int64 parent_id = 3;
 }

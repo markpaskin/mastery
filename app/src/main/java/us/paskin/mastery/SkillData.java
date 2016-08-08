@@ -60,7 +60,6 @@ public class SkillData {
     }
 
     public Skill getSkillById(long id) {
-        System.out.println("getSkillById " + id);
         String[] projection = {DatabaseContract.SkillEntry.COLUMN_NAME_PROTO};
         String selection = DatabaseContract.SkillEntry._ID + " = " + id;
         Cursor c = db.query(
@@ -88,17 +87,24 @@ public class SkillData {
         }
     }
 
+    private void validateSkill(Proto.Skill skill) {
+        if (!skill.hasName()) {
+            throw new IllegalArgumentException("Skill missing name");
+        }
+    }
+
     // The ID of the skill is returned.
     public long addSkill(Skill skill) {
+        validateSkill(skill);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_PROTO, skill.toByteArray());
         long id = db.insert(DatabaseContract.SkillEntry.TABLE_NAME, null, values);
-        System.out.println("added id: " + id);
         return id;
     }
 
     public boolean updateSkill(long id, Skill skill) {
+        validateSkill(skill);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_PROTO, skill.toByteArray());
@@ -135,16 +141,114 @@ public class SkillData {
         return resources.getQuantityString(R.plurals.last_practiced_months, (int) diffInMonths, (int) diffInMonths);
     }
 
+    // Returns a cursor with two columns: SkillGroupEntry._ID and SkillGroupEntry.COLUMN_NAME_NAME.
+    public Cursor getSkillGroupList() {
+        String[] projection = {
+                DatabaseContract.SkillGroupEntry._ID,
+                DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO};
+        String sortOrder =
+                DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + " ASC";
+        return db.query(
+                DatabaseContract.SkillGroupEntry.TABLE_NAME,   // The table to query
+                projection,                               // The columns to return
+                null,                                     // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder
+        );
+    }
+
+    public Proto.SkillGroup getSkillGroupById(long id) {
+        String[] projection = {DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO};
+        String selection = DatabaseContract.SkillGroupEntry._ID + " = " + id;
+        Cursor c = db.query(
+                DatabaseContract.SkillGroupEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        if (c.getCount() != 1) {
+            throw new InternalError("Expected one row, got " + c.getCount());
+        }
+        if (c.getColumnCount() != 1) {
+            throw new InternalError("Expected one column, got " + c.getColumnCount());
+        }
+        c.moveToFirst();
+        try {
+            Proto.SkillGroup skillGroup = Proto.SkillGroup.parseFrom(c.getBlob(0));
+            c.close();
+            return skillGroup;
+        } catch (InvalidProtocolBufferException x) {
+            throw new InternalError("failed to parse protocol message");
+        }
+    }
+
+    private void validateSkillGroup(Proto.SkillGroup skillGroup) {
+        if (!skillGroup.hasId()) {
+            throw new IllegalArgumentException("Skill group missing ID");
+        }
+        if (!skillGroup.hasName()) {
+            throw new IllegalArgumentException("Skill group missing name");
+        }
+    }
+
+    // The ID of the skill group is returned.
+    public long addSkillGroup(Proto.SkillGroup skillGroup) {
+        validateSkillGroup(skillGroup);
+        ContentValues values = new ContentValues();
+        values.put(DatabaseContract.SkillGroupEntry._ID, skillGroup.getId());
+        values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME, skillGroup.getName());
+        values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO, skillGroup.toByteArray());
+        final long id = db.insert(DatabaseContract.SkillGroupEntry.TABLE_NAME, null, values);
+        if (id != skillGroup.getId()) {
+            throw new InternalError("ID mismatch");
+        }
+        return id;
+    }
+
+    public boolean updateSkillGroup(Proto.SkillGroup skillGroup) {
+        validateSkillGroup(skillGroup);
+        ContentValues values = new ContentValues();
+        values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME, skillGroup.getName());
+        values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO, skillGroup.toByteArray());
+        String selection = DatabaseContract.SkillEntry._ID + " = " + skillGroup.hasId();
+        final boolean success = 1 == db.update(DatabaseContract.SkillGroupEntry.TABLE_NAME,
+                values, selection, null);
+        return success;
+    }
+
     public void addFakeData() {
+        // Add skill groups
+        addSkillGroup(Proto.SkillGroup.newBuilder()
+                .setId(-1)
+                .setName("Scales")
+                .build());
+        addSkillGroup(Proto.SkillGroup.newBuilder()
+                .setId(0)
+                .setName("Warm-ups")
+                .addParentId(-1)
+                .build());
+        addSkillGroup(Proto.SkillGroup.newBuilder()
+                .setId(1)
+                .setName("Etudes")
+                .build());
+
+        // Add skills
         addSkill(Skill.newBuilder()
                 .setName("Carcassi Op. 60 No. 7")
                 .setDateLastPracticed(new Date().getTime() - TimeUnit.DAYS.toMillis(2))
                 .setPriority(6)
+                .addGroupId(1)
                 .build());
         addSkill(Skill.newBuilder()
                 .setName("Shearer Scale p. 253")
                 .setDateLastPracticed(new Date().getTime() - TimeUnit.HOURS.toMillis(7))
                 .setPriority(2)
+                .addGroupId(-1)
                 .build());
     }
 }

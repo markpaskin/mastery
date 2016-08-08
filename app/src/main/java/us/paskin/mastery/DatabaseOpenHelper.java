@@ -27,6 +27,17 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_SKILLS =
             "DROP TABLE IF EXISTS " + DatabaseContract.SkillEntry.TABLE_NAME;
 
+
+    // Skill groups DB statements
+    private static final String SQL_CREATE_SKILL_GROUPS =
+            "CREATE TABLE " + DatabaseContract.SkillGroupEntry.TABLE_NAME + " (" +
+                    DatabaseContract.SkillGroupEntry._ID + " INTEGER PRIMARY KEY" +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
+                    " )";
+    private static final String SQL_DELETE_SKILL_GROUPS =
+            "DROP TABLE IF EXISTS " + DatabaseContract.SkillGroupEntry.TABLE_NAME;
+
     private static DatabaseOpenHelper singleton;
 
     public static synchronized DatabaseOpenHelper getInstance(Context context) {
@@ -46,11 +57,13 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_SKILLS);
+        db.execSQL(SQL_CREATE_SKILL_GROUPS);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // TODO: upgrade policy is to simply to discard the data and start over
         db.execSQL(SQL_DELETE_SKILLS);
+        db.execSQL(SQL_DELETE_SKILL_GROUPS);
         onCreate(db);
     }
 
