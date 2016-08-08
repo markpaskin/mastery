@@ -10,14 +10,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
+import java.util.zip.Inflater;
 
 /**
  * An activity representing a single Skill detail screen. This
@@ -172,6 +179,21 @@ public class SkillDetailActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        TableLayout parentGroupLayout = (TableLayout) findViewById(R.id.parent_group_list);
+        setupParentGroupLayout(parentGroupLayout);
+    }
+
+    void setupParentGroupLayout(TableLayout parentGroupLayout) {
+        if (skill == null) return;
+        LayoutInflater inflater = LayoutInflater.from(parentGroupLayout.getContext());
+        for (long groupId : data.getAllSkillGroupIds(skill)) {
+            Proto.SkillGroup skillGroup = data.getSkillGroupById(groupId);
+            TableRow row = (TableRow) inflater.inflate(R.layout.parent_group_item, parentGroupLayout, false);
+            TextView textView = (TextView) row.findViewById(R.id.parent_group_name);
+            textView.setText(skillGroup.getName());
+            parentGroupLayout.addView(row);
+        }
     }
 
     /**

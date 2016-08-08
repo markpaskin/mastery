@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import us.paskin.mastery.Proto.Skill;
@@ -24,7 +26,12 @@ public class SkillData {
     public static final int MIN_PRIORITY = 1;
     public static final int MAX_PRIORITY = 10;
 
-    SQLiteDatabase db = null;
+    private SQLiteDatabase db = null;
+
+    /**
+     * Maps a group ID to the IDs of its parents.
+     */
+    private HashMap<Long, Set<Long>> parentGroups = new HashMap<Long, Set<Long>>();
 
     private static SkillData singleton;
 
@@ -196,6 +203,10 @@ public class SkillData {
         }
     }
 
+    private void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
+        parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+    }
+
     // The ID of the skill group is returned.
     public long addSkillGroup(Proto.SkillGroup skillGroup) {
         validateSkillGroup(skillGroup);
@@ -207,6 +218,7 @@ public class SkillData {
         if (id != skillGroup.getId()) {
             throw new InternalError("ID mismatch");
         }
+        updateSkillGroupParents(skillGroup);
         return id;
     }
 
@@ -218,19 +230,46 @@ public class SkillData {
         String selection = DatabaseContract.SkillEntry._ID + " = " + skillGroup.getId();
         final boolean success = 1 == db.update(DatabaseContract.SkillGroupEntry.TABLE_NAME,
                 values, selection, null);
+        if (success) updateSkillGroupParents(skillGroup);
         return success;
+    }
+
+    /**
+     * Returns a set of ancestor group IDs, or null if there are none.
+     *
+     * @param groupId
+     * @return
+     */
+    public Set<Long> getAncestorGroups(long groupId) {
+        return parentGroups.get(groupId); // TODO
+    }
+
+    /**
+     * Returns a list of the IDs of all skill groups this skill is in, directly or indirectly.
+     *
+     * @param skill
+     * @return
+     */
+    public Set<Long> getAllSkillGroupIds(Skill skill) {
+        Set<Long> result = new TreeSet<Long>();
+        for (long directGroupId : skill.getGroupIdList()) {
+            result.add(directGroupId);
+            Set<Long> ancestors = getAncestorGroups(directGroupId);
+            if (ancestors != null) result.addAll(getAncestorGroups(directGroupId));
+        }
+        return result;
     }
 
     public void addFakeData() {
         // Add skill groups
         addSkillGroup(Proto.SkillGroup.newBuilder()
-                .setId(-1)
-                .setName("Scales")
-                .build());
-        addSkillGroup(Proto.SkillGroup.newBuilder()
                 .setId(0)
                 .setName("Warm-ups")
-                .addParentId(-1)
+                .build());
+        addSkillGroup(Proto.SkillGroup.newBuilder()
+                .setId(-1)
+                .setName("Scales")
+                .addParentId(0)
                 .build());
         addSkillGroup(Proto.SkillGroup.newBuilder()
                 .setId(1)

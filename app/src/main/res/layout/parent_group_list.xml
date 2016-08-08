@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parent_group_list">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/add_parent_group_button"
+            android:src="@android:drawable/ic_input_add"
+            android:layout_gravity="center_vertical|end"
+            android:layout_margin="@dimen/small_button_margin"
+            android:tint="@android:color/white" />
+    </TableRow>
+
+</TableLayout>
