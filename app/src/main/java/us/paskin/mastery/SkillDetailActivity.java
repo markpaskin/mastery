@@ -25,10 +25,11 @@ import android.widget.Toast;
  */
 public class SkillDetailActivity extends AppCompatActivity {
     /**
-     * The intent argument representing the index of the skill being edited/added.
-     * It is both an input and output argument.
+     * The intent arguments representing the index and ID of the skill being edited/added.
+     * They are both an input and output argument.
      */
     public static final String ARG_SKILL_INDEX = "skill_index";
+    public static final String ARG_SKILL_ID = "skill_id";
 
 
     /**
@@ -37,10 +38,18 @@ public class SkillDetailActivity extends AppCompatActivity {
     public static final int REQ_EDIT_SKILL = 1;
     public static final int REQ_ADD_SKILL = 2;
 
+    private SkillData data;
+
     /**
-     * The index of the skill being edited.  If this is -1, it's a new skill.
+     * The index of the skill being edited.  If this is -1, it's a new skill.  After saving,
+     * the ID will be set for a new skill.
      */
     private int skillIndex = -1;
+
+    /**
+     * The ID of the skill being edited.  If this is -1, it's a new skill.
+     */
+    private long skillId = -1;
 
     /**
      * The skill before any updates.  This is null if a new skill is being created.
@@ -75,12 +84,13 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        data = SkillData.getInstance(this);
 
         // Initialize this object from the intent arguments.
         if (getIntent().hasExtra(ARG_SKILL_INDEX)) {
             skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
-            skill = SkillData.getInstance().getSkillByIndex(skillIndex);
-            assert skill != null;
+            skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
+            skill = data.getSkillById(skillId);
             skillBuilder = skill.toBuilder();
         } else {
             skillBuilder = Proto.Skill.newBuilder();
@@ -130,6 +140,7 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * This is invoked if an option is select, e.g., the left arrow to return.
+     *
      * @param item
      * @return
      */
@@ -152,6 +163,7 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * Updates the title.
+     *
      * @param title
      */
     void updateTitle(CharSequence title) {
@@ -166,12 +178,11 @@ public class SkillDetailActivity extends AppCompatActivity {
      */
     boolean saveSkill() {
         if (!unsavedChanges) return true;
-        SkillData data = SkillData.getInstance();
         if (skillIndex != -1) {
-            data.updateSkill(skillIndex, skillBuilder.build());
+            data.updateSkill(skillId, skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         } else {
-            skillIndex = data.addSkill(skillBuilder.build());
+            skillId = data.addSkill(skillBuilder.build());
             addedSkill = true;
             Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
         }
@@ -181,7 +192,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
-     *  Finishes if there are no unsaved changes (or the user discards them).
+     * Finishes if there are no unsaved changes (or the user discards them).
      */
     private void maybeFinish() {
         if (!unsavedChanges) {
@@ -211,6 +222,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         Intent intent = new Intent();
         if (savedChanges) {
             intent.putExtra(ARG_SKILL_INDEX, skillIndex);
+            intent.putExtra(ARG_SKILL_ID, skillId);
             setResult(Activity.RESULT_OK, intent);
         } else {
             setResult(Activity.RESULT_CANCELED, intent);

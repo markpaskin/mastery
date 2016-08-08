@@ -3,6 +3,7 @@ package us.paskin.mastery;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * An activity representing a list of Skills. This activity
@@ -41,6 +44,7 @@ public class SkillListActivity extends DrawerActivity {
                 Context context = view.getContext();
                 Intent intent = new Intent(context, SkillDetailActivity.class);
                 intent.removeExtra(SkillDetailActivity.ARG_SKILL_INDEX);
+                intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
                 SkillListActivity.this.startActivityForResult(intent, SkillDetailActivity.REQ_ADD_SKILL);
             }
         });
@@ -51,7 +55,7 @@ public class SkillListActivity extends DrawerActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter());
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this));
     }
 
     @Override
@@ -59,23 +63,44 @@ public class SkillListActivity extends DrawerActivity {
         if (resultCode != Activity.RESULT_OK) return;
         final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_list);
+        SimpleItemRecyclerViewAdapter adaptor =
+                (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
+        adaptor.refreshView();
+        adaptor.notifyDataSetChanged();
+/*
         switch (requestCode) {
             case SkillDetailActivity.REQ_EDIT_SKILL:
-                recyclerView.getAdapter().notifyItemChanged(skillIndex);
+                System.out.println("notify for position " + skillIndex);
+                adaptor.notifyItemChanged(skillIndex);
                 break;
             case SkillDetailActivity.REQ_ADD_SKILL:
-                recyclerView.getAdapter().notifyItemInserted(skillIndex);
+                adaptor.notifyDataSetChanged();
                 break;
         }
+        */
     }
 
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final SkillData data;
+        private Cursor cursor;
 
-        public SimpleItemRecyclerViewAdapter() {
-            data = SkillData.getInstance();
+        public SimpleItemRecyclerViewAdapter(Context context) {
+            setHasStableIds(true);
+            data = SkillData.getInstance(context);
+            refreshView();
+        }
+
+        public void refreshView() {
+            if (cursor != null) cursor.close();
+            cursor = data.getSkillList();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            cursor.moveToPosition(position);
+            return cursor.getLong(0);
         }
 
         @Override
@@ -87,14 +112,21 @@ public class SkillListActivity extends DrawerActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            Proto.Skill skill = data.getSkillByIndex(position);
-            holder.setData(skill);
+            cursor.moveToPosition(position);
+            final long id = cursor.getLong(0);
+            try {
+                final Proto.Skill skill = Proto.Skill.parseFrom(cursor.getBlob(1));
+                holder.setData(skill);
+            } catch (InvalidProtocolBufferException x) {
+                throw new InternalError("failed to parse protocol buffer");
+            }
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillDetailActivity.class);
                     intent.putExtra(SkillDetailActivity.ARG_SKILL_INDEX, position);
+                    intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, id);
                     SkillListActivity.this.startActivityForResult(intent, SkillDetailActivity.REQ_EDIT_SKILL);
                 }
             });
@@ -102,7 +134,7 @@ public class SkillListActivity extends DrawerActivity {
 
         @Override
         public int getItemCount() {
-            return data.numSkills();
+            return cursor.getCount();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
