@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/parent_group_name" />
+        android:id="@+id/parent_group_name"
+        android:layout_margin="@dimen/text_margin"
+        android:layout_gravity="center_vertical" />
 
     <ImageButton
         android:id="@+id/remove_parent_group_button"
         android:src="@android:drawable/ic_input_delete"
-        android:layout_gravity="center_vertical|end"
+        android:layout_gravity="center_vertical"
         android:layout_margin="@dimen/small_button_margin"
         android:tint="@android:color/white" />
 

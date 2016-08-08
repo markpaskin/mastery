@@ -194,6 +194,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             textView.setText(skillGroup.getName());
             parentGroupLayout.addView(row);
         }
+        parentGroupLayout.requestLayout();
     }
 
     /**
