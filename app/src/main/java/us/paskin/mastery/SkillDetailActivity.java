@@ -252,7 +252,6 @@ public class SkillDetailActivity extends AppCompatActivity {
             finish();
             return;
         }
-        // TODO: i18n
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.discard_edits_title)
