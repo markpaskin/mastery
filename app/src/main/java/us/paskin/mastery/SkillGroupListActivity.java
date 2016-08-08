@@ -26,6 +26,24 @@ import com.google.protobuf.InvalidProtocolBufferException;
  */
 public class SkillGroupListActivity extends DrawerActivity {
 
+    /**
+     * If this boolean Intent argument is set to true, then tapping on a skill group
+     * returns the ID of that group as a result to the calling activity via the RES_SKILL_GROUP_ID
+     * extra.  This activity also permits adding new skills in this mode, in which case the added
+     * group is selected.
+     */
+    public static final String ARG_MODE_SELECT = "select";
+
+    /**
+     * When run in "select" mode, this activity will return the selected group's ID with this name.
+     */
+    public static final String ARG_SELECTED_SKILL_GROUP_ID = "selected_group_id";
+
+    /**
+     * Indicates if this activity was launched in "select" mode.
+     */
+    private boolean selectMode = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +53,8 @@ public class SkillGroupListActivity extends DrawerActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
         super.onCreateDrawer();
+
+        selectMode = getIntent().getBooleanExtra(ARG_MODE_SELECT, false);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +81,14 @@ public class SkillGroupListActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
+
+        // If this activity is run in "select" mode and we've just added a new group, auto-select it.
+        if (requestCode == SkillGroupDetailActivity.REQ_ADD_SKILL_GROUP && selectMode) {
+            final int skillGroupId = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
+            returnSkillGroupId(skillGroupId);
+            return;
+        }
+
         final int skillGroupIndex = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, -1);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_group_list);
         SimpleItemRecyclerViewAdapter adaptor =
@@ -77,6 +105,18 @@ public class SkillGroupListActivity extends DrawerActivity {
                 break;
         }
         */
+    }
+
+    /**
+     * Finishes this activity, returning the selected group ID.
+     *
+     * @param id
+     */
+    private void returnSkillGroupId(long id) {
+        Intent intent = new Intent();
+        intent.putExtra(ARG_SELECTED_SKILL_GROUP_ID, id);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 
     public class SimpleItemRecyclerViewAdapter
@@ -122,6 +162,10 @@ public class SkillGroupListActivity extends DrawerActivity {
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (selectMode) {
+                        returnSkillGroupId(id);
+                        return;
+                    }
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillGroupDetailActivity.class);
                     intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, position);

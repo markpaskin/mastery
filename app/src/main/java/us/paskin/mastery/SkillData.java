@@ -215,7 +215,7 @@ public class SkillData {
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME, skillGroup.getName());
         values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO, skillGroup.toByteArray());
-        String selection = DatabaseContract.SkillEntry._ID + " = " + skillGroup.hasId();
+        String selection = DatabaseContract.SkillEntry._ID + " = " + skillGroup.getId();
         final boolean success = 1 == db.update(DatabaseContract.SkillGroupEntry.TABLE_NAME,
                 values, selection, null);
         return success;
