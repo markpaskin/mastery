@@ -11,4 +11,5 @@ option java_outer_classname = "Proto";
 message Skill {
   optional string name = 1;
   optional uint64 date_last_practiced = 2;
+  optional int32 priority = 3;
 }

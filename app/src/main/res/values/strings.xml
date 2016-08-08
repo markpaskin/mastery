@@ -17,12 +17,34 @@
     <string name="added_skill">Skill added</string>
     <string name="skill_name">Skill name</string>
 
+    <string name="last_practiced_never">Not practiced yet</string>
+    <string name="last_practiced_recently">Recently practiced</string>
+    <plurals name="last_practiced_days">
+        <item quantity="one">Last practiced %d day ago</item>
+        <item quantity="other">Last practiced %d days ago</item>
+    </plurals>
+    <plurals name="last_practiced_weeks">
+        <item quantity="one">Last practiced %d week ago</item>
+        <item quantity="other">Last practiced %d weeks ago</item>
+    </plurals>
+    <plurals name="last_practiced_months">
+        <item quantity="one">Last practiced %d month ago</item>
+        <item quantity="other">Last practiced %d months ago</item>
+    </plurals>
+
+    <string name="practice_priority">Priority</string>
+    <string name="practice_priority_detail">Skills with higher priority will be scheduled for practice more often.</string>
+
 
     <string name="discard_edits_title">Discard changes?</string>
     <string name="discard_edits_question">You have unsaved changes.  Do you want to discard them?</string>
 
+    <string name="missing_skill_name_title">Skill name empty</string>
+    <string name="missing_skill_name_detail">Please enter a name for this skill.</string>
+
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="ok">OK</string>
 
 
 </resources>

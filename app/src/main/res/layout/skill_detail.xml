@@ -8,20 +8,34 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="@dimen/text_margin">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/name" />
+            android:text="@string/name"
+            style="@style/HeaderText" />
 
         <EditText
             android:id="@+id/skill_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="16dp"
-            android:inputType="textCapSentences|textAutoCorrect" />
+            android:inputType="textCapSentences|textAutoCorrect"
+            android:padding="@dimen/text_margin" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/last_practiced"
+        android:padding="@dimen/text_margin" />
+
+    <include
+        layout="@layout/practice_priority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
 </LinearLayout>

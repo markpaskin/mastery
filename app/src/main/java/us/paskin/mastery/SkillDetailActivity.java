@@ -15,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -38,6 +40,14 @@ public class SkillDetailActivity extends AppCompatActivity {
     public static final int REQ_EDIT_SKILL = 1;
     public static final int REQ_ADD_SKILL = 2;
 
+    /**
+     * True if we're adding a new skill; false if we're editing one.
+     */
+    private boolean addingSkill;
+
+    /**
+     * If we're not adding a new skill, this is the previous skill data.
+     */
     private SkillData data;
 
     /**
@@ -87,7 +97,8 @@ public class SkillDetailActivity extends AppCompatActivity {
         data = SkillData.getInstance(this);
 
         // Initialize this object from the intent arguments.
-        if (getIntent().hasExtra(ARG_SKILL_INDEX)) {
+        addingSkill = !getIntent().hasExtra(ARG_SKILL_INDEX);
+        if (!addingSkill) {
             skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
             skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
             skill = data.getSkillById(skillId);
@@ -115,11 +126,27 @@ public class SkillDetailActivity extends AppCompatActivity {
         }
 
         EditText nameEditText = ((EditText) findViewById(R.id.skill_name));
+        TextView lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
+
+        // Hide the last practiced text if we're adding a new skill.
+        if (addingSkill) lastPracticedText.setVisibility(View.GONE);
+
+        // Set up the priority picker
+        NumberPicker practicePriorityPicker = ((NumberPicker) findViewById(R.id.priority_picker));
+        practicePriorityPicker.setMinValue(SkillData.MIN_PRIORITY);
+        practicePriorityPicker.setMaxValue(SkillData.MAX_PRIORITY);
+
+        // Initialize the controls with pre-existing values or defaults.
         if (skill != null) {
             updateTitle(skill.getName());
             nameEditText.setText(skill.getName());
+            lastPracticedText.setText(SkillData.getLastPracticedText(skill, getResources()));
+            practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : SkillData.MAX_PRIORITY);
+        } else {
+            skillBuilder.setPriority(SkillData.MAX_PRIORITY);
         }
 
+        // Set up listeners (after setting initial values, so we don't get events for those).
         nameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -136,6 +163,15 @@ public class SkillDetailActivity extends AppCompatActivity {
                 updateTitle(editable);
             }
         });
+        practicePriorityPicker.setOnValueChangedListener(
+                new NumberPicker.OnValueChangeListener() {
+                    @Override
+                    public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
+                        unsavedChanges = true;
+                        skillBuilder.setPriority(newVal);
+                    }
+                }
+        );
     }
 
     /**
@@ -172,12 +208,29 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Validates the current input and shows error dialogs if needed.
+     */
+    boolean validate() {
+        if (!skillBuilder.hasName() || skillBuilder.getName().isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(R.string.missing_skill_name_title)
+                    .setMessage(R.string.missing_skill_name_detail)
+                    .setNeutralButton(R.string.ok, null)
+                    .show();
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * If there are unsaved changes, they are saved.
      *
      * @return true if no failures occur
      */
     boolean saveSkill() {
         if (!unsavedChanges) return true;
+        if (!validate()) return false;
         if (skillIndex != -1) {
             data.updateSkill(skillId, skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();

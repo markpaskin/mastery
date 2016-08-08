@@ -2,6 +2,7 @@ package us.paskin.mastery;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -19,6 +20,9 @@ import us.paskin.mastery.Proto.Skill;
  *
  */
 public class SkillData {
+
+    public static final int MIN_PRIORITY = 1;
+    public static final int MAX_PRIORITY = 10;
 
     SQLiteDatabase db = null;
 
@@ -104,33 +108,43 @@ public class SkillData {
         return success;
     }
 
-    public String timeSinceLastPracticedText(Skill skill) {
-        // TODO: i18n
+    /**
+     * Returns a localized string like "Last practiced 4 days ago".
+     *
+     * @param skill
+     * @param resources
+     * @return
+     */
+    public static String getLastPracticedText(Skill skill, Resources resources) {
         if (!skill.hasDateLastPracticed()) {
-            return "never";
+            return resources.getString(R.string.last_practiced_never);
         }
         final long millis = new Date().getTime() - new Date(skill.getDateLastPracticed()).getTime();
-        final long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(millis);
-        if (diffInMinutes == 0) return "just now";
-        final long diffInHours = TimeUnit.MILLISECONDS.toHours(millis);
-        if (diffInHours == 0) return diffInMinutes + " minutes ago";
         final long diffInDays = TimeUnit.MILLISECONDS.toDays(millis);
-        if (diffInDays == 0) return diffInHours + " hours ago";
+        if (diffInDays == 0) {
+            return resources.getString(R.string.last_practiced_recently);
+        }
         final long diffInWeeks = diffInDays / 7;
-        if (diffInWeeks < 14) return diffInDays + " days ago";
+        if (diffInWeeks < 14) {
+            return resources.getQuantityString(R.plurals.last_practiced_days, (int) diffInDays, (int) diffInDays);
+        }
         final long diffInMonths = diffInDays / 30;
-        if (diffInMonths < 3) return diffInWeeks + " weeks ago";
-        return diffInMonths + "months ago";
+        if (diffInMonths < 3) {
+            return resources.getQuantityString(R.plurals.last_practiced_weeks, (int) diffInWeeks, (int) diffInWeeks);
+        }
+        return resources.getQuantityString(R.plurals.last_practiced_months, (int) diffInMonths, (int) diffInMonths);
     }
 
     public void addFakeData() {
         addSkill(Skill.newBuilder()
                 .setName("Carcassi Op. 60 No. 7")
                 .setDateLastPracticed(new Date().getTime() - TimeUnit.DAYS.toMillis(2))
+                .setPriority(6)
                 .build());
         addSkill(Skill.newBuilder()
                 .setName("Shearer Scale p. 253")
                 .setDateLastPracticed(new Date().getTime() - TimeUnit.HOURS.toMillis(7))
+                .setPriority(2)
                 .build());
     }
 }
