@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -106,14 +107,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (saveSkill()) finish();
-            }
-        });
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -200,6 +193,15 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if (!addingSkillGroup) {
+            getMenuInflater().inflate(R.menu.skill_group_detail, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
     private void removeParentGroup(long skillGroupId) {
         unsavedChanges = true;
         LinkedList<Long> groupIds = new LinkedList<Long>(skillGroupBuilder.getParentIdList());
@@ -248,8 +250,32 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             //
             maybeFinish();
             return true;
+        } else if (id == R.id.revert_changes) {
+            handleRevertChanges();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Called if the user requests to revert changes.
+     */
+    void handleRevertChanges() {
+        if (!unsavedChanges) {
+            finish();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.discard_edits_title)
+                .setMessage(R.string.discard_edits_question)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SkillGroupDetailActivity.this.finish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
     }
 
     /**
@@ -299,25 +325,10 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes if there are no unsaved changes (or the user discards them).
+     * Finishes if any pending changes can be saved.
      */
     private void maybeFinish() {
-        if (!unsavedChanges) {
-            finish();
-            return;
-        }
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.discard_edits_title)
-                .setMessage(R.string.discard_edits_question)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SkillGroupDetailActivity.this.finish();
-                    }
-                })
-                .setNegativeButton(R.string.no, null)
-                .show();
+        if (saveSkill()) finish();
     }
 
     /**
