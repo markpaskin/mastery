@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -42,22 +44,37 @@ public class SkillListActivity extends DrawerActivity {
         toolbar.setTitle(getTitle());
         super.onCreateDrawer();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Start the detail activity with no ARG_ITEM_ID to create a new one.
-                Context context = view.getContext();
-                Intent intent = new Intent(context, SkillDetailActivity.class);
-                intent.removeExtra(SkillDetailActivity.ARG_SKILL_POSITION);
-                intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
-                SkillListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL);
-            }
-        });
-
         View recyclerView = findViewById(R.id.skill_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.skill_list, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * This is invoked if an option is select, e.g., the left arrow to return.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.add_skill) {
+            handleAddSkill();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void handleAddSkill() {
+        // Start the detail activity with no ARG_ITEM_ID to create a new one.
+        Intent intent = new Intent(this, SkillDetailActivity.class);
+        intent.removeExtra(SkillDetailActivity.ARG_SKILL_POSITION);
+        intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
+        SkillListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {

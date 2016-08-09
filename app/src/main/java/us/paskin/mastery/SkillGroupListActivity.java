@@ -10,6 +10,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -62,22 +64,36 @@ public class SkillGroupListActivity extends DrawerActivity {
 
         selectMode = getIntent().getBooleanExtra(ARG_MODE_SELECT, false);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Start the detail activity with no ARG_SKILL_GROUP_ITEM_ID to create a new one.
-                Context context = view.getContext();
-                Intent intent = new Intent(context, SkillGroupDetailActivity.class);
-                intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION);
-                intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID);
-                SkillGroupListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL_GROUP);
-            }
-        });
-
         View recyclerView = findViewById(R.id.skill_group_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.skill_group_list, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * This is invoked if an option is select, e.g., the left arrow to return.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.add_skill_group) {
+            handleAddSkillGroup();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void handleAddSkillGroup() {
+        Intent intent = new Intent(this, SkillGroupDetailActivity.class);
+        intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION);
+        intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID);
+        SkillGroupListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL_GROUP);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {

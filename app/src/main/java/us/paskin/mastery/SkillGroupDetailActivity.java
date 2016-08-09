@@ -196,9 +196,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        if (!addingSkillGroup) {
-            getMenuInflater().inflate(R.menu.skill_group_detail, menu);
-        }
+        getMenuInflater().inflate(R.menu.skill_group_detail, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
