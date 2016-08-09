@@ -68,4 +68,8 @@
     <string name="skill_group_cycle_title">Skill Group Cycle</string>
     <string name="skill_group_cycle_detail">Skill groups must be arranged in a hierarchy; the requested action would create a cycle.</string>
 
+    <string name="delete_skill">Delete skill</string>
+    <string name="delete_skill_confirm_title">Delete skill?</string>
+    <string name="cannot_undo_detail">This action cannot be undone.</string>
+
 </resources>

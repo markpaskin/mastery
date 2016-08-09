@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -33,7 +34,8 @@ public class SkillDetailActivity extends AppCompatActivity {
      * The intent arguments representing the index and ID of the skill being edited/added.
      * They are both an input and output argument.  If ID is missing, then the request is
      * to add a new skill.  POSITION is an optional argument used by callers for whom it
-     * is convenient to get the position returned as a result.
+     * is convenient to get the position returned as a result.  If ID is -1 on exit and was
+     * not -1 on entry, then the skill has been deleted.
      */
     public static final String ARG_SKILL_ID = "skill_id";
     public static final String ARG_SKILL_POSITION = "skill_pos";
@@ -246,6 +248,15 @@ public class SkillDetailActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if (!addingSkill) {
+            getMenuInflater().inflate(R.menu.skill_detail, menu);
+        }
+        return true;
+    }
+
     /**
      * This is invoked if an option is select, e.g., the left arrow to return.
      */
@@ -262,8 +273,33 @@ public class SkillDetailActivity extends AppCompatActivity {
             //
             maybeFinish();
             return true;
+        } else if (id == R.id.delete_skill) {
+            handleDeleteSkill();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    void handleDeleteSkill() {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.delete_skill_confirm_title)
+                .setMessage(R.string.cannot_undo_detail)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SkillDetailActivity.this.deleteAndFinish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
+    }
+
+    void deleteAndFinish() {
+        data.deleteSkill(skillId);
+        skillId = -1;
+        unsavedChanges = false;
+        savedChanges = true;
+        finish();
     }
 
     /**
