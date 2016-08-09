@@ -413,6 +413,13 @@ public class Model {
                 .setPriority(2)
                 .addGroupId(-1)
                 .build());
+
+        // Add a schedule
+        addSchedule(Proto.Schedule.newBuilder()
+                .setName("Weekday")
+                .addSlot(Proto.Schedule.Slot.newBuilder().setGroupId(0).setDurationInSecs(300))
+                .addSlot(Proto.Schedule.Slot.newBuilder().setGroupId(1).setDurationInSecs(1200))
+                .build());
     }
 
     // Returns a cursor with two columns: ScheduleEntry._ID and ScheduleEntry.COLUMN_NAME_PROTO.
