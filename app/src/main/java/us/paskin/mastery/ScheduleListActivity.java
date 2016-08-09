@@ -18,32 +18,32 @@ import android.widget.TextView;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * An activity representing a list of Skills. This activity
+ * An activity representing a list of Schedules. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link SkillDetailActivity} representing
+ * lead to a {@link ScheduleDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class SkillListActivity extends DrawerActivity {
+public class ScheduleListActivity extends DrawerActivity {
 
     /**
      * These are intent request types, used for interpreting results from child intents.
      */
-    private static final int REQ_EDIT_SKILL = 1;
-    private static final int REQ_ADD_SKILL = 2;
+    private static final int REQ_EDIT_SCHEDULE = 1;
+    private static final int REQ_ADD_SCHEDULE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_skill_list);
+        setContentView(R.layout.activity_schedule_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
         super.onCreateDrawer();
 
-        View recyclerView = findViewById(R.id.skill_list);
+        View recyclerView = findViewById(R.id.schedule_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
     }
@@ -51,7 +51,7 @@ public class SkillListActivity extends DrawerActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.skill_list, menu);
+        getMenuInflater().inflate(R.menu.schedule_list, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -61,19 +61,19 @@ public class SkillListActivity extends DrawerActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.add_skill) {
-            handleAddSkill();
+        if (id == R.id.add_schedule) {
+            handleAddSchedule();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void handleAddSkill() {
+    private void handleAddSchedule() {
         // Start the detail activity with no ARG_ITEM_ID to create a new one.
-        Intent intent = new Intent(this, SkillDetailActivity.class);
-        intent.removeExtra(SkillDetailActivity.ARG_SKILL_POSITION);
-        intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
-        SkillListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL);
+        Intent intent = new Intent(this, ScheduleDetailActivity.class);
+        intent.removeExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION);
+        intent.removeExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID);
+        ScheduleListActivity.this.startActivityForResult(intent, REQ_ADD_SCHEDULE);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -83,22 +83,22 @@ public class SkillListActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
-        final int skillId = data.getIntExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
-        final boolean deleted = skillId == -1;
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_list);
+        final int scheduleIndex = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
+        final int scheduleId = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
+        final boolean deleted = scheduleId == -1;
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.schedule_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
         adaptor.refreshView();
         adaptor.notifyDataSetChanged();
 /*
         switch (requestCode) {
-            case SkillDetailActivity.REQ_EDIT_SKILL:
-                System.out.println("notify for position " + skillIndex);
-                if (deleted) adaptor.notifyItemRemoved(skillIndex);
-                else adaptor.notifyItemChanged(skillIndex);
+            case ScheduleDetailActivity.REQ_EDIT_SCHEDULE:
+                System.out.println("notify for position " + scheduleIndex);
+                if (deleted) adaptor.notifyItemRemoved(scheduleIndex);
+                else adaptor.notifyItemChanged(scheduleIndex);
                 break;
-            case SkillDetailActivity.REQ_ADD_SKILL:
+            case ScheduleDetailActivity.REQ_ADD_SCHEDULE:
                 adaptor.notifyDataSetChanged();
                 break;
         }
@@ -119,7 +119,7 @@ public class SkillListActivity extends DrawerActivity {
 
         public void refreshView() {
             if (cursor != null) cursor.close();
-            cursor = data.getSkillList();
+            cursor = data.getScheduleList();
         }
 
         @Override
@@ -131,7 +131,7 @@ public class SkillListActivity extends DrawerActivity {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.skill_list_item, parent, false);
+                    .inflate(R.layout.schedule_list_item, parent, false);
             return new ViewHolder(view);
         }
 
@@ -140,8 +140,8 @@ public class SkillListActivity extends DrawerActivity {
             cursor.moveToPosition(position);
             final long id = cursor.getLong(0);
             try {
-                final Proto.Skill skill = Proto.Skill.parseFrom(cursor.getBlob(1));
-                holder.setData(skill);
+                final Proto.Schedule schedule = Proto.Schedule.parseFrom(cursor.getBlob(1));
+                holder.setData(schedule);
             } catch (InvalidProtocolBufferException x) {
                 throw new InternalError("failed to parse protocol buffer");
             }
@@ -149,10 +149,10 @@ public class SkillListActivity extends DrawerActivity {
                 @Override
                 public void onClick(View v) {
                     Context context = v.getContext();
-                    Intent intent = new Intent(context, SkillDetailActivity.class);
-                    intent.putExtra(SkillDetailActivity.ARG_SKILL_POSITION, position);
-                    intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, id);
-                    SkillListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL);
+                    Intent intent = new Intent(context, ScheduleDetailActivity.class);
+                    intent.putExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, position);
+                    intent.putExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, id);
+                    ScheduleListActivity.this.startActivityForResult(intent, REQ_EDIT_SCHEDULE);
                 }
             });
         }
@@ -169,10 +169,10 @@ public class SkillListActivity extends DrawerActivity {
             public ViewHolder(View view) {
                 super(view);
                 this.view = view;
-                text = (TextView) view.findViewById(R.id.skill_item_text);
+                text = (TextView) view.findViewById(R.id.schedule_item_text);
             }
 
-            public void setData(Proto.Skill s) {
+            public void setData(Proto.Schedule s) {
                 text.setText(s.getName());
             }
 

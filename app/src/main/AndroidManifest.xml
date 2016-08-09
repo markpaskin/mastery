@@ -40,6 +40,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="us.paskin.mastery.SkillGroupListActivity" />
         </activity>
+        <activity
+            android:name=".ScheduleListActivity"
+            android:label="@string/title_schedule_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".ScheduleDetailActivity"
+            android:label="@string/title_schedule_detail"
+            android:parentActivityName=".ScheduleListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="us.paskin.mastery.ScheduleListActivity" />
+        </activity>
     </application>
 
 </manifest>

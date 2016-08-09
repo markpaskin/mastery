@@ -5,75 +5,72 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
-import android.view.View;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.NumberPicker;
 import android.widget.TableLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.LinkedList;
 
 /**
- * An activity representing a single Skill detail screen. This
+ * An activity representing a single Schedule detail screen. This
  * activity is only used narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link SkillListActivity}.
+ * in a {@link ScheduleListActivity}.
  */
-public class SkillDetailActivity extends AppCompatActivity {
+public class ScheduleDetailActivity extends AppCompatActivity {
     /**
-     * The intent arguments representing the index and ID of the skill being edited/added.
+     * The intent arguments representing the index and ID of the schedule being edited/added.
      * They are both an input and output argument.  If ID is missing, then the request is
-     * to add a new skill.  POSITION is an optional argument used by callers for whom it
+     * to add a new schedule.  POSITION is an optional argument used by callers for whom it
      * is convenient to get the position returned as a result.  If ID is -1 on exit and was
-     * not -1 on entry, then the skill has been deleted.
+     * not -1 on entry, then the schedule has been deleted.
      */
-    public static final String ARG_SKILL_ID = "skill_id";
-    public static final String ARG_SKILL_POSITION = "skill_pos";
+    public static final String ARG_SCHEDULE_ID = "schedule_id";
+    public static final String ARG_SCHEDULE_POSITION = "schedule_pos";
 
     /**
      * This intent type is used to identify results from child intents.
      */
-    public static final int SELECT_SKILL_GROUP_TO_ADD = 1;
+    public static final int ADD_SLOT = 1;
 
     /**
-     * True if we're adding a new skill; false if we're editing one.
+     * True if we're adding a new schedule; false if we're editing one.
      */
-    private boolean addingSkill;
+    private boolean addingSchedule;
 
     /**
-     * If we're not adding a new skill, this is the previous skill data.
+     * The application model.
      */
-    private Model data;
+    private Model model;
 
     /**
-     * The index of the skill being edited (or -1 if it's being added).
+     * The index of the schedule being edited (or -1 if it's being added).
      */
-    private int skillIndex = -1;
+    private int scheduleIndex = -1;
 
     /**
-     * The ID of the skill being edited (or -1 if it's being added).
+     * The ID of the schedule being edited (or -1 if it's being added).
      */
-    private long skillId = -1;
+    private long scheduleId = -1;
 
     /**
-     * The skill before any updates.  This is null if a new skill is being added.
+     * The schedule before any updates.  This is null if a new schedule is being added.
      */
-    private Proto.Skill skill;
+    private Proto.Schedule schedule;
 
     /**
-     * The builder that is used to update the skill.  Its fields reflect the data entered by the user.
+     * The builder that is used to update the schedule.  Its fields reflect the model entered by the user.
      */
-    private Proto.Skill.Builder skillBuilder;
+    private Proto.Schedule.Builder scheduleBuilder;
 
     /**
      * This is true if there have been changes that weren't committed.
@@ -86,9 +83,9 @@ public class SkillDetailActivity extends AppCompatActivity {
     private boolean savedChanges = false;
 
     /**
-     * This is the table used to render the skill groups this skill is in.
+     * This is the table used to render the schedule groups this schedule is in.
      */
-    EditableList skillGroupList;
+    EditableList slotList;
 
     /**
      * Sets up the activity.
@@ -98,20 +95,20 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = Model.getInstance(this);
+        model = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
-        addingSkill = !getIntent().hasExtra(ARG_SKILL_POSITION);
-        if (!addingSkill) {
-            skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
-            skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
-            skill = data.getSkillById(skillId);
-            skillBuilder = skill.toBuilder();
+        addingSchedule = !getIntent().hasExtra(ARG_SCHEDULE_POSITION);
+        if (!addingSchedule) {
+            scheduleIndex = getIntent().getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
+            scheduleId = getIntent().getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
+            schedule = model.getScheduleById(scheduleId);
+            scheduleBuilder = schedule.toBuilder();
         } else {
-            skillBuilder = Proto.Skill.newBuilder();
+            scheduleBuilder = Proto.Schedule.newBuilder();
         }
 
-        setContentView(R.layout.activity_skill_detail);
+        setContentView(R.layout.activity_schedule_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -121,25 +118,12 @@ public class SkillDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        EditText nameEditText = ((EditText) findViewById(R.id.skill_name));
-        TextView lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
-
-        // Hide the last practiced text if we're adding a new skill.
-        if (addingSkill) lastPracticedText.setVisibility(View.GONE);
-
-        // Set up the priority picker
-        NumberPicker practicePriorityPicker = ((NumberPicker) findViewById(R.id.priority_picker));
-        practicePriorityPicker.setMinValue(Model.MIN_PRIORITY);
-        practicePriorityPicker.setMaxValue(Model.MAX_PRIORITY);
+        EditText nameEditText = ((EditText) findViewById(R.id.schedule_name));
 
         // Initialize the controls with pre-existing values or defaults.
-        if (skill != null) {
-            updateTitle(skill.getName());
-            nameEditText.setText(skill.getName());
-            lastPracticedText.setText(Model.getLastPracticedText(skill, getResources()));
-            practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : Model.MAX_PRIORITY);
-        } else {
-            skillBuilder.setPriority(Model.MAX_PRIORITY);
+        if (schedule != null) {
+            updateTitle(schedule.getName());
+            nameEditText.setText(schedule.getName());
         }
 
         // Set up listeners (after setting initial values, so we don't get events for those).
@@ -155,35 +139,23 @@ public class SkillDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 unsavedChanges = true;
-                skillBuilder.setName(editable.toString());
+                scheduleBuilder.setName(editable.toString());
                 updateTitle(editable);
             }
         });
-        practicePriorityPicker.setOnValueChangedListener(
-                new NumberPicker.OnValueChangeListener() {
-                    @Override
-                    public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
-                        unsavedChanges = true;
-                        skillBuilder.setPriority(newVal);
-                    }
-                }
-        );
-        practicePriorityPicker.setValue(Model.DEFAULT_PRIORITY);
 
-        skillGroupList = new EditableList(
+        slotList = new EditableList(
                 (TableLayout) findViewById(R.id.parent_group_list),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(view.getContext(), SkillGroupListActivity.class);
-                        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
-                        SkillDetailActivity.this.startActivityForResult(intent, SELECT_SKILL_GROUP_TO_ADD);
+                        // TODO: select
                     }
                 });
 
-        if (skill != null) {
-            for (final long groupId : skill.getGroupIdList()) {
-                addParentGroupToTable(groupId);
+        if (schedule != null) {
+            for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
+                addSlotToTable(slot);
             }
         }
     }
@@ -194,57 +166,36 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        if (requestCode == SELECT_SKILL_GROUP_TO_ADD) {
-            final long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
-            if (!skillBuilder.getGroupIdList().contains(skillGroupId)) {
-                skillBuilder.addGroupId(skillGroupId);
-                unsavedChanges = true;
-                addParentGroupToTable(skillGroupId);
-                Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
-            }
+        if (requestCode == ADD_SLOT) {
+            //TODO
         }
-    }
-
-    private void removeFromSkillGroup(long skillGroupId) {
-        unsavedChanges = true;
-        LinkedList<Long> groupIds = new LinkedList<Long>(skillBuilder.getGroupIdList());
-        if (!groupIds.remove(skillGroupId)) {
-            throw new InternalError("Could not remove " + skillGroupId);
-        }
-        skillBuilder.clearGroupId().addAllGroupId(groupIds);
-        Toast.makeText(getApplicationContext(), R.string.skill_group_removed, Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * Adds an entry to the parent skill group table.
+     * Adds an entry to the parent schedule group table.
      */
-    private void addParentGroupToTable(final long skillGroupId) {
-        Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
-        skillGroupList.addItem(
-                skillGroup.getName(),
+    private void addSlotToTable(Proto.Schedule.Slot slot) {
+        slotList.addItem(
+                model.getSkillGroupById(slot.getGroupId()).getName(),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(view.getContext(), SkillGroupDetailActivity.class);
-                        intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, skillGroupId);
-                        SkillDetailActivity.this.startActivity(intent);
+                        // TODO: select group again
                     }
                 },
                 new Runnable() {
-            @Override
-            public void run() {
-                removeFromSkillGroup(skillGroupId);
-            }
-        });
+                    @Override
+                    public void run() {
+                        // TODO remove slot
+                    }
+                });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.skill_detail, menu);
-        if (addingSkill) menu.findItem(R.id.delete_skill).setVisible(false);
+        getMenuInflater().inflate(R.menu.schedule_detail, menu);
+        if (addingSchedule) menu.findItem(R.id.delete_schedule).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -264,8 +215,8 @@ public class SkillDetailActivity extends AppCompatActivity {
             //
             maybeFinish();
             return true;
-        } else if (id == R.id.delete_skill) {
-            handleDeleteSkill();
+        } else if (id == R.id.delete_schedule) {
+            handleDeleteSchedule();
             return true;
         } else if (id == R.id.revert_changes) {
             handleRevertChanges();
@@ -275,17 +226,17 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Called if the user requests to delete this skill.
+     * Called if the user requests to delete this schedule.
      */
-    void handleDeleteSkill() {
+    void handleDeleteSchedule() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.delete_skill_confirm_title)
+                .setTitle(R.string.delete_schedule_confirm_title)
                 .setMessage(R.string.cannot_undo_detail)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SkillDetailActivity.this.deleteAndFinish();
+                        ScheduleDetailActivity.this.deleteAndFinish();
                     }
                 })
                 .setNegativeButton(R.string.no, null)
@@ -293,8 +244,8 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     void deleteAndFinish() {
-        if (!addingSkill) data.deleteSkill(skillId);
-        skillId = -1;
+        if (!addingSchedule) model.deleteSchedule(scheduleId);
+        scheduleId = -1;
         unsavedChanges = false;
         savedChanges = true;
         finish();
@@ -315,7 +266,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SkillDetailActivity.this.finish();
+                        ScheduleDetailActivity.this.finish();
                     }
                 })
                 .setNegativeButton(R.string.no, null)
@@ -334,20 +285,20 @@ public class SkillDetailActivity extends AppCompatActivity {
      * Validates the current input and shows error dialogs if needed.
      */
     boolean validate() {
-        if (!skillBuilder.hasName() || skillBuilder.getName().isEmpty()) {
+        if (!scheduleBuilder.hasName() || scheduleBuilder.getName().isEmpty()) {
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.missing_skill_name_title)
-                    .setMessage(R.string.missing_skill_name_detail)
+                    .setTitle(R.string.missing_schedule_name_title)
+                    .setMessage(R.string.missing_schedule_name_detail)
                     .setNeutralButton(R.string.ok, null)
                     .show();
             return false;
         }
-        if (skillBuilder.getGroupIdList().isEmpty()) {
+        if (scheduleBuilder.getSlotList().isEmpty()) {
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.no_skill_groups_title)
-                    .setMessage(R.string.no_skill_groups_detail)
+                    .setTitle(R.string.no_schedule_slots_title)
+                    .setMessage(R.string.no_schedule_slots_detail)
                     .setNeutralButton(R.string.ok, null)
                     .show();
             return false;
@@ -360,15 +311,15 @@ public class SkillDetailActivity extends AppCompatActivity {
      *
      * @return true if no failures occur
      */
-    boolean saveSkill() {
+    boolean saveSchedule() {
         if (!unsavedChanges) return true;
         if (!validate()) return false;
-        if (!addingSkill) {
-            data.updateSkill(skillId, skillBuilder.build());
-            Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
+        if (!addingSchedule) {
+            model.updateSchedule(scheduleId, scheduleBuilder.build());
+            Toast.makeText(getApplicationContext(), R.string.saved_schedule, Toast.LENGTH_SHORT).show();
         } else {
-            skillId = data.addSkill(skillBuilder.build());
-            Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
+            scheduleId = model.addSchedule(scheduleBuilder.build());
+            Toast.makeText(getApplicationContext(), R.string.added_schedule, Toast.LENGTH_SHORT).show();
         }
         unsavedChanges = false;
         savedChanges = true;
@@ -379,7 +330,7 @@ public class SkillDetailActivity extends AppCompatActivity {
      * Finishes if any pending changes can be saved.
      */
     private void maybeFinish() {
-        if (saveSkill()) finish();
+        if (saveSchedule()) finish();
     }
 
     /**
@@ -389,8 +340,8 @@ public class SkillDetailActivity extends AppCompatActivity {
     public void finish() {
         Intent intent = new Intent();
         if (savedChanges) {
-            intent.putExtra(ARG_SKILL_POSITION, skillIndex);
-            intent.putExtra(ARG_SKILL_ID, skillId);
+            intent.putExtra(ARG_SCHEDULE_POSITION, scheduleIndex);
+            intent.putExtra(ARG_SCHEDULE_ID, scheduleId);
             setResult(Activity.RESULT_OK, intent);
         } else {
             setResult(Activity.RESULT_CANCELED, intent);

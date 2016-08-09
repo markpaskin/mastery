@@ -82,19 +82,16 @@ public class DrawerActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.view_skills) {
             startActivity(new Intent(this, SkillListActivity.class));
         } else if (id == R.id.view_skill_groups) {
             startActivity(new Intent(this, SkillGroupListActivity.class));
         } else if (id == R.id.view_schedules) {
-
+            startActivity(new Intent(this, ScheduleListActivity.class));
         } else if (id == R.id.view_preferences) {
-
+            // TODO
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

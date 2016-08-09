@@ -13,10 +13,15 @@
     <string name="title_skill_list">Skills</string>
     <string name="title_skill_detail">Skill Details</string>
     <string name="add_skill">Add Skill</string>
+    <string name="add_schedule">Add Schedule</string>
     <string name="name">Name:</string>
     <string name="saved_skill">Skill updated</string>
     <string name="added_skill">Skill added</string>
     <string name="skill_name">Skill name</string>
+
+    <string name="saved_schedule">Schedule updated</string>
+    <string name="added_schedule">Schedule added</string>
+    <string name="schedule_name">Schedule name</string>
 
     <string name="title_skill_group_list">Skill groups</string>
     <string name="title_skill_group_detail">Skill Group Details</string>
@@ -50,6 +55,9 @@
     <string name="missing_skill_name_title">Skill name empty</string>
     <string name="missing_skill_name_detail">Please enter a name for this skill.</string>
 
+    <string name="missing_schedule_name_title">Schedule name empty</string>
+    <string name="missing_schedule_name_detail">Please enter a name for this schedule.</string>
+
     <string name="no_skill_groups_title">No skill groups</string>
     <string name="no_skill_groups_detail">Skills are scheduled for practice through their membership in groups.  Please add this skill to one or more groups.</string>
 
@@ -71,6 +79,15 @@
     <string name="delete_skill">Delete skill</string>
     <string name="delete_skill_confirm_title">Delete skill?</string>
     <string name="cannot_undo_detail">This action cannot be undone.</string>
+
+    <string name="title_schedule_list">Schedules</string>
+    <string name="title_schedule_detail">Schedule Details</string>
+
+    <string name="delete_schedule">Delete schedule</string>
+    <string name="delete_schedule_confirm_title">Delete schedule?</string>
+
+    <string name="no_schedule_slots_title">Schedule has no slots</string>
+    <string name="no_schedule_slots_detail">Add one or more slots to your schedule so they can be filled by skills to practice.</string>
 
     <string name="revert_changes">Undo changes</string>
 
