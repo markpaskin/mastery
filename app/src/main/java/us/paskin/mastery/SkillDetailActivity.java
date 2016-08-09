@@ -1,12 +1,14 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.RunnableFuture;
 import java.util.zip.Inflater;
 
 /**
@@ -48,6 +51,7 @@ public class SkillDetailActivity extends AppCompatActivity {
      */
     public static final int REQ_EDIT_SKILL = 1;
     public static final int REQ_ADD_SKILL = 2;
+    public static final int SELECT_SKILL_GROUP_TO_ADD = 3;
 
     /**
      * True if we're adding a new skill; false if we're editing one.
@@ -94,6 +98,11 @@ public class SkillDetailActivity extends AppCompatActivity {
      * This is true if a new skill was added.
      */
     private boolean addedSkill = false;
+
+    /**
+     * This is the table of skill groups this skill is in.
+     */
+    TableLayout parentGroupLayout;
 
     /**
      * Sets up the activity.
@@ -182,8 +191,42 @@ public class SkillDetailActivity extends AppCompatActivity {
                 }
         );
 
-        TableLayout parentGroupLayout = (TableLayout) findViewById(R.id.parent_group_list);
+        parentGroupLayout = (TableLayout) findViewById(R.id.parent_group_list);
         setupParentGroupLayout(parentGroupLayout);
+    }
+
+    /**
+     * Launches an intent to select a skill group to be added.
+     *
+     * @param context
+     */
+    private void addSkillGroup(Context context) {
+        Intent intent = new Intent(context, SkillGroupListActivity.class);
+        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
+        startActivityForResult(intent, SELECT_SKILL_GROUP_TO_ADD);
+    }
+
+    /**
+     * Handles results from intents launched by this activity.
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) return;
+        if (requestCode == SELECT_SKILL_GROUP_TO_ADD) {
+            final long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
+            if (!skillBuilder.getGroupIdList().contains(Long.valueOf(skillGroupId))) {
+                skillBuilder.addGroupId(skillGroupId);
+                unsavedChanges = true;
+                addParentGroupToTable(skillGroupId);
+                Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void removeFromSkillGroup(long skillGroupId) {
@@ -193,26 +236,61 @@ public class SkillDetailActivity extends AppCompatActivity {
             throw new InternalError("Could not remove " + skillGroupId);
         }
         skillBuilder.clearGroupId().addAllGroupId(groupIds);
+        Toast.makeText(getApplicationContext(), R.string.skill_group_removed, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Adds an entry to the parent skill group table.
+     *
+     * @param skillGroupId
+     */
+    private void addParentGroupToTable(final long skillGroupId) {
+        Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
+        addParentGroupToTable(skillGroup.getName(), parentGroupLayout, new Runnable() {
+            @Override
+            public void run() {
+                removeFromSkillGroup(skillGroupId);
+            }
+        });
+    }
+
+    /**
+     * Adds an entry to the parent skill group table.
+     *
+     * @param groupName
+     * @param parentGroupLayout
+     * @param onRemove
+     */
+    private void addParentGroupToTable(String groupName, final TableLayout parentGroupLayout,
+                                       final Runnable onRemove) {
+        LayoutInflater inflater = LayoutInflater.from(parentGroupLayout.getContext());
+        final TableRow row = (TableRow) inflater.inflate(R.layout.parent_group_item, parentGroupLayout, false);
+        TextView textView = (TextView) row.findViewById(R.id.parent_group_name);
+        textView.setText(groupName);
+        parentGroupLayout.addView(row);
+        View removeButton = row.findViewById(R.id.remove_parent_group_button);
+        removeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onRemove.run();
+                parentGroupLayout.removeView(row);
+            }
+        });
     }
 
     void setupParentGroupLayout(final TableLayout parentGroupLayout) {
         if (skill == null) return;
+        // Add the handler for adding new skills.
+        final View addGroupButton = parentGroupLayout.findViewById(R.id.add_parent_group_button);
+        addGroupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addSkillGroup(addGroupButton.getContext());
+            }
+        });
         LayoutInflater inflater = LayoutInflater.from(parentGroupLayout.getContext());
         for (final long groupId : skill.getGroupIdList()) {
-            Proto.SkillGroup skillGroup = data.getSkillGroupById(groupId);
-            final TableRow row = (TableRow) inflater.inflate(R.layout.parent_group_item, parentGroupLayout, false);
-            TextView textView = (TextView) row.findViewById(R.id.parent_group_name);
-            textView.setText(skillGroup.getName());
-            parentGroupLayout.addView(row);
-            View removeButton = row.findViewById(R.id.remove_parent_group_button);
-            removeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    removeFromSkillGroup(groupId);
-                    parentGroupLayout.removeView(row);
-                }
-            });
-
+            addParentGroupToTable(groupId);
         }
         parentGroupLayout.requestLayout();
     }

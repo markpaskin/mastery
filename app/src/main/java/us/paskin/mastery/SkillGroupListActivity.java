@@ -84,7 +84,7 @@ public class SkillGroupListActivity extends DrawerActivity {
 
         // If this activity is run in "select" mode and we've just added a new group, auto-select it.
         if (requestCode == SkillGroupDetailActivity.REQ_ADD_SKILL_GROUP && selectMode) {
-            final int skillGroupId = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
+            final long skillGroupId = data.getLongExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
             returnSkillGroupId(skillGroupId);
             return;
         }
