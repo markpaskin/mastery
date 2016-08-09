@@ -116,6 +116,27 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
     }
 
     @Test
+    public void testDeleteSkill() {
+        Proto.Skill skill = Proto.Skill.newBuilder().setName("A").setPriority(5).build();
+        assertEquals(0, model.getSkillList().getCount());
+        final long id = model.addSkill(skill);
+        assertEquals(1, model.getSkillList().getCount());
+        model.deleteSkill(id);
+        assertEquals(0, model.getSkillList().getCount());
+    }
+
+    @Test
+    public void testDeleteSkillBadId() {
+        try {
+            model.deleteSkill(0);
+        } catch (IllegalArgumentException x) {
+            assertEquals("invalid id: 0", x.getMessage());
+            return;
+        }
+        fail("did not throw an error");
+    }
+
+    @Test
     public void testGetSkillGroupById() {
         final long id = 1;
         Proto.SkillGroup skillGroup = Proto.SkillGroup.newBuilder().setName("A").setId(id).build();
@@ -278,10 +299,16 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
         model.addSchedule(Proto.Schedule.newBuilder().setName("S").build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAddInvalidScheduleSlotHasBadGroupId() {
-        model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
-                Proto.Schedule.Slot.newBuilder().setGroupId(1).setDurationInSecs(60)).build());
+        try {
+            model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
+                    Proto.Schedule.Slot.newBuilder().setGroupId(1).setDurationInSecs(60)).build());
+        } catch (IllegalArgumentException x) {
+            assertEquals("slot has invalid group id", x.getMessage());
+            return;
+        }
+        fail("did not throw an error");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -324,6 +351,31 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
         model.updateSchedule(scheduleId, schedule);
         retrieved = model.getScheduleById(scheduleId);
         assertEquals(schedule, retrieved);
+    }
+
+    @Test
+    public void testDeleteSchedule() {
+        final long groupId = 1;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("G").setId(groupId).build());
+        Proto.Schedule schedule = Proto.Schedule.newBuilder().setName("S").addSlot(
+                Proto.Schedule.Slot.newBuilder().setGroupId(groupId).setDurationInSecs(60)).build();
+
+        assertEquals(0, model.getScheduleList().getCount());
+        final long scheduleId = model.addSchedule(schedule);
+        assertEquals(1, model.getScheduleList().getCount());
+        model.deleteSchedule(scheduleId);
+        assertEquals(0, model.getScheduleList().getCount());
+    }
+
+    @Test
+    public void testDeleteScheduleBadId() {
+        try {
+            model.deleteSchedule(0);
+        } catch (IllegalArgumentException x) {
+            assertEquals("invalid id: 0", x.getMessage());
+            return;
+        }
+        fail("did not throw an error");
     }
 
     @Test

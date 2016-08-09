@@ -59,7 +59,7 @@ public class Model {
      *
      * @param openHelper
      */
-    void init(DatabaseOpenHelper openHelper) {
+    synchronized void init(DatabaseOpenHelper openHelper) {
         db = openHelper.getWritableDatabase();
         initCaches();
     }
@@ -67,7 +67,7 @@ public class Model {
     /**
      * Initializes in-memory caches from the database.
      */
-    private void initCaches() {
+    private synchronized void initCaches() {
         Cursor cursor = getSkillGroupList();
         Proto.SkillGroup skillGroup;
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -85,12 +85,12 @@ public class Model {
         cursor.close();
     }
 
-    boolean isValidSkillGroupId(long id) {
+    synchronized boolean isValidSkillGroupId(long id) {
         return parentGroups.containsKey(id);
     }
 
     // Returns a cursor with two columns: SkillEntry._ID and SkillEntry.COLUMN_NAME_PROTO.
-    public Cursor getSkillList() {
+    public synchronized Cursor getSkillList() {
         String[] projection = {
                 DatabaseContract.SkillEntry._ID,
                 DatabaseContract.SkillEntry.COLUMN_NAME_PROTO};
@@ -107,7 +107,7 @@ public class Model {
         );
     }
 
-    public Skill getSkillById(long id) {
+    public synchronized Skill getSkillById(long id) {
         String[] projection = {DatabaseContract.SkillEntry.COLUMN_NAME_PROTO};
         String selection = DatabaseContract.SkillEntry._ID + " = " + id;
         Cursor c = db.query(
@@ -135,7 +135,7 @@ public class Model {
         }
     }
 
-    private void validateSkill(Proto.Skill skill) {
+    private synchronized void validateSkill(Proto.Skill skill) {
         if (!skill.hasName() || skill.getName().isEmpty()) {
             throw new IllegalArgumentException("Skill missing name");
         }
@@ -153,7 +153,7 @@ public class Model {
     }
 
     // The ID of the skill is returned.
-    public long addSkill(Skill skill) {
+    public synchronized long addSkill(Skill skill) {
         validateSkill(skill);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
@@ -168,7 +168,7 @@ public class Model {
      * @param id    the ID of the skill to update.  Throws IllegalArgumentException if this is invalid.
      * @param skill the new skill data.
      */
-    public void updateSkill(long id, Skill skill) throws IllegalArgumentException {
+    public synchronized void updateSkill(long id, Skill skill) throws IllegalArgumentException {
         validateSkill(skill);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
@@ -183,6 +183,24 @@ public class Model {
                 throw new IllegalArgumentException("invalid id: " + id);
             default:
                 throw new InternalError("id has multiple records");
+        }
+    }
+
+    /**
+     * Deletes a skill from the database.
+     *
+     * @param id the ID of the skill to delete.  Throws IllegalArgumentException if this is invalid.
+     */
+    public synchronized void deleteSkill(long id) throws IllegalArgumentException {
+        String selection = DatabaseContract.SkillEntry._ID + " = " + id;
+        final int numDeleted = db.delete(DatabaseContract.SkillEntry.TABLE_NAME, selection, null);
+        switch (numDeleted) {
+            case 1:
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + id);
+            default:
+                throw new InternalError("id had multiple records");
         }
     }
 
@@ -214,7 +232,7 @@ public class Model {
     }
 
     // Returns a cursor with two columns: SkillGroupEntry._ID and SkillGroupEntry.COLUMN_NAME_PROTO.
-    public Cursor getSkillGroupList() {
+    public synchronized Cursor getSkillGroupList() {
         String[] projection = {
                 DatabaseContract.SkillGroupEntry._ID,
                 DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO};
@@ -231,7 +249,7 @@ public class Model {
         );
     }
 
-    public Proto.SkillGroup getSkillGroupById(long id) {
+    public synchronized Proto.SkillGroup getSkillGroupById(long id) {
         String[] projection = {DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO};
         String selection = DatabaseContract.SkillGroupEntry._ID + " = " + id;
         Cursor c = db.query(
@@ -259,7 +277,7 @@ public class Model {
         }
     }
 
-    private void validateSkillGroup(Proto.SkillGroup skillGroup) {
+    private synchronized void validateSkillGroup(Proto.SkillGroup skillGroup) {
         if (!skillGroup.hasId()) {
             throw new IllegalArgumentException("Skill group missing ID");
         }
@@ -273,11 +291,11 @@ public class Model {
         }
     }
 
-    private void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
+    private synchronized void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
         parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
     }
 
-    public void addSkillGroup(Proto.SkillGroup skillGroup) {
+    public synchronized void addSkillGroup(Proto.SkillGroup skillGroup) {
         validateSkillGroup(skillGroup);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillGroupEntry._ID, skillGroup.getId());
@@ -296,7 +314,7 @@ public class Model {
      *
      * @param skillGroup the new skill data.
      */
-    public void updateSkillGroup(Proto.SkillGroup skillGroup) {
+    public synchronized void updateSkillGroup(Proto.SkillGroup skillGroup) {
         validateSkillGroup(skillGroup);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME, skillGroup.getName());
@@ -321,7 +339,7 @@ public class Model {
      * @param groupId
      * @return null if there are no ancestors
      */
-    public
+    public synchronized
     @Nullable
     Set<Long> getAncestorGroups(long groupId) {
         return parentGroups.get(groupId); // TODO: handle indirect relationships
@@ -330,7 +348,7 @@ public class Model {
     /**
      * Returns true if ancestorGroupId is an ancestor of groupId.
      */
-    public boolean isAncestorOf(long ancestorGroupId, long groupId) {
+    public synchronized boolean isAncestorOf(long ancestorGroupId, long groupId) {
         Set<Long> ancestorGroups = getAncestorGroups(groupId);
         if (ancestorGroups == null) return false;
         else return ancestorGroups.contains(Long.valueOf(ancestorGroupId));  // TODO: optimize
@@ -342,7 +360,7 @@ public class Model {
      * @param skill
      * @return
      */
-    public Set<Long> getAllSkillGroupIds(Skill skill) {
+    public synchronized Set<Long> getAllSkillGroupIds(Skill skill) {
         Set<Long> result = new TreeSet<Long>();
         for (long directGroupId : skill.getGroupIdList()) {
             result.add(directGroupId);
@@ -355,7 +373,7 @@ public class Model {
     /**
      * Removes all data, returning it to a newly-initialized state.
      */
-    public void clearAllData() {
+    public synchronized void clearAllData() {
         db.delete(DatabaseContract.SkillEntry.TABLE_NAME, null, null);
         db.delete(DatabaseContract.SkillGroupEntry.TABLE_NAME, null, null);
     }
@@ -363,7 +381,7 @@ public class Model {
     /**
      * Removes all existing data and re-initializes with fake data.
      */
-    public void initWithFakeData() {
+    public synchronized void initWithFakeData() {
         clearAllData();
 
         // Add skill groups.  Note these must be done in reverse dependency order.
@@ -397,7 +415,7 @@ public class Model {
     }
 
     // Returns a cursor with two columns: ScheduleEntry._ID and ScheduleEntry.COLUMN_NAME_PROTO.
-    public Cursor getScheduleList() {
+    public synchronized Cursor getScheduleList() {
         String[] projection = {
                 DatabaseContract.ScheduleEntry._ID,
                 DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO};
@@ -414,7 +432,7 @@ public class Model {
         );
     }
 
-    public Proto.Schedule getScheduleById(long id) {
+    public synchronized Proto.Schedule getScheduleById(long id) {
         String[] projection = {DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO};
         String selection = DatabaseContract.ScheduleEntry._ID + " = " + id;
         Cursor c = db.query(
@@ -442,7 +460,7 @@ public class Model {
         }
     }
 
-    private void validateSchedule(Proto.Schedule schedule) {
+    private synchronized void validateSchedule(Proto.Schedule schedule) {
         if (!schedule.hasName() || schedule.getName().isEmpty()) {
             throw new IllegalArgumentException("Schedule missing name");
         }
@@ -460,7 +478,7 @@ public class Model {
     }
 
     // The ID of the skill is returned.
-    public long addSchedule(Proto.Schedule schedule) {
+    public synchronized long addSchedule(Proto.Schedule schedule) {
         validateSchedule(schedule);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME, schedule.getName());
@@ -475,7 +493,7 @@ public class Model {
      * @param id       the ID of the schedule to update.  Throws IllegalArgumentException if this is invalid.
      * @param schedule the new schedule data.
      */
-    public void updateSchedule(long id, Proto.Schedule schedule) throws IllegalArgumentException {
+    public synchronized void updateSchedule(long id, Proto.Schedule schedule) throws IllegalArgumentException {
         validateSchedule(schedule);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME, schedule.getName());
@@ -493,4 +511,21 @@ public class Model {
         }
     }
 
+    /**
+     * Deletes a schedule from the database.
+     *
+     * @param id the ID of the schedule to delete.  Throws IllegalArgumentException if this is invalid.
+     */
+    public synchronized void deleteSchedule(long id) throws IllegalArgumentException {
+        String selection = DatabaseContract.ScheduleEntry._ID + " = " + id;
+        final int numDeleted = db.delete(DatabaseContract.ScheduleEntry.TABLE_NAME, selection, null);
+        switch (numDeleted) {
+            case 1:
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + id);
+            default:
+                throw new InternalError("id had multiple records");
+        }
+    }
 }
