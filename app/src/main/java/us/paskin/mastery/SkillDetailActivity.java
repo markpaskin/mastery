@@ -254,7 +254,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         if (!addingSkill) {
             getMenuInflater().inflate(R.menu.skill_detail, menu);
         }
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
