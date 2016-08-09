@@ -252,6 +252,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.revert_changes) {
             handleRevertChanges();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

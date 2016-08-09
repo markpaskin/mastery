@@ -267,8 +267,10 @@ public class SkillDetailActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.delete_skill) {
             handleDeleteSkill();
+            return true;
         } else if (id == R.id.revert_changes) {
             handleRevertChanges();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
