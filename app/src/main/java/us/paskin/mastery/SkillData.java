@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 
+import com.google.protobuf.Internal;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -20,14 +23,15 @@ import us.paskin.mastery.Proto.Skill;
  *
  */
 public class SkillData {
-
+    // Constants for Skill.priority.
     public static final int MIN_PRIORITY = 1;
     public static final int MAX_PRIORITY = 10;
+    public static final int DEFAULT_PRIORITY = MAX_PRIORITY;
 
     private SQLiteDatabase db = null;
 
     /**
-     * Maps a group ID to the IDs of its parents.
+     * Maps a group ID to the IDs of its parents.  If there are no parents, the value is null.
      */
     private HashMap<Long, Set<Long>> parentGroups = new HashMap<Long, Set<Long>>();
 
@@ -42,19 +46,52 @@ public class SkillData {
     }
 
     private SkillData(Context context) {
-        DatabaseOpenHelper openHelper = new DatabaseOpenHelper(context);
-        db = openHelper.getWritableDatabase();
+        init(new DatabaseOpenHelper(context));
     }
 
     /**
      * Constructor used for testing.
      */
     SkillData(Context context, String testDatabaseName) {
-        DatabaseOpenHelper openHelper = new DatabaseOpenHelper(context, testDatabaseName);
-        db = openHelper.getWritableDatabase();
+        init(new DatabaseOpenHelper(context, testDatabaseName));
     }
 
-    // Returns a cursor with two columns: SkillEntry._ID and SkillEntry.COLUMN_NAME_NAME.
+    /**
+     * Initializes this object.
+     *
+     * @param openHelper
+     */
+    void init(DatabaseOpenHelper openHelper) {
+        db = openHelper.getWritableDatabase();
+        initCaches();
+    }
+
+    /**
+     * Initializes in-memory caches from the database.
+     */
+    private void initCaches() {
+        Cursor cursor = getSkillGroupList();
+        Proto.SkillGroup skillGroup;
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            try {
+                skillGroup = Proto.SkillGroup.parseFrom(cursor.getBlob(1));
+            } catch (InvalidProtocolBufferException x) {
+                throw new InternalError("cannot parse protocol buffer");
+            }
+            if (skillGroup.getParentIdCount() > 0) {
+                parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+            } else {
+                parentGroups.put(skillGroup.getId(), null);
+            }
+        }
+        cursor.close();
+    }
+
+    boolean isValidSkillGroupId(long id) {
+        return parentGroups.containsKey(id);
+    }
+
+    // Returns a cursor with two columns: SkillEntry._ID and SkillEntry.COLUMN_NAME_PROTO.
     public Cursor getSkillList() {
         String[] projection = {
                 DatabaseContract.SkillEntry._ID,
@@ -101,8 +138,19 @@ public class SkillData {
     }
 
     private void validateSkill(Proto.Skill skill) {
-        if (!skill.hasName()) {
+        if (!skill.hasName() || skill.getName().isEmpty()) {
             throw new IllegalArgumentException("Skill missing name");
+        }
+        if (!skill.hasPriority()) {
+            throw new IllegalArgumentException("Skill missing priority");
+        }
+        if (skill.getPriority() > MAX_PRIORITY || skill.getPriority() < MIN_PRIORITY) {
+            throw new IllegalArgumentException("Skill priority out of range: " + skill.getPriority());
+        }
+        for (long skillGroupId : skill.getGroupIdList()) {
+            if (!isValidSkillGroupId(skillGroupId)) {
+                throw new IllegalArgumentException("Skill in invalid group");
+            }
         }
     }
 
@@ -116,15 +164,28 @@ public class SkillData {
         return id;
     }
 
-    public boolean updateSkill(long id, Skill skill) {
+    /**
+     * Updates a skill in the database.
+     *
+     * @param id    the ID of the skill to update.  Throws IllegalArgumentException if this is invalid.
+     * @param skill the new skill data.
+     */
+    public void updateSkill(long id, Skill skill) throws IllegalArgumentException {
         validateSkill(skill);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_PROTO, skill.toByteArray());
         String selection = DatabaseContract.SkillEntry._ID + " = " + id;
-        final boolean success = 1 == db.update(DatabaseContract.SkillEntry.TABLE_NAME,
+        final int numUpdated = db.update(DatabaseContract.SkillEntry.TABLE_NAME,
                 values, selection, null);
-        return success;
+        switch (numUpdated) {
+            case 1:
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + id);
+            default:
+                throw new InternalError("id has multiple records");
+        }
     }
 
     /**
@@ -154,7 +215,7 @@ public class SkillData {
         return resources.getQuantityString(R.plurals.last_practiced_months, (int) diffInMonths, (int) diffInMonths);
     }
 
-    // Returns a cursor with two columns: SkillGroupEntry._ID and SkillGroupEntry.COLUMN_NAME_NAME.
+    // Returns a cursor with two columns: SkillGroupEntry._ID and SkillGroupEntry.COLUMN_NAME_PROTO.
     public Cursor getSkillGroupList() {
         String[] projection = {
                 DatabaseContract.SkillGroupEntry._ID,
@@ -204,8 +265,13 @@ public class SkillData {
         if (!skillGroup.hasId()) {
             throw new IllegalArgumentException("Skill group missing ID");
         }
-        if (!skillGroup.hasName()) {
+        if (!skillGroup.hasName() || skillGroup.getName().isEmpty()) {
             throw new IllegalArgumentException("Skill group missing name");
+        }
+        for (long skillGroupId : skillGroup.getParentIdList()) {
+            if (!isValidSkillGroupId(skillGroupId)) {
+                throw new IllegalArgumentException("Skill group has invalid parent");
+            }
         }
     }
 
@@ -213,8 +279,7 @@ public class SkillData {
         parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
     }
 
-    // The ID of the skill group is returned.
-    public long addSkillGroup(Proto.SkillGroup skillGroup) {
+    public void addSkillGroup(Proto.SkillGroup skillGroup) {
         validateSkillGroup(skillGroup);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillGroupEntry._ID, skillGroup.getId());
@@ -225,28 +290,42 @@ public class SkillData {
             throw new InternalError("ID mismatch");
         }
         updateSkillGroupParents(skillGroup);
-        return id;
     }
 
-    public boolean updateSkillGroup(Proto.SkillGroup skillGroup) {
+
+    /**
+     * Updates a skill group in the database.
+     *
+     * @param skillGroup the new skill data.
+     */
+    public void updateSkillGroup(Proto.SkillGroup skillGroup) {
         validateSkillGroup(skillGroup);
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME, skillGroup.getName());
         values.put(DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO, skillGroup.toByteArray());
         String selection = DatabaseContract.SkillEntry._ID + " = " + skillGroup.getId();
-        final boolean success = 1 == db.update(DatabaseContract.SkillGroupEntry.TABLE_NAME,
+        final int numUpdated = db.update(DatabaseContract.SkillGroupEntry.TABLE_NAME,
                 values, selection, null);
-        if (success) updateSkillGroupParents(skillGroup);
-        return success;
+        switch (numUpdated) {
+            case 1:
+                updateSkillGroupParents(skillGroup);
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + skillGroup.getId());
+            default:
+                throw new InternalError("id has multiple records");
+        }
     }
 
     /**
      * Returns a set of ancestor group IDs, or null if there are none.
      *
      * @param groupId
-     * @return
+     * @return null if there are no ancestors
      */
-    public Set<Long> getAncestorGroups(long groupId) {
+    public
+    @Nullable
+    Set<Long> getAncestorGroups(long groupId) {
         return parentGroups.get(groupId); // TODO: handle indirect relationships
     }
 
@@ -254,7 +333,9 @@ public class SkillData {
      * Returns true if ancestorGroupId is an ancestor of groupId.
      */
     public boolean isAncestorOf(long ancestorGroupId, long groupId) {
-        return getAncestorGroups(groupId).contains(Long.valueOf(ancestorGroupId));  // TODO: optimize
+        Set<Long> ancestorGroups = getAncestorGroups(groupId);
+        if (ancestorGroups == null) return false;
+        else return ancestorGroups.contains(Long.valueOf(ancestorGroupId));  // TODO: optimize
     }
 
     /**
@@ -287,7 +368,7 @@ public class SkillData {
     public void initWithFakeData() {
         clearAllData();
 
-        // Add skill groups
+        // Add skill groups.  Note these must be done in reverse dependency order.
         addSkillGroup(Proto.SkillGroup.newBuilder()
                 .setId(0)
                 .setName("Warm-ups")

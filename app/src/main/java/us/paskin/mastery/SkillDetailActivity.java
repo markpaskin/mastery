@@ -174,6 +174,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                     }
                 }
         );
+        practicePriorityPicker.setValue(SkillData.DEFAULT_PRIORITY);
 
         skillGroupList = new EditableList(
                 (TableLayout) findViewById(R.id.parent_group_list),
