@@ -28,3 +28,20 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.1.1'
     compile files('libs/protobuf-java-3.0.0.jar')
 }
+
+dependencies {
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+}
+
+android {
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:support-annotations:23.1.1'
+    }
+}

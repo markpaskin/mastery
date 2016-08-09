@@ -38,21 +38,23 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_SKILL_GROUPS =
             "DROP TABLE IF EXISTS " + DatabaseContract.SkillGroupEntry.TABLE_NAME;
 
-    private static DatabaseOpenHelper singleton;
-
-    public static synchronized DatabaseOpenHelper getInstance(Context context) {
-        // Use the application context, which will ensure that you
-        // don't accidentally leak an Activity's context.
-        // See this article for more information: http://bit.ly/6LRzfx
-        if (singleton == null) {
-            singleton = new DatabaseOpenHelper(context.getApplicationContext());
-        }
-        return singleton;
+    /**
+     * Main constructor.
+     *
+     * @param context
+     */
+    public DatabaseOpenHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    private DatabaseOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        context.deleteDatabase(DATABASE_NAME);  // TODO remove
+    /**
+     * Opens a database with a provided name.  Used for testing.
+     *
+     * @param context
+     * @param databaseName
+     */
+    public DatabaseOpenHelper(Context context, String databaseName) {
+        super(context, databaseName, null, DATABASE_VERSION);
     }
 
     public void onCreate(SQLiteDatabase db) {

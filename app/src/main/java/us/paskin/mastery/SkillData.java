@@ -10,8 +10,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -38,14 +36,22 @@ public class SkillData {
     public static synchronized SkillData getInstance(Context context) {
         if (singleton == null) {
             singleton = new SkillData(context);
+            singleton.initWithFakeData();  // TODO remove
         }
         return singleton;
     }
 
     private SkillData(Context context) {
-        DatabaseOpenHelper openHelper = DatabaseOpenHelper.getInstance(context);
+        DatabaseOpenHelper openHelper = new DatabaseOpenHelper(context);
         db = openHelper.getWritableDatabase();
-        addFakeData();
+    }
+
+    /**
+     * Constructor used for testing.
+     */
+    SkillData(Context context, String testDatabaseName) {
+        DatabaseOpenHelper openHelper = new DatabaseOpenHelper(context, testDatabaseName);
+        db = openHelper.getWritableDatabase();
     }
 
     // Returns a cursor with two columns: SkillEntry._ID and SkillEntry.COLUMN_NAME_NAME.
@@ -267,7 +273,20 @@ public class SkillData {
         return result;
     }
 
-    public void addFakeData() {
+    /**
+     * Removes all data, returning it to a newly-initialized state.
+     */
+    public void clearAllData() {
+        db.delete(DatabaseContract.SkillEntry.TABLE_NAME, null, null);
+        db.delete(DatabaseContract.SkillGroupEntry.TABLE_NAME, null, null);
+    }
+
+    /**
+     * Removes all existing data and re-initializes with fake data.
+     */
+    public void initWithFakeData() {
+        clearAllData();
+
         // Add skill groups
         addSkillGroup(Proto.SkillGroup.newBuilder()
                 .setId(0)
