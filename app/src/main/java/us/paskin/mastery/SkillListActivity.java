@@ -26,6 +26,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
  */
 public class SkillListActivity extends DrawerActivity {
 
+    /**
+     * These are intent request types, used for interpreting results from child intents.
+     */
+    private static final int REQ_EDIT_SKILL = 1;
+    private static final int REQ_ADD_SKILL = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +51,7 @@ public class SkillListActivity extends DrawerActivity {
                 Intent intent = new Intent(context, SkillDetailActivity.class);
                 intent.removeExtra(SkillDetailActivity.ARG_SKILL_INDEX);
                 intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
-                SkillListActivity.this.startActivityForResult(intent, SkillDetailActivity.REQ_ADD_SKILL);
+                SkillListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL);
             }
         });
 
@@ -127,7 +133,7 @@ public class SkillListActivity extends DrawerActivity {
                     Intent intent = new Intent(context, SkillDetailActivity.class);
                     intent.putExtra(SkillDetailActivity.ARG_SKILL_INDEX, position);
                     intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, id);
-                    SkillListActivity.this.startActivityForResult(intent, SkillDetailActivity.REQ_EDIT_SKILL);
+                    SkillListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL);
                 }
             });
         }

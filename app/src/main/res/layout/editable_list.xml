@@ -17,7 +17,7 @@
             android:layout_margin="@dimen/text_margin" />
 
         <ImageButton
-            android:id="@+id/add_parent_group_button"
+            android:id="@+id/add_button"
             android:src="@android:drawable/ic_input_add"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/small_button_margin"

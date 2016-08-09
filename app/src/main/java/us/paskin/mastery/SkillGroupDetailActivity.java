@@ -15,9 +15,10 @@ import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.TextView;
+import android.widget.TableLayout;
 import android.widget.Toast;
+
+import java.util.LinkedList;
 
 /**
  * An activity to view/edit a skill group.
@@ -30,11 +31,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     public static final String ARG_SKILL_GROUP_INDEX = "skill_group_index";
     public static final String ARG_SKILL_GROUP_ID = "skill_group_id";
 
-    /**
-     * These are intent request types.
-     */
-    public static final int REQ_EDIT_SKILL_GROUP = 1;
-    public static final int REQ_ADD_SKILL_GROUP = 2;
+    public static final int SELECT_PARENT_GROUP_TO_ADD = 3;
 
     /**
      * A handle on the data model.
@@ -81,6 +78,11 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      * This is true if a new skill group was added.
      */
     private boolean addedSkillGroup = false;
+
+    /**
+     * This is the table of parent groups this group is in.
+     */
+    EditableList parentGroupList;
 
     /**
      * Sets up the activity.
@@ -144,6 +146,71 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                 unsavedChanges = true;
                 skillGroupBuilder.setName(editable.toString());
                 updateTitle(editable);
+            }
+        });
+
+        parentGroupList = new EditableList(
+                (TableLayout) findViewById(R.id.parent_group_list),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(view.getContext(), SkillGroupListActivity.class);
+                        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
+                        SkillGroupDetailActivity.this.startActivityForResult(intent, SELECT_PARENT_GROUP_TO_ADD);
+                    }
+                });
+
+        if (skillGroup != null) {
+            for (final long groupId : skillGroup.getParentIdList()) {
+                addParentGroupToTable(groupId);
+            }
+        }
+    }
+
+    /**
+     * Handles results from intents launched by this activity.
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) return;
+        if (requestCode == SELECT_PARENT_GROUP_TO_ADD) {
+            final long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
+            if (!skillGroupBuilder.getParentIdList().contains(skillGroupId)) {
+                skillGroupBuilder.addParentId(skillGroupId);
+                unsavedChanges = true;
+                addParentGroupToTable(skillGroupId);
+                Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void removeParentGroup(long skillGroupId) {
+        unsavedChanges = true;
+        LinkedList<Long> groupIds = new LinkedList<Long>(skillGroupBuilder.getParentIdList());
+        if (!groupIds.remove(skillGroupId)) {
+            throw new InternalError("Could not remove " + skillGroupId);
+        }
+        skillGroupBuilder.clearParentId().addAllParentId(groupIds);
+        Toast.makeText(getApplicationContext(), R.string.skill_group_removed, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Adds an entry to the parent skill group table.
+     *
+     * @param skillGroupId
+     */
+    private void addParentGroupToTable(final long skillGroupId) {
+        Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
+        parentGroupList.addItem(skillGroup.getName(), new Runnable() {
+            @Override
+            public void run() {
+                removeParentGroup(skillGroupId);
             }
         });
     }

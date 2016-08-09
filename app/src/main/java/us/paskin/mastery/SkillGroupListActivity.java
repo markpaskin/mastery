@@ -40,6 +40,12 @@ public class SkillGroupListActivity extends DrawerActivity {
     public static final String ARG_SELECTED_SKILL_GROUP_ID = "selected_group_id";
 
     /**
+     * These are intent request types.  They are used to process results from child intents.
+     */
+    private static final int REQ_EDIT_SKILL_GROUP = 1;
+    private static final int REQ_ADD_SKILL_GROUP = 2;
+
+    /**
      * Indicates if this activity was launched in "select" mode.
      */
     private boolean selectMode = false;
@@ -65,7 +71,7 @@ public class SkillGroupListActivity extends DrawerActivity {
                 Intent intent = new Intent(context, SkillGroupDetailActivity.class);
                 intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX);
                 intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID);
-                SkillGroupListActivity.this.startActivityForResult(intent, SkillGroupDetailActivity.REQ_ADD_SKILL_GROUP);
+                SkillGroupListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL_GROUP);
             }
         });
 
@@ -83,7 +89,7 @@ public class SkillGroupListActivity extends DrawerActivity {
         if (resultCode != Activity.RESULT_OK) return;
 
         // If this activity is run in "select" mode and we've just added a new group, auto-select it.
-        if (requestCode == SkillGroupDetailActivity.REQ_ADD_SKILL_GROUP && selectMode) {
+        if (requestCode == REQ_ADD_SKILL_GROUP && selectMode) {
             final long skillGroupId = data.getLongExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
             returnSkillGroupId(skillGroupId);
             return;
@@ -170,7 +176,7 @@ public class SkillGroupListActivity extends DrawerActivity {
                     Intent intent = new Intent(context, SkillGroupDetailActivity.class);
                     intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, position);
                     intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, id);
-                    SkillGroupListActivity.this.startActivityForResult(intent, SkillGroupDetailActivity.REQ_EDIT_SKILL_GROUP);
+                    SkillGroupListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL_GROUP);
                 }
             });
         }
