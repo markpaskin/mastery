@@ -89,12 +89,12 @@ public class SkillListActivity extends DrawerActivity {
     public class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final SkillData data;
+        private final Model data;
         private Cursor cursor;
 
         public SimpleItemRecyclerViewAdapter(Context context) {
             setHasStableIds(true);
-            data = SkillData.getInstance(context);
+            data = Model.getInstance(context);
             refreshView();
         }
 

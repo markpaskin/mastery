@@ -7,12 +7,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
-import com.google.protobuf.Internal;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -20,9 +18,9 @@ import java.util.concurrent.TimeUnit;
 import us.paskin.mastery.Proto.Skill;
 
 /**
- *
+ * Represents the data underlying the Mastery app.
  */
-public class SkillData {
+public class Model {
     // Constants for Skill.priority.
     public static final int MIN_PRIORITY = 1;
     public static final int MAX_PRIORITY = 10;
@@ -35,24 +33,24 @@ public class SkillData {
      */
     private HashMap<Long, Set<Long>> parentGroups = new HashMap<Long, Set<Long>>();
 
-    private static SkillData singleton;
+    private static Model singleton;
 
-    public static synchronized SkillData getInstance(Context context) {
+    public static synchronized Model getInstance(Context context) {
         if (singleton == null) {
-            singleton = new SkillData(context);
+            singleton = new Model(context);
             singleton.initWithFakeData();  // TODO remove
         }
         return singleton;
     }
 
-    private SkillData(Context context) {
+    private Model(Context context) {
         init(new DatabaseOpenHelper(context));
     }
 
     /**
      * Constructor used for testing.
      */
-    SkillData(Context context, String testDatabaseName) {
+    Model(Context context, String testDatabaseName) {
         init(new DatabaseOpenHelper(context, testDatabaseName));
     }
 
@@ -397,4 +395,102 @@ public class SkillData {
                 .addGroupId(-1)
                 .build());
     }
+
+    // Returns a cursor with two columns: ScheduleEntry._ID and ScheduleEntry.COLUMN_NAME_PROTO.
+    public Cursor getScheduleList() {
+        String[] projection = {
+                DatabaseContract.ScheduleEntry._ID,
+                DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO};
+        String sortOrder =
+                DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME + " ASC";
+        return db.query(
+                DatabaseContract.ScheduleEntry.TABLE_NAME,   // The table to query
+                projection,                               // The columns to return
+                null,                                     // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder
+        );
+    }
+
+    public Proto.Schedule getScheduleById(long id) {
+        String[] projection = {DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO};
+        String selection = DatabaseContract.ScheduleEntry._ID + " = " + id;
+        Cursor c = db.query(
+                DatabaseContract.ScheduleEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        if (c.getCount() != 1) {
+            throw new InternalError("Expected one row, got " + c.getCount());
+        }
+        if (c.getColumnCount() != 1) {
+            throw new InternalError("Expected one column, got " + c.getColumnCount());
+        }
+        c.moveToFirst();
+        try {
+            Proto.Schedule schedule = Proto.Schedule.parseFrom(c.getBlob(0));
+            c.close();
+            return schedule;
+        } catch (InvalidProtocolBufferException x) {
+            throw new InternalError("failed to parse protocol message");
+        }
+    }
+
+    private void validateSchedule(Proto.Schedule schedule) {
+        if (!schedule.hasName() || schedule.getName().isEmpty()) {
+            throw new IllegalArgumentException("Schedule missing name");
+        }
+        if (schedule.getSlotCount() == 0) {
+            throw new IllegalArgumentException("empty schedule");
+        }
+        for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
+            if (!slot.hasDurationInSecs() || slot.getDurationInSecs() <= 0) {
+                throw new IllegalArgumentException("non-positive slot duration");
+            }
+            if (!isValidSkillGroupId(slot.getGroupId())) {
+                throw new IllegalArgumentException("slot has invalid group id");
+            }
+        }
+    }
+
+    // The ID of the skill is returned.
+    public long addSchedule(Proto.Schedule schedule) {
+        validateSchedule(schedule);
+        ContentValues values = new ContentValues();
+        values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME, schedule.getName());
+        values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO, schedule.toByteArray());
+        long id = db.insert(DatabaseContract.ScheduleEntry.TABLE_NAME, null, values);
+        return id;
+    }
+
+    /**
+     * Updates a schedule in the database.
+     *
+     * @param id       the ID of the schedule to update.  Throws IllegalArgumentException if this is invalid.
+     * @param schedule the new schedule data.
+     */
+    public void updateSchedule(long id, Proto.Schedule schedule) throws IllegalArgumentException {
+        validateSchedule(schedule);
+        ContentValues values = new ContentValues();
+        values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME, schedule.getName());
+        values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO, schedule.toByteArray());
+        String selection = DatabaseContract.ScheduleEntry._ID + " = " + id;
+        final int numUpdated = db.update(DatabaseContract.ScheduleEntry.TABLE_NAME,
+                values, selection, null);
+        switch (numUpdated) {
+            case 1:
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + id);
+            default:
+                throw new InternalError("id has multiple records");
+        }
+    }
+
 }

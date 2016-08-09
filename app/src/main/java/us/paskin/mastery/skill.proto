@@ -9,14 +9,42 @@ option java_outer_classname = "Proto";
 // cd /Users/baq/AndroidStudioProjects/Mastery/app/src/main/java/
 // protoc us/paskin/mastery/skill.proto --java_out=.
 message Skill {
+  // The name of the skill.  This may not be empty.
   optional string name = 1;
+
+  // The date this skill was last practiced, specified as seconds since the epoch.
+  // If missing, the skill was never practiced.
   optional uint64 date_last_practiced = 2;
-  optional int32 priority = 3;
+
+  // The priority of the skill.  Must be between 1 and 10.
+  optional int32 priority = 3 [default = 10];
+
+  // The IDs of the groups this skill is a member of.
   repeated int64 group_id = 4;
 }
 
+// Represents a group of skills.
 message SkillGroup {
+  // The ID of this group.  This must be unique across all SkillGroups.
   optional int64 id = 1;
+
+  // The name of this group.  This must be non-empty.
   optional string name = 2;
+
+  // The IDs of the groups this group is nested within.  Optional.
   repeated int64 parent_id = 3;
+}
+
+// A schedule is an abstract session: a sequence of slots, each of which has a group
+// and a duration.
+message Schedule {
+  // The name of this schedule.  This must be non-empty.
+  optional string name = 1;
+
+  // The slots in this schedule that must be filled by items.
+  message Slot {
+    optional int64 group_id = 1;
+    optional int32 duration_in_secs = 2;
+  }
+  repeated Slot slot = 2;
 }

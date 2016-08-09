@@ -51,7 +51,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     /**
      * If we're not adding a new skill, this is the previous skill data.
      */
-    private SkillData data;
+    private Model data;
 
     /**
      * The index of the skill being edited (or -1 if it's being added).
@@ -96,7 +96,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = SkillData.getInstance(this);
+        data = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
         addingSkill = !getIntent().hasExtra(ARG_SKILL_POSITION);
@@ -135,17 +135,17 @@ public class SkillDetailActivity extends AppCompatActivity {
 
         // Set up the priority picker
         NumberPicker practicePriorityPicker = ((NumberPicker) findViewById(R.id.priority_picker));
-        practicePriorityPicker.setMinValue(SkillData.MIN_PRIORITY);
-        practicePriorityPicker.setMaxValue(SkillData.MAX_PRIORITY);
+        practicePriorityPicker.setMinValue(Model.MIN_PRIORITY);
+        practicePriorityPicker.setMaxValue(Model.MAX_PRIORITY);
 
         // Initialize the controls with pre-existing values or defaults.
         if (skill != null) {
             updateTitle(skill.getName());
             nameEditText.setText(skill.getName());
-            lastPracticedText.setText(SkillData.getLastPracticedText(skill, getResources()));
-            practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : SkillData.MAX_PRIORITY);
+            lastPracticedText.setText(Model.getLastPracticedText(skill, getResources()));
+            practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : Model.MAX_PRIORITY);
         } else {
-            skillBuilder.setPriority(SkillData.MAX_PRIORITY);
+            skillBuilder.setPriority(Model.MAX_PRIORITY);
         }
 
         // Set up listeners (after setting initial values, so we don't get events for those).
@@ -174,7 +174,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                     }
                 }
         );
-        practicePriorityPicker.setValue(SkillData.DEFAULT_PRIORITY);
+        practicePriorityPicker.setValue(Model.DEFAULT_PRIORITY);
 
         skillGroupList = new EditableList(
                 (TableLayout) findViewById(R.id.parent_group_list),

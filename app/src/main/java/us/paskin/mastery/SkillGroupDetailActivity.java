@@ -41,7 +41,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     /**
      * A handle on the data model.
      */
-    private SkillData data;
+    private Model data;
 
     /**
      * True if we're adding a new skill group; false if we're editing one.
@@ -89,7 +89,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = SkillData.getInstance(this);
+        data = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
         addingSkillGroup = !getIntent().hasExtra(ARG_SKILL_GROUP_ID);

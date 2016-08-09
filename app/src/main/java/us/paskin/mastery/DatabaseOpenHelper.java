@@ -24,7 +24,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                     COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_NAME + TEXT_TYPE +
                     COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
-    private static final String SQL_DELETE_SKILLS =
+    private static final String SQL_DROP_SKILLS =
             "DROP TABLE IF EXISTS " + DatabaseContract.SkillEntry.TABLE_NAME;
 
 
@@ -35,8 +35,18 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
                     COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE +
                     COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
-    private static final String SQL_DELETE_SKILL_GROUPS =
+    private static final String SQL_DROP_SKILL_GROUPS =
             "DROP TABLE IF EXISTS " + DatabaseContract.SkillGroupEntry.TABLE_NAME;
+
+    // Schedule DB statements
+    private static final String SQL_CREATE_SCHEDULES =
+            "CREATE TABLE " + DatabaseContract.ScheduleEntry.TABLE_NAME + " (" +
+                    DatabaseContract.ScheduleEntry._ID + " INTEGER PRIMARY KEY" +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE +
+                    COMMA_SEP + DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
+                    " )";
+    private static final String SQL_DROP_SCHEDULES =
+            "DROP TABLE IF EXISTS " + DatabaseContract.ScheduleEntry.TABLE_NAME;
 
     /**
      * Main constructor.
@@ -60,12 +70,14 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_SKILLS);
         db.execSQL(SQL_CREATE_SKILL_GROUPS);
+        db.execSQL(SQL_CREATE_SCHEDULES);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // TODO: upgrade policy is to simply to discard the data and start over
-        db.execSQL(SQL_DELETE_SKILLS);
-        db.execSQL(SQL_DELETE_SKILL_GROUPS);
+        db.execSQL(SQL_DROP_SKILLS);
+        db.execSQL(SQL_DROP_SKILL_GROUPS);
+        db.execSQL(SQL_DROP_SCHEDULES);
         onCreate(db);
     }
 
