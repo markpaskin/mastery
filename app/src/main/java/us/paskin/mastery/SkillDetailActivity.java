@@ -115,14 +115,6 @@ public class SkillDetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (saveSkill()) finish();
-            }
-        });
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -275,10 +267,15 @@ public class SkillDetailActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.delete_skill) {
             handleDeleteSkill();
+        } else if (id == R.id.revert_changes) {
+            handleRevertChanges();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Called if the user requests to delete this skill.
+     */
     void handleDeleteSkill() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -300,6 +297,28 @@ public class SkillDetailActivity extends AppCompatActivity {
         unsavedChanges = false;
         savedChanges = true;
         finish();
+    }
+
+    /**
+     * Called if the user requests to revert changes.
+     */
+    void handleRevertChanges() {
+        if (!unsavedChanges) {
+            finish();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.discard_edits_title)
+                .setMessage(R.string.discard_edits_question)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SkillDetailActivity.this.finish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
     }
 
     /**
@@ -356,25 +375,10 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes if there are no unsaved changes (or the user discards them).
+     * Finishes if any pending changes can be saved.
      */
     private void maybeFinish() {
-        if (!unsavedChanges) {
-            finish();
-            return;
-        }
-        new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.discard_edits_title)
-                .setMessage(R.string.discard_edits_question)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SkillDetailActivity.this.finish();
-                    }
-                })
-                .setNegativeButton(R.string.no, null)
-                .show();
+        if (saveSkill()) finish();
     }
 
     /**

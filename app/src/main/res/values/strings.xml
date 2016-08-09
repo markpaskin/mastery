@@ -72,4 +72,6 @@
     <string name="delete_skill_confirm_title">Delete skill?</string>
     <string name="cannot_undo_detail">This action cannot be undone.</string>
 
+    <string name="revert_changes">Undo changes</string>
+
 </resources>
