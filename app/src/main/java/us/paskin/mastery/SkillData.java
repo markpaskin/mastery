@@ -241,7 +241,14 @@ public class SkillData {
      * @return
      */
     public Set<Long> getAncestorGroups(long groupId) {
-        return parentGroups.get(groupId); // TODO
+        return parentGroups.get(groupId); // TODO: handle indirect relationships
+    }
+
+    /**
+     * Returns true if ancestorGroupId is an ancestor of groupId.
+     */
+    public boolean isAncestorOf(long ancestorGroupId, long groupId) {
+        return getAncestorGroups(groupId).contains(Long.valueOf(ancestorGroupId));  // TODO: optimize
     }
 
     /**

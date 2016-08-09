@@ -25,13 +25,18 @@ import java.util.LinkedList;
  */
 public class SkillGroupDetailActivity extends AppCompatActivity {
     /**
-     * The intent arguments representing the index and ID of the skill being edited/added.
-     * They are both an input and output argument.
+     * The intent arguments representing the index and ID of the skill group being edited/added.
+     * They are both an input and output argument.  If ID is missing, then the request is
+     * to add a new group.  POSITION is an optional argument used by callers for whom it
+     * is convenient to get the position returned as a result.
      */
-    public static final String ARG_SKILL_GROUP_INDEX = "skill_group_index";
     public static final String ARG_SKILL_GROUP_ID = "skill_group_id";
+    public static final String ARG_SKILL_GROUP_POSITION = "skill_group_pos";
 
-    public static final int SELECT_PARENT_GROUP_TO_ADD = 3;
+    /**
+     * This intent type is used to identify results from child intents.
+     */
+    public static final int SELECT_PARENT_GROUP_TO_ADD = 1;
 
     /**
      * A handle on the data model.
@@ -44,15 +49,14 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     private boolean addingSkillGroup;
 
     /**
-     * The index of the skill group being edited.  If this is -1, it's a new skill group.  After saving,
-     * the ID will be set for a new skill group.
+     * The ID of the skill being edited (or -1 if one is being created).
      */
-    private int skillGroupIndex;
+    private long skillGroupId = -1;
 
     /**
-     * The ID of the skill being edited.
+     * The index of the skill group being edited (or -1 if none was supplied).
      */
-    private long skillGroupId;
+    private int skillGroupPosition = -1;
 
     /**
      * The skill group before any updates.  This is null if a new group is being created.
@@ -75,19 +79,12 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     private boolean savedChanges = false;
 
     /**
-     * This is true if a new skill group was added.
-     */
-    private boolean addedSkillGroup = false;
-
-    /**
      * This is the table of parent groups this group is in.
      */
     EditableList parentGroupList;
 
     /**
      * Sets up the activity.
-     *
-     * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,14 +92,14 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         data = SkillData.getInstance(this);
 
         // Initialize this object from the intent arguments.
-        addingSkillGroup = !getIntent().hasExtra(ARG_SKILL_GROUP_INDEX);
-        if (!addingSkillGroup) {
-            skillGroupIndex = getIntent().getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, -1);
+        addingSkillGroup = !getIntent().hasExtra(ARG_SKILL_GROUP_ID);
+        if (addingSkillGroup) {
+            skillGroupBuilder = Proto.SkillGroup.newBuilder();
+        } else {
+            skillGroupPosition = getIntent().getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
             skillGroupId = getIntent().getLongExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
             skillGroup = data.getSkillGroupById(skillGroupId);
             skillGroupBuilder = skillGroup.toBuilder();
-        } else {
-            skillGroupBuilder = Proto.SkillGroup.newBuilder();
         }
 
         setContentView(R.layout.activity_skill_group_detail);
@@ -167,26 +164,39 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         }
     }
 
+    private void tryAddParentGroup(long parentGroupId) {
+        if (!addingSkillGroup && parentGroupId == skillGroup.getId()) {
+            Toast.makeText(getApplicationContext(), R.string.skill_self_parent, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (skillGroupBuilder.getParentIdList().contains(parentGroupId)) {
+            Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!addingSkillGroup && data.isAncestorOf(skillGroup.getId(), parentGroupId)) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(R.string.skill_group_cycle_title)
+                    .setMessage(R.string.skill_group_cycle_detail)
+                    .setNeutralButton(R.string.ok, null)
+                    .show();
+            return;
+        }
+        skillGroupBuilder.addParentId(parentGroupId);
+        unsavedChanges = true;
+        addParentGroupToTable(parentGroupId);
+        Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
+    }
+
     /**
      * Handles results from intents launched by this activity.
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
         if (requestCode == SELECT_PARENT_GROUP_TO_ADD) {
-            final long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
-            if (!skillGroupBuilder.getParentIdList().contains(skillGroupId)) {
-                skillGroupBuilder.addParentId(skillGroupId);
-                unsavedChanges = true;
-                addParentGroupToTable(skillGroupId);
-                Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
-            }
+            final long parentGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
+            tryAddParentGroup(parentGroupId);
         }
     }
 
@@ -202,24 +212,28 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
 
     /**
      * Adds an entry to the parent skill group table.
-     *
-     * @param skillGroupId
      */
     private void addParentGroupToTable(final long skillGroupId) {
         Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
-        parentGroupList.addItem(skillGroup.getName(), new Runnable() {
-            @Override
-            public void run() {
-                removeParentGroup(skillGroupId);
-            }
-        });
+        parentGroupList.addItem(
+                skillGroup.getName(),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(view.getContext(), SkillGroupDetailActivity.class);
+                        intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, skillGroupId);
+                        SkillGroupDetailActivity.this.startActivity(intent);
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        removeParentGroup(skillGroupId);
+                    }
+                });
     }
 
     /**
      * This is invoked if an option is select, e.g., the left arrow to return.
-     *
-     * @param item
-     * @return
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -240,8 +254,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
 
     /**
      * Updates the title.
-     *
-     * @param title
      */
     void updateTitle(CharSequence title) {
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
@@ -279,7 +291,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             skillGroupBuilder.setId(Fingerprint.forString(skillGroupBuilder.getName()));
             skillGroupId = skillGroupBuilder.getId();
             data.addSkillGroup(skillGroupBuilder.build());
-            addedSkillGroup = true;
             Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
         }
         unsavedChanges = false;
@@ -316,7 +327,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     public void finish() {
         Intent intent = new Intent();
         if (savedChanges) {
-            intent.putExtra(ARG_SKILL_GROUP_INDEX, skillGroupIndex);
+            intent.putExtra(ARG_SKILL_GROUP_POSITION, skillGroupPosition);
             intent.putExtra(ARG_SKILL_GROUP_ID, skillGroupId);
             setResult(Activity.RESULT_OK, intent);
         } else {

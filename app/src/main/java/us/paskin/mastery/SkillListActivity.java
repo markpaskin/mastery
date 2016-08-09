@@ -49,7 +49,7 @@ public class SkillListActivity extends DrawerActivity {
                 // Start the detail activity with no ARG_ITEM_ID to create a new one.
                 Context context = view.getContext();
                 Intent intent = new Intent(context, SkillDetailActivity.class);
-                intent.removeExtra(SkillDetailActivity.ARG_SKILL_INDEX);
+                intent.removeExtra(SkillDetailActivity.ARG_SKILL_POSITION);
                 intent.removeExtra(SkillDetailActivity.ARG_SKILL_ID);
                 SkillListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL);
             }
@@ -67,7 +67,7 @@ public class SkillListActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
+        final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
@@ -131,7 +131,7 @@ public class SkillListActivity extends DrawerActivity {
                 public void onClick(View v) {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillDetailActivity.class);
-                    intent.putExtra(SkillDetailActivity.ARG_SKILL_INDEX, position);
+                    intent.putExtra(SkillDetailActivity.ARG_SKILL_POSITION, position);
                     intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, id);
                     SkillListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL);
                 }

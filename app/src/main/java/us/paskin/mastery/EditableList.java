@@ -26,13 +26,15 @@ public class EditableList {
      * Adds an item to the list.
      *
      * @param text     the displayed text
+     * @param onClick    called if the item is tapped
      * @param onRemove called if the item is removed
      */
-    public void addItem(String text, final Runnable onRemove) {
+    public void addItem(String text, View.OnClickListener onClick, final Runnable onRemove) {
         LayoutInflater inflater = LayoutInflater.from(tableLayout.getContext());
         final TableRow row = (TableRow) inflater.inflate(R.layout.editable_list_item, tableLayout, false);
         TextView textView = (TextView) row.findViewById(R.id.item_text);
         textView.setText(text);
+        textView.setOnClickListener(onClick);
         tableLayout.addView(row);
         View removeButton = row.findViewById(R.id.remove_button);
         removeButton.setOnClickListener(new View.OnClickListener() {

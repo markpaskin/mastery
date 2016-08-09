@@ -69,7 +69,7 @@ public class SkillGroupListActivity extends DrawerActivity {
                 // Start the detail activity with no ARG_SKILL_GROUP_ITEM_ID to create a new one.
                 Context context = view.getContext();
                 Intent intent = new Intent(context, SkillGroupDetailActivity.class);
-                intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX);
+                intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION);
                 intent.removeExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID);
                 SkillGroupListActivity.this.startActivityForResult(intent, REQ_ADD_SKILL_GROUP);
             }
@@ -95,7 +95,7 @@ public class SkillGroupListActivity extends DrawerActivity {
             return;
         }
 
-        final int skillGroupIndex = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, -1);
+        final int skillGroupIndex = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_group_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
@@ -174,7 +174,7 @@ public class SkillGroupListActivity extends DrawerActivity {
                     }
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillGroupDetailActivity.class);
-                    intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_INDEX, position);
+                    intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, position);
                     intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, id);
                     SkillGroupListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL_GROUP);
                 }

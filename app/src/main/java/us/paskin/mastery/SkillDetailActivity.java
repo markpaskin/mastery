@@ -1,7 +1,6 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -33,13 +31,17 @@ import java.util.LinkedList;
 public class SkillDetailActivity extends AppCompatActivity {
     /**
      * The intent arguments representing the index and ID of the skill being edited/added.
-     * They are both an input and output argument.
+     * They are both an input and output argument.  If ID is missing, then the request is
+     * to add a new skill.  POSITION is an optional argument used by callers for whom it
+     * is convenient to get the position returned as a result.
      */
-    public static final String ARG_SKILL_INDEX = "skill_index";
     public static final String ARG_SKILL_ID = "skill_id";
+    public static final String ARG_SKILL_POSITION = "skill_pos";
 
-
-    public static final int SELECT_SKILL_GROUP_TO_ADD = 3;
+    /**
+     * This intent type is used to identify results from child intents.
+     */
+    public static final int SELECT_SKILL_GROUP_TO_ADD = 1;
 
     /**
      * True if we're adding a new skill; false if we're editing one.
@@ -52,23 +54,22 @@ public class SkillDetailActivity extends AppCompatActivity {
     private SkillData data;
 
     /**
-     * The index of the skill being edited.  If this is -1, it's a new skill.  After saving,
-     * the ID will be set for a new skill.
+     * The index of the skill being edited (or -1 if it's being added).
      */
     private int skillIndex = -1;
 
     /**
-     * The ID of the skill being edited.  If this is -1, it's a new skill.
+     * The ID of the skill being edited (or -1 if it's being added).
      */
     private long skillId = -1;
 
     /**
-     * The skill before any updates.  This is null if a new skill is being created.
+     * The skill before any updates.  This is null if a new skill is being added.
      */
     private Proto.Skill skill;
 
     /**
-     * The builder that is used to update the skill.
+     * The builder that is used to update the skill.  Its fields reflect the data entered by the user.
      */
     private Proto.Skill.Builder skillBuilder;
 
@@ -83,12 +84,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     private boolean savedChanges = false;
 
     /**
-     * This is true if a new skill was added.
-     */
-    private boolean addedSkill = false;
-
-    /**
-     * This is the table of skill groups this skill is in.
+     * This is the table used to render the skill groups this skill is in.
      */
     EditableList skillGroupList;
 
@@ -103,9 +99,9 @@ public class SkillDetailActivity extends AppCompatActivity {
         data = SkillData.getInstance(this);
 
         // Initialize this object from the intent arguments.
-        addingSkill = !getIntent().hasExtra(ARG_SKILL_INDEX);
+        addingSkill = !getIntent().hasExtra(ARG_SKILL_POSITION);
         if (!addingSkill) {
-            skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_INDEX, -1);
+            skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
             skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
             skill = data.getSkillById(skillId);
             skillBuilder = skill.toBuilder();
@@ -199,10 +195,6 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * Handles results from intents launched by this activity.
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -232,12 +224,20 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * Adds an entry to the parent skill group table.
-     *
-     * @param skillGroupId
      */
     private void addParentGroupToTable(final long skillGroupId) {
         Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
-        skillGroupList.addItem(skillGroup.getName(), new Runnable() {
+        skillGroupList.addItem(
+                skillGroup.getName(),
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(view.getContext(), SkillGroupDetailActivity.class);
+                        intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, skillGroupId);
+                        SkillDetailActivity.this.startActivity(intent);
+                    }
+                },
+                new Runnable() {
             @Override
             public void run() {
                 removeFromSkillGroup(skillGroupId);
@@ -247,9 +247,6 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * This is invoked if an option is select, e.g., the left arrow to return.
-     *
-     * @param item
-     * @return
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -270,8 +267,6 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     /**
      * Updates the title.
-     *
-     * @param title
      */
     void updateTitle(CharSequence title) {
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
@@ -307,7 +302,6 @@ public class SkillDetailActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         } else {
             skillId = data.addSkill(skillBuilder.build());
-            addedSkill = true;
             Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
         }
         unsavedChanges = false;
@@ -344,7 +338,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     public void finish() {
         Intent intent = new Intent();
         if (savedChanges) {
-            intent.putExtra(ARG_SKILL_INDEX, skillIndex);
+            intent.putExtra(ARG_SKILL_POSITION, skillIndex);
             intent.putExtra(ARG_SKILL_ID, skillId);
             setResult(Activity.RESULT_OK, intent);
         } else {
