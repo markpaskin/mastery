@@ -50,12 +50,15 @@
     <string name="missing_skill_name_title">Skill name empty</string>
     <string name="missing_skill_name_detail">Please enter a name for this skill.</string>
 
+    <string name="no_skill_groups_title">No skill groups</string>
+    <string name="no_skill_groups_detail">Skills are scheduled for practice through their membership in groups.  Please add this skill to one or more groups.</string>
+
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
 
     <string name="skill_in_groups_title">Skill groups</string>
-    <string name="skill_in_groups_detail">To get this skill scheduled for practice, add it to one or more groups.</string>
+    <string name="skill_in_groups_detail">This can be scheduled for slots assigned to the following groups.</string>
     <string name="parent_groups_title">Parent groups</string>
     <string name="parent_groups_detail">Skills in this group will also be in the parent groups.</string>
 
