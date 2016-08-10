@@ -2,12 +2,14 @@ package us.paskin.mastery;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -195,6 +197,17 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             Proto.Schedule.Slot.Builder slotBuilder = it.next();
             addSlotToTable(it.previousIndex(), slotBuilder);
         }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (addingSchedule)
+                    unsavedChanges = true;  // forces us to try to save even if no edits
+                if (saveSchedule()) play();
+            }
+        });
+        if (!addingSchedule) fab.requestFocus();
     }
 
     /**
@@ -219,6 +232,16 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 groupName.setBackgroundColor(getResources().getColor(R.color.background));
                 break;
         }
+    }
+
+    /**
+     * Starts a practice for this schedule.
+     */
+    private void play() {
+        if (scheduleId == -1) throw new InternalError("Schedule ID missing");
+        Intent intent = new Intent(this, SessionActivity.class);
+        intent.putExtra(SessionActivity.ARG_SESSION_ID, scheduleId);
+        startActivity(intent);
     }
 
     /**
@@ -417,7 +440,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.missing_schedule_name_title)
                     .setMessage(R.string.missing_schedule_name_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
         }
@@ -426,7 +449,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.no_schedule_slots_title)
                     .setMessage(R.string.no_schedule_slots_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
         } else {
@@ -436,7 +459,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setTitle(R.string.no_slot_group_title)
                             .setMessage(R.string.no_slot_group_detail)
-                            .setNeutralButton(R.string.ok, null)
+                            .setPositiveButton(R.string.ok, null)
                             .show();
                     return false;
                 }

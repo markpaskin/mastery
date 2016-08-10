@@ -176,7 +176,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.skill_group_cycle_title)
                     .setMessage(R.string.skill_group_cycle_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return;
         }
@@ -294,7 +294,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.missing_skill_name_title)
                     .setMessage(R.string.missing_skill_name_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
         }

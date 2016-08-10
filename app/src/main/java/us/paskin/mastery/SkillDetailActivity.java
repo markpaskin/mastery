@@ -338,7 +338,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.missing_skill_name_title)
                     .setMessage(R.string.missing_skill_name_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
         }
@@ -347,7 +347,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.no_skill_groups_title)
                     .setMessage(R.string.no_skill_groups_detail)
-                    .setNeutralButton(R.string.ok, null)
+                    .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
         }

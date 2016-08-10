@@ -11,13 +11,7 @@
         <activity
             android:name=".SkillListActivity"
             android:label="@string/title_skill_list"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".SkillDetailActivity"
             android:label="@string/title_skill_detail"
@@ -30,7 +24,7 @@
         <activity
             android:name=".SkillGroupListActivity"
             android:label="@string/title_skill_group_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SkillGroupDetailActivity"
             android:label="@string/title_skill_group_detail"
@@ -43,7 +37,13 @@
         <activity
             android:name=".ScheduleListActivity"
             android:label="@string/title_schedule_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ScheduleDetailActivity"
             android:label="@string/title_schedule_detail"
@@ -52,6 +52,21 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="us.paskin.mastery.ScheduleListActivity" />
+        </activity>
+        <activity
+            android:name=".SessionActivity"
+            android:label="@string/title_activity_session"
+            android:parentActivityName=".ScheduleListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="us.paskin.mastery.ScheduleListActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

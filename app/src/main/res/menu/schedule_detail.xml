@@ -5,12 +5,12 @@
         android:id="@+id/revert_changes"
         android:title="@string/revert_changes"
         android:icon="@android:drawable/ic_menu_revert"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         android:orderInCategory="1" />
     <item
         android:id="@+id/delete_schedule"
         android:title="@string/delete_schedule"
         android:icon="@android:drawable/ic_menu_delete"
-        app:showAsAction="ifRoom"
-        android:orderInCategory="1" />
+        app:showAsAction="never"
+        android:orderInCategory="2" />
 </menu>

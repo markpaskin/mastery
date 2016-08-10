@@ -8,7 +8,7 @@
     <string name="Skills">Skills</string>
     <string name="SkillGroups">Skill Groups</string>
     <string name="Schedules">Schedules</string>
-    <string name="Preferences">Preferences</string>
+    <string name="Settings">Settings</string>
 
     <string name="title_skill_list">Skills</string>
     <string name="title_skill_detail">Skill Details</string>
@@ -107,5 +107,6 @@
 
     <string name="no_slot_group_title">Missing skill group</string>
     <string name="no_slot_group_detail">Every slot must have a skill group.</string>
+    <string name="title_activity_session">SessionActivity</string>
 
 </resources>
