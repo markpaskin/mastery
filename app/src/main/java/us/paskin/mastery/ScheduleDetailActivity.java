@@ -20,13 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
@@ -91,7 +88,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * A map from slot index to a TextView rendering the skill group name.
      */
-    private HashMap<Integer, TextView> slotIndexToGroupNameTextView = new HashMap<Integer, TextView>();
+    private ArrayList<TextView> slotGroupNameTextViews = new ArrayList<TextView>();
 
     /**
      * This is true if there have been changes that weren't committed.
@@ -176,6 +173,15 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         // TODO: select
                     }
+                },
+                new EditableList.OnItemRemovedListener() {
+                    @Override
+                    public void onItemRemoved(int index) {
+                        slotBuilders.remove(index);
+                        slotGroupNameTextViews.remove(index);
+                        unsavedChanges = true;
+                        Toast.makeText(getApplicationContext(), R.string.slot_removed, Toast.LENGTH_SHORT).show();
+                    }
                 });
 
         for (final ListIterator<Proto.Schedule.Slot.Builder> it = slotBuilders.listIterator(); it.hasNext(); ) {
@@ -200,7 +206,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
                 slotBuilder.setGroupId(skillGroupId);
                 unsavedChanges = true;
-                slotIndexToGroupNameTextView.get(position).setText(
+                slotGroupNameTextViews.get(position).setText(
                         model.getSkillGroupById(slotBuilder.getGroupId()).getName());
                 break;
         }
@@ -262,7 +268,13 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(slotList.getRoot().getContext());
         View slotView = inflater.inflate(R.layout.slot, slotList.getRoot(), false);
         TextView groupName = (TextView) slotView.findViewById(R.id.slot_group_name);
-        slotIndexToGroupNameTextView.put(index, groupName);
+        if (index < slotGroupNameTextViews.size()) {
+            slotGroupNameTextViews.set(index, groupName);
+        } else if (index != slotGroupNameTextViews.size()) {
+            throw new InternalError("slots not added in order");
+        } else {
+            slotGroupNameTextViews.add(groupName);
+        }
         Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
         groupName.setText(skillGroup.getName());
         groupName.setOnClickListener(new View.OnClickListener() {
@@ -286,21 +298,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * Adds an entry to the parent schedule group table.
      */
-    private void addSlotToTable(int index, Proto.Schedule.Slot.Builder slotBuilder) {
-        slotList.addItem(
-                makeSlotView(index, slotBuilder),
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // TODO: select group again
-                    }
-                },
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        // TODO remove slot
-                    }
-                });
+    private void addSlotToTable(final int index, Proto.Schedule.Slot.Builder slotBuilder) {
+        slotList.addItem(makeSlotView(index, slotBuilder));
     }
 
     @Override

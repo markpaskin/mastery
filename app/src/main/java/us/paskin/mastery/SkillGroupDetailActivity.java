@@ -147,6 +147,12 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                         intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
                         SkillGroupDetailActivity.this.startActivityForResult(intent, SELECT_PARENT_GROUP_TO_ADD);
                     }
+                },
+                new EditableList.OnItemRemovedListener() {
+                    @Override
+                    public void onItemRemoved(int index) {
+                        removeParentGroup(skillGroupBuilder.getParentId(index));
+                    }
                 });
 
         if (skillGroup != null) {
@@ -222,11 +228,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                         Intent intent = new Intent(view.getContext(), SkillGroupDetailActivity.class);
                         intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, skillGroupId);
                         SkillGroupDetailActivity.this.startActivity(intent);
-                    }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        removeParentGroup(skillGroupId);
                     }
                 });
     }

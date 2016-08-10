@@ -102,5 +102,7 @@
 
     <string name="duration_dialog_title">Slot length</string>
     <string name="duration_dialog_detail">Choose the length of this slot in minutes:</string>
+    <string name="slot_removed">Slot removed.</string>
+
 
 </resources>
