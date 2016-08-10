@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -171,7 +173,12 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO: select
+                        unsavedChanges = true;
+                        Proto.Schedule.Slot.Builder slotBuilder = Proto.Schedule.Slot.newBuilder();
+                        slotBuilder.setDurationInSecs(Model.DEFAULT_SLOT_DURATION_IN_SECS);
+                        slotBuilders.add(slotBuilder);
+                        int slotIndex = slotBuilders.size() - 1;
+                        addSlotToTable(slotIndex, slotBuilder);
                     }
                 },
                 new EditableList.OnItemRemovedListener() {
@@ -206,8 +213,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 }
                 slotBuilder.setGroupId(skillGroupId);
                 unsavedChanges = true;
-                slotGroupNameTextViews.get(position).setText(
-                        model.getSkillGroupById(slotBuilder.getGroupId()).getName());
+                TextView groupName = slotGroupNameTextViews.get(position);
+                groupName.setText(model.getSkillGroupById(slotBuilder.getGroupId()).getName());
+                groupName.setTypeface(null, Typeface.NORMAL);
+                groupName.setBackgroundColor(getResources().getColor(R.color.background));
                 break;
         }
     }
@@ -275,8 +284,15 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         } else {
             slotGroupNameTextViews.add(groupName);
         }
-        Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
-        groupName.setText(skillGroup.getName());
+        if (slotBuilder.hasGroupId()) {
+            Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
+            groupName.setText(skillGroup.getName());
+        } else {
+            // Newly added slot without initialized group.
+            groupName.setText(R.string.choose_skill_group);
+            groupName.setTypeface(null, Typeface.ITALIC);
+            groupName.setBackgroundColor(getResources().getColor(R.color.highlight_background));
+        }
         groupName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -413,6 +429,18 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     .setNeutralButton(R.string.ok, null)
                     .show();
             return false;
+        } else {
+            for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
+                if (!slotBuilder.hasGroupId()) {
+                    new AlertDialog.Builder(this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(R.string.no_slot_group_title)
+                            .setMessage(R.string.no_slot_group_detail)
+                            .setNeutralButton(R.string.ok, null)
+                            .show();
+                    return false;
+                }
+            }
         }
         return true;
     }

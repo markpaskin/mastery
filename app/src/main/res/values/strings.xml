@@ -103,6 +103,9 @@
     <string name="duration_dialog_title">Slot length</string>
     <string name="duration_dialog_detail">Choose the length of this slot in minutes:</string>
     <string name="slot_removed">Slot removed.</string>
+    <string name="choose_skill_group">Choose skill group</string>
 
+    <string name="no_slot_group_title">Missing skill group</string>
+    <string name="no_slot_group_detail">Every slot must have a skill group.</string>
 
 </resources>

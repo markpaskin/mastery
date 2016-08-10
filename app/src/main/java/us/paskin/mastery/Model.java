@@ -484,8 +484,8 @@ public class Model {
             if (!slot.hasDurationInSecs() || slot.getDurationInSecs() <= 0) {
                 throw new IllegalArgumentException("non-positive slot duration");
             }
-            if (!isValidSkillGroupId(slot.getGroupId())) {
-                throw new IllegalArgumentException("slot has invalid group id");
+            if (!slot.hasGroupId() || !isValidSkillGroupId(slot.getGroupId())) {
+                throw new IllegalArgumentException("slot has missing/invalid group id");
             }
         }
     }

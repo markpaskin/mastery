@@ -300,12 +300,24 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
     }
 
     @Test
+    public void testAddInvalidScheduleSlotHasMissingGroupId() {
+        try {
+            model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
+                    Proto.Schedule.Slot.newBuilder().setDurationInSecs(60)).build());
+        } catch (IllegalArgumentException x) {
+            assertEquals("slot has missing/invalid group id", x.getMessage());
+            return;
+        }
+        fail("did not throw an error");
+    }
+
+    @Test
     public void testAddInvalidScheduleSlotHasBadGroupId() {
         try {
             model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
                     Proto.Schedule.Slot.newBuilder().setGroupId(1).setDurationInSecs(60)).build());
         } catch (IllegalArgumentException x) {
-            assertEquals("slot has invalid group id", x.getMessage());
+            assertEquals("slot has missing/invalid group id", x.getMessage());
             return;
         }
         fail("did not throw an error");
