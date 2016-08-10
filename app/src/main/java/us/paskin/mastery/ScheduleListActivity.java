@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * An activity representing a list of Schedules. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -164,21 +166,29 @@ public class ScheduleListActivity extends DrawerActivity {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View view;
-            public final TextView text;
+            public final TextView nameTextView;
+            public final TextView durationTextView;
 
             public ViewHolder(View view) {
                 super(view);
                 this.view = view;
-                text = (TextView) view.findViewById(R.id.schedule_item_text);
+                nameTextView = (TextView) view.findViewById(R.id.schedule_name);
+                durationTextView = (TextView) view.findViewById(R.id.schedule_duration);
             }
 
             public void setData(Proto.Schedule s) {
-                text.setText(s.getName());
+                nameTextView.setText(s.getName());
+                int totalDurationSecs = 0;
+                for (Proto.Schedule.Slot slot : s.getSlotList()) {
+                    totalDurationSecs += slot.getDurationInSecs();
+                }
+                int durationInMins = (int) TimeUnit.SECONDS.toMinutes(totalDurationSecs);
+                durationTextView.setText(getResources().getQuantityString(R.plurals.num_min, durationInMins, durationInMins));
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + text.getText() + "'";
+                return super.toString() + " '" + nameTextView.getText() + "'";
             }
         }
     }
