@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -215,7 +214,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      */
     private void addParentGroupToTable(final long skillGroupId) {
         Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
-        parentGroupList.addItem(
+        parentGroupList.addTextItem(
                 skillGroup.getName(),
                 new View.OnClickListener() {
                     @Override

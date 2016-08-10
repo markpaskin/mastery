@@ -64,6 +64,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
 
     <string name="skill_in_groups_title">Skill groups</string>
     <string name="skill_in_groups_detail">This can be scheduled for slots assigned to the following groups.</string>
@@ -90,5 +92,14 @@
     <string name="no_schedule_slots_detail">Add one or more slots to your schedule so they can be filled by skills to practice.</string>
 
     <string name="revert_changes">Undo changes</string>
+
+    <!-- This should be an abbreviated string to display an amount of time in minutes, e.g., "7 min" -->
+    <plurals name="num_min">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d mins</item>
+    </plurals>
+
+    <string name="duration_dialog_title">Slot length</string>
+    <string name="duration_dialog_detail">Choose the length of this slot in minutes:</string>
 
 </resources>

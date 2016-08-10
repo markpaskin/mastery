@@ -1,7 +1,10 @@
 package us.paskin.mastery;
 
+import android.content.Context;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -23,18 +26,38 @@ public class EditableList {
     }
 
     /**
-     * Adds an item to the list.
+     * Returns the root view of this list.  The caller can use this to inflate views that will be added via addItem.
+     */
+    public TableLayout getRoot() {
+        return tableLayout;
+    }
+
+    /**
+     * Adds an string item to the list.
      *
      * @param text     the displayed text
      * @param onClick    called if the item is tapped
      * @param onRemove called if the item is removed
      */
-    public void addItem(String text, View.OnClickListener onClick, final Runnable onRemove) {
+    public void addTextItem(String text, View.OnClickListener onClick, final Runnable onRemove) {
+        TextView textView = new TextView(tableLayout.getContext());
+        textView.setText(text);
+        addItem(textView, onClick, onRemove);
+    }
+
+    /**
+     * Adds an string item to the list.
+     *
+     * @param view     the displayed item
+     * @param onClick  called if the item is tapped
+     * @param onRemove called if the item is removed
+     */
+    public void addItem(View view, View.OnClickListener onClick, final Runnable onRemove) {
         LayoutInflater inflater = LayoutInflater.from(tableLayout.getContext());
         final TableRow row = (TableRow) inflater.inflate(R.layout.editable_list_item, tableLayout, false);
-        TextView textView = (TextView) row.findViewById(R.id.item_text);
-        textView.setText(text);
-        textView.setOnClickListener(onClick);
+        LinearLayout itemLayout = (LinearLayout) row.findViewById(R.id.item);
+        itemLayout.setOnClickListener(onClick);
+        itemLayout.addView(view);
         tableLayout.addView(row);
         View removeButton = row.findViewById(R.id.remove_button);
         removeButton.setOnClickListener(new View.OnClickListener() {

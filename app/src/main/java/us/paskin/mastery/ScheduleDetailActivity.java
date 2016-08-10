@@ -1,6 +1,7 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,14 +12,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An activity representing a single Schedule detail screen. This
@@ -73,6 +82,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private Proto.Schedule.Builder scheduleBuilder;
 
     /**
+     * Builders for each of the slots in the schedule.
+     */
+    private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList();
+
+    /**
      * This is true if there have been changes that weren't committed.
      */
     private boolean unsavedChanges = false;
@@ -104,6 +118,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             scheduleId = getIntent().getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
             schedule = model.getScheduleById(scheduleId);
             scheduleBuilder = schedule.toBuilder();
+            for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
+                slotBuilders.add(slot.toBuilder());
+            }
+            scheduleBuilder.clearSlot();
         } else {
             scheduleBuilder = Proto.Schedule.newBuilder();
         }
@@ -153,10 +171,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     }
                 });
 
-        if (schedule != null) {
-            for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
-                addSlotToTable(slot);
-            }
+        for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
+            addSlotToTable(slotBuilder);
         }
     }
 
@@ -172,11 +188,77 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Launches a dialog to choose the duration of a slot.
+     *
+     * @param slotBuilder
+     */
+    void launchDurationDialog(final Proto.Schedule.Slot.Builder slotBuilder,
+                              final TextView durationText) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setTitle(R.string.duration_dialog_title);
+        dialog.setContentView(R.layout.duration_dialog);
+        Button cancelButton = (Button) dialog.findViewById(R.id.cancel_button);
+        Button setButton = (Button) dialog.findViewById(R.id.set_button);
+        final NumberPicker durationPicker = (NumberPicker) dialog.findViewById(R.id.duration_picker);
+        durationPicker.setMinValue((int) TimeUnit.SECONDS.toMinutes(Model.MIN_SLOT_DURATION_IN_SECS));
+        durationPicker.setMaxValue((int) TimeUnit.SECONDS.toMinutes(Model.MAX_SLOT_DURATION_IN_SECS));
+        if (slotBuilder.hasDurationInSecs()) {
+            durationPicker.setValue((int) TimeUnit.SECONDS.toMinutes(slotBuilder.getDurationInSecs()));
+        } else {
+            durationPicker.setValue((int) TimeUnit.SECONDS.toMinutes(Model.DEFAULT_SLOT_DURATION_IN_SECS));
+        }
+        setButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int durationInMinutes = durationPicker.getValue();
+                slotBuilder.setDurationInSecs((int) TimeUnit.MINUTES.toSeconds(durationInMinutes));
+                unsavedChanges = true;
+                durationText.setText(getResources().getQuantityString(R.plurals.num_min, durationInMinutes, durationInMinutes));
+                dialog.dismiss();
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    /**
+     * Creates a new view which renders the slot.
+     */
+    View makeSlotView(final Proto.Schedule.Slot.Builder slotBuilder) {
+        LayoutInflater inflater = LayoutInflater.from(slotList.getRoot().getContext());
+        View slotView = inflater.inflate(R.layout.slot, slotList.getRoot(), false);
+        TextView groupName = (TextView) slotView.findViewById(R.id.slot_group_name);
+        Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
+        groupName.setText(skillGroup.getName());
+        groupName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        final TextView duration = (TextView) slotView.findViewById(R.id.slot_duration);
+        final int durationInMinutes = (int) TimeUnit.SECONDS.toMinutes(slotBuilder.getDurationInSecs());
+        duration.setText(getResources().getQuantityString(R.plurals.num_min, durationInMinutes, durationInMinutes));
+        duration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchDurationDialog(slotBuilder, duration);
+            }
+        });
+        return slotView;
+    }
+
+    /**
      * Adds an entry to the parent schedule group table.
      */
-    private void addSlotToTable(Proto.Schedule.Slot slot) {
+    private void addSlotToTable(Proto.Schedule.Slot.Builder slotBuilder) {
         slotList.addItem(
-                model.getSkillGroupById(slot.getGroupId()).getName(),
+                makeSlotView(slotBuilder),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -294,7 +376,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     .show();
             return false;
         }
-        if (scheduleBuilder.getSlotList().isEmpty()) {
+        if (slotBuilders.isEmpty()) {
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.no_schedule_slots_title)
@@ -314,6 +396,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     boolean saveSchedule() {
         if (!unsavedChanges) return true;
         if (!validate()) return false;
+        scheduleBuilder.clearSlot();
+        for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
+            scheduleBuilder.addSlot(slotBuilder);
+        }
+        Proto.Schedule newSchedule = scheduleBuilder.build();
         if (!addingSchedule) {
             model.updateSchedule(scheduleId, scheduleBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_schedule, Toast.LENGTH_SHORT).show();

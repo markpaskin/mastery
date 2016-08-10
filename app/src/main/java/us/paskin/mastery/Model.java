@@ -26,6 +26,11 @@ public class Model {
     public static final int MAX_PRIORITY = 10;
     public static final int DEFAULT_PRIORITY = MAX_PRIORITY;
 
+    // Constants for Schedule.Slot.duration_in_secs.
+    public static final int MIN_SLOT_DURATION_IN_SECS = (int) TimeUnit.MINUTES.toSeconds(1);
+    public static final int MAX_SLOT_DURATION_IN_SECS = (int) TimeUnit.MINUTES.toSeconds(60);
+    public static final int DEFAULT_SLOT_DURATION_IN_SECS = (int) TimeUnit.MINUTES.toSeconds(10);
+
     private SQLiteDatabase db = null;
 
     /**
