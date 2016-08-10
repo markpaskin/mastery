@@ -58,7 +58,9 @@ public class EditableList {
         LinearLayout itemLayout = (LinearLayout) row.findViewById(R.id.item);
         itemLayout.setOnClickListener(onClick);
         itemLayout.addView(view);
-        tableLayout.addView(row);
+        // Add this as the penultimate row so the "add" row is last.
+        int numRows = tableLayout.getChildCount();
+        tableLayout.addView(row, numRows - 1);
         View removeButton = row.findViewById(R.id.remove_button);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override

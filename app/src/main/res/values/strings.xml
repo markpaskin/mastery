@@ -69,7 +69,7 @@
     <string name="cancel">Cancel</string>
 
     <string name="skill_in_groups_title">Skill groups</string>
-    <string name="skill_in_groups_detail">This can be scheduled for slots assigned to the following groups.</string>
+    <string name="skill_in_groups_detail">This skill can be scheduled for slots with the following groups.</string>
     <string name="parent_groups_title">Parent groups</string>
     <string name="parent_groups_detail">Skills in this group will also be in the parent groups.</string>
 
