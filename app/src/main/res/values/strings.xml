@@ -24,6 +24,7 @@
     <string name="schedule_name">Schedule name</string>
 
     <string name="title_skill_group_list">Skill groups</string>
+    <string name="select_skill_group_title">Select skill group</string>
     <string name="title_skill_group_detail">Skill Group Details</string>
     <string name="add_skill_group">Add Skill Group</string>
     <string name="saved_skill_group">Skill group updated</string>

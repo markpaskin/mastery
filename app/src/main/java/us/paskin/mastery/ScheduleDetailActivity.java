@@ -26,7 +26,9 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,9 +49,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     public static final String ARG_SCHEDULE_POSITION = "schedule_pos";
 
     /**
-     * This intent type is used to identify results from child intents.
+     * This is the request code used to identify results from a skill group selection.
      */
-    public static final int ADD_SLOT = 1;
+    private static final int REQ_CHOOSE_SKILL_GROUP = 1;
 
     /**
      * True if we're adding a new schedule; false if we're editing one.
@@ -84,7 +86,12 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * Builders for each of the slots in the schedule.
      */
-    private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList();
+    private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList<Proto.Schedule.Slot.Builder>();
+
+    /**
+     * A map from slot index to a TextView rendering the skill group name.
+     */
+    private HashMap<Integer, TextView> slotIndexToGroupNameTextView = new HashMap<Integer, TextView>();
 
     /**
      * This is true if there have been changes that weren't committed.
@@ -171,8 +178,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     }
                 });
 
-        for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
-            addSlotToTable(slotBuilder);
+        for (final ListIterator<Proto.Schedule.Slot.Builder> it = slotBuilders.listIterator(); it.hasNext(); ) {
+            Proto.Schedule.Slot.Builder slotBuilder = it.next();
+            addSlotToTable(it.previousIndex(), slotBuilder);
         }
     }
 
@@ -182,8 +190,19 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        if (requestCode == ADD_SLOT) {
-            //TODO
+        switch (requestCode) {
+            case REQ_CHOOSE_SKILL_GROUP:
+                long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
+                int position = data.getIntExtra(SkillGroupListActivity.ARG_POSITION, -1);
+                Proto.Schedule.Slot.Builder slotBuilder = slotBuilders.get(position);
+                if (slotBuilder.hasGroupId() && slotBuilder.getGroupId() == skillGroupId) {
+                    return;
+                }
+                slotBuilder.setGroupId(skillGroupId);
+                unsavedChanges = true;
+                slotIndexToGroupNameTextView.get(position).setText(
+                        model.getSkillGroupById(slotBuilder.getGroupId()).getName());
+                break;
         }
     }
 
@@ -227,18 +246,29 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Launches a dialog to choose the skill group of the slot with the supplied index.
+     */
+    void launchChooseSkillGroup(final int slotIndex) {
+        Intent intent = new Intent(this, SkillGroupListActivity.class);
+        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
+        intent.putExtra(SkillGroupListActivity.ARG_POSITION, slotIndex);
+        startActivityForResult(intent, REQ_CHOOSE_SKILL_GROUP);
+    }
+
+    /**
      * Creates a new view which renders the slot.
      */
-    View makeSlotView(final Proto.Schedule.Slot.Builder slotBuilder) {
+    View makeSlotView(final int index, final Proto.Schedule.Slot.Builder slotBuilder) {
         LayoutInflater inflater = LayoutInflater.from(slotList.getRoot().getContext());
         View slotView = inflater.inflate(R.layout.slot, slotList.getRoot(), false);
         TextView groupName = (TextView) slotView.findViewById(R.id.slot_group_name);
+        slotIndexToGroupNameTextView.put(index, groupName);
         Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
         groupName.setText(skillGroup.getName());
         groupName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                launchChooseSkillGroup(index);
             }
         });
         final TextView duration = (TextView) slotView.findViewById(R.id.slot_duration);
@@ -256,9 +286,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * Adds an entry to the parent schedule group table.
      */
-    private void addSlotToTable(Proto.Schedule.Slot.Builder slotBuilder) {
+    private void addSlotToTable(int index, Proto.Schedule.Slot.Builder slotBuilder) {
         slotList.addItem(
-                makeSlotView(slotBuilder),
+                makeSlotView(index, slotBuilder),
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

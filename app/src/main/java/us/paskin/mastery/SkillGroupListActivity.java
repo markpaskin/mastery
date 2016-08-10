@@ -41,6 +41,11 @@ public class SkillGroupListActivity extends DrawerActivity {
     public static final String ARG_SELECTED_SKILL_GROUP_ID = "selected_group_id";
 
     /**
+     * If supplied, then this int extra will be passed through from input to output.
+     */
+    public static final String ARG_POSITION = "position";
+
+    /**
      * These are intent request types.  They are used to process results from child intents.
      */
     private static final int REQ_EDIT_SKILL_GROUP = 1;
@@ -51,17 +56,25 @@ public class SkillGroupListActivity extends DrawerActivity {
      */
     private boolean selectMode = false;
 
+    /**
+     * This is the value of ARG_POSITION if it is supplied or -1 otherwise.
+     */
+    private int position;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_skill_group_list);
 
+        selectMode = getIntent().getBooleanExtra(ARG_MODE_SELECT, false);
+        position = getIntent().getIntExtra(ARG_POSITION, -1);
+
+        if (selectMode) setTitle(R.string.select_skill_group_title);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
         super.onCreateDrawer();
-
-        selectMode = getIntent().getBooleanExtra(ARG_MODE_SELECT, false);
 
         View recyclerView = findViewById(R.id.skill_group_list);
         assert recyclerView != null;
@@ -136,6 +149,7 @@ public class SkillGroupListActivity extends DrawerActivity {
     private void returnSkillGroupId(long id) {
         Intent intent = new Intent();
         intent.putExtra(ARG_SELECTED_SKILL_GROUP_ID, id);
+        intent.putExtra(ARG_POSITION, position);
         setResult(Activity.RESULT_OK, intent);
         finish();
     }

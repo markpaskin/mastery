@@ -84,7 +84,7 @@ public class ScheduleListActivity extends DrawerActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
         final int scheduleIndex = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
-        final int scheduleId = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
+        final long scheduleId = data.getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
         final boolean deleted = scheduleId == -1;
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.schedule_list);
         SimpleItemRecyclerViewAdapter adaptor =
