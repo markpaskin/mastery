@@ -90,7 +90,7 @@ public class DrawerActivity extends AppCompatActivity
         } else if (id == R.id.view_schedules) {
             startActivity(new Intent(this, ScheduleListActivity.class));
         } else if (id == R.id.view_preferences) {
-            // TODO
+            startActivity(new Intent(this, SettingsActivity.class));
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -6,10 +6,13 @@ import android.database.Cursor;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.lang.reflect.Array;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a concrete practice session.
@@ -147,6 +150,17 @@ public class Session {
      * Returns the weight of this skill.  The probability the skill is sampled is proportional to weight.
      */
     private static float weight(Proto.Skill skill) {
-        return (float) skill.getPriority();  // TODO: add in time
+        // Scale the priority to [0, 1].
+        float priorityZeroOne = ((float) (skill.getPriority()) / ((float) (Model.MAX_PRIORITY)));
+
+        // Map the time from last practice to [0, 1].
+        final long curDateSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
+        final long secondsSincePracticed = Math.max(0L, curDateSecs - skill.getDateLastPracticed());
+        final long halfPoint = TimeUnit.DAYS.toSeconds(100);
+        final double timeZeroOne = ((double) secondsSincePracticed / (double) (secondsSincePracticed + halfPoint));
+        final float timeWeight = 0.5f; // todo
+        final float priorityWeight = 1.0f - timeWeight;
+
+        return timeWeight * (float) timeZeroOne + priorityWeight * priorityZeroOne;
     }
 }

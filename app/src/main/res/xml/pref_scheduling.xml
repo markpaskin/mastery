@@ -1,0 +1,10 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <us.paskin.mastery.SliderPreference
+        android:defaultValue="@string/staleness_importance_default"
+        android:dialogMessage="@string/staleness_importance_slider_detail"
+        android:key="foobar"
+        android:summary="@array/slider_summaries"
+        android:title="@string/staleness_importance_slider_title" />
+
+</PreferenceScreen>

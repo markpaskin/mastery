@@ -40,6 +40,9 @@ android {
     }
 }
 
+dependencies {
+    compile 'com.android.support:support-v4:24.+'
+}
 configurations.all {
     resolutionStrategy {
         force 'com.android.support:support-annotations:23.1.1'
