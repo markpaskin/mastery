@@ -5,8 +5,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
@@ -22,6 +26,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +41,18 @@ public class SessionActivity extends AppCompatActivity {
      * The ID of the status notification posted by this activity.
      */
     private static int STATUS_NOTIFICATION_ID = 1;
+
+    /**
+     * The key to a float preference giving a [0, 1] weight for staleness.
+     */
+    public static String PREF_STALENESS_IMPORTANCE = "pref_staleness_importance";
+
+    /**
+     * The keys for the notification preferences.
+     */
+    public static String PREF_ENABLE_NOTIFICATIONS = "enable_practice_notifications";
+    public static String PREF_NOTIFICATION_RINGTONE = "practice_notification_ringtone";
+    public static String PREF_NOTIFICATION_VIBRATE = "practice_notification_vibrate";
 
     /**
      * The application model.
@@ -113,6 +130,15 @@ public class SessionActivity extends AppCompatActivity {
      * Used to notify the user it's time to move on.
      */
     private Timer nextNotificationTimer;
+
+    /**
+     * The cached value of PREF_STALENESS_WEIGHT.
+     */
+    private float stalenessWeight;
+
+    private boolean enableNotifications;
+    private boolean notificationsVibrate;
+    private String notificationRingtoneUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,6 +226,7 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     void scheduleNextNotification() {
+        if (!enableNotifications) return;
         if (mode != Mode.PLAY) return;
         final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
         final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
@@ -250,6 +277,7 @@ public class SessionActivity extends AppCompatActivity {
      * Generates a notification that it's time to move on to the next slot.
      */
     private void generateNextNotification() {
+        if (!enableNotifications) return;
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -259,10 +287,11 @@ public class SessionActivity extends AppCompatActivity {
                         .setSmallIcon(R.drawable.play)
                         .setContentTitle(getResources().getString(R.string.next_notification_title))
                         .setContentText(getResources().getString(
-                                atLastSlot ? R.string.next_notification_text : R.string.practice_complete_detail))
+                                atLastSlot ? R.string.practice_complete_detail : R.string.next_notification_text))
                         .setContentIntent(intent)
                         .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_ALL);
+                        .setSound(Uri.parse(notificationRingtoneUri));
+        if (notificationsVibrate) mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
@@ -273,6 +302,7 @@ public class SessionActivity extends AppCompatActivity {
      * Generates a notification that shows that a practice is ongoing.
      */
     private void generatePracticingNotification() {
+        if (!enableNotifications) return;
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -343,7 +373,7 @@ public class SessionActivity extends AppCompatActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    session = Session.sampleSession(schedule, model);
+                    session = Session.sampleSession(schedule, model, stalenessWeight);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -359,9 +389,23 @@ public class SessionActivity extends AppCompatActivity {
         }
         if (mode == Mode.PLAY) startDurationUpdates();
         cancelStatusNotification();
+
+        // Get the staleness importance preference.  It should be in [0, 1].
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        stalenessWeight = sharedPreferences.getFloat(PREF_STALENESS_IMPORTANCE, 0.5f);
+        stalenessWeight = Math.max(0.0f, stalenessWeight);
+        stalenessWeight = Math.min(1.0f, stalenessWeight);
+
+        enableNotifications = sharedPreferences.getBoolean(PREF_ENABLE_NOTIFICATIONS, true);
+        notificationsVibrate = sharedPreferences.getBoolean(PREF_NOTIFICATION_VIBRATE, true);
+        notificationRingtoneUri = sharedPreferences.getString(PREF_NOTIFICATION_RINGTONE,
+                Settings.System.DEFAULT_NOTIFICATION_URI.toString());
+
+        System.out.println(notificationRingtoneUri);
     }
 
     void cancelStatusNotification() {
+        if (!enableNotifications) return;
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(STATUS_NOTIFICATION_ID);

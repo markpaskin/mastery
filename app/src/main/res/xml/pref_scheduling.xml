@@ -3,7 +3,7 @@
     <us.paskin.mastery.SliderPreference
         android:defaultValue="@string/staleness_importance_default"
         android:dialogMessage="@string/staleness_importance_slider_detail"
-        android:key="foobar"
+        android:key="pref_staleness_importance"
         android:summary="@array/slider_summaries"
         android:title="@string/staleness_importance_slider_title" />
 

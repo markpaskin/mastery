@@ -28,7 +28,8 @@ public class Session {
      * slots.
      */
     public static Session sampleSession(Proto.Schedule schedule,
-                                        Model model) {
+                                        Model model,
+                                        float stalenessWeight) {
         Session session = new Session(schedule, model);
         HashSet<Long> sampledSkillIds = new HashSet<Long>();
         // Scan through the skills, sampling as we go.
@@ -47,7 +48,7 @@ public class Session {
             } catch (InvalidProtocolBufferException x) {
                 throw new InternalError("cannot parse protocol buffer");
             }
-            final float weight = weight(skill);
+            final float weight = weight(skill, stalenessWeight);
             for (int slotIndex = 0; slotIndex < numSlots; ++slotIndex) {
                 Slot slot = session.slots.get(slotIndex);
                 if (!slot.canBeFilledBy(skill)) continue;
@@ -149,7 +150,7 @@ public class Session {
     /**
      * Returns the weight of this skill.  The probability the skill is sampled is proportional to weight.
      */
-    private static float weight(Proto.Skill skill) {
+    private static float weight(Proto.Skill skill, float stalenessWeight) {
         // Scale the priority to [0, 1].
         float priorityZeroOne = ((float) (skill.getPriority()) / ((float) (Model.MAX_PRIORITY)));
 
@@ -157,10 +158,9 @@ public class Session {
         final long curDateSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
         final long secondsSincePracticed = Math.max(0L, curDateSecs - skill.getDateLastPracticed());
         final long halfPoint = TimeUnit.DAYS.toSeconds(100);
-        final double timeZeroOne = ((double) secondsSincePracticed / (double) (secondsSincePracticed + halfPoint));
-        final float timeWeight = 0.5f; // todo
-        final float priorityWeight = 1.0f - timeWeight;
+        final double stalenessZeroOne = ((double) secondsSincePracticed / (double) (secondsSincePracticed + halfPoint));
+        final float priorityWeight = 1.0f - stalenessWeight;
 
-        return timeWeight * (float) timeZeroOne + priorityWeight * priorityZeroOne;
+        return stalenessWeight * (float) stalenessZeroOne + priorityWeight * priorityZeroOne;
     }
 }
