@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -173,6 +174,7 @@ public class SessionActivity extends AppCompatActivity {
         if (getSlotTotalSecondsPracticed(curSlotIndex) < schedule.getSlotList().get(curSlotIndex).getDurationInSecs()) {
             scheduleNextNotification();
         }
+        cancelStatusNotification();
     }
 
     void startDurationUpdates() {
@@ -251,11 +253,13 @@ public class SessionActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        final boolean atLastSlot = curSlotIndex == schedule.getSlotCount() - 1;
         NotificationCompat.Builder mBuilder =
                 (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.play)
                         .setContentTitle(getResources().getString(R.string.next_notification_title))
-                        .setContentText(getResources().getString(R.string.next_notification_text))
+                        .setContentText(getResources().getString(
+                                atLastSlot ? R.string.next_notification_text : R.string.practice_complete_detail))
                         .setContentIntent(intent)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL);
@@ -291,6 +295,7 @@ public class SessionActivity extends AppCompatActivity {
         slotDurationTextViewList.get(curSlotIndex).setTypeface(null, Typeface.NORMAL);
         stopDurationUpdates();
         cancelNextNotification();
+        cancelStatusNotification();
     }
 
     synchronized void accumulatePracticeTime() {
@@ -301,6 +306,7 @@ public class SessionActivity extends AppCompatActivity {
             final int secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
             long skillId = session.getSlotList().get(curSlotIndex).getSkillId();
             model.addPracticeSecondsToSkill(secondsPracticed, skillId);
+            Toast.makeText(getApplicationContext(), R.string.updated_duration_practiced, Toast.LENGTH_SHORT).show();
             storedDurations[curSlotIndex] += secondsPracticed;
         }
         practicingSince = null;

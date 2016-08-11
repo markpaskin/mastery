@@ -92,7 +92,7 @@
     <string name="no_schedule_slots_title">Schedule has no slots</string>
     <string name="no_schedule_slots_detail">Add one or more slots to your schedule so they can be filled by skills to practice.</string>
 
-    <string name="revert_changes">Undo changes</string>
+    <string name="revert_changes">Discard changes</string>
 
     <!-- This should be an abbreviated string to display an amount of time in minutes, e.g., "7 min" -->
     <plurals name="num_min">
@@ -121,10 +121,13 @@
 
     <string name="next_notification_title">Time\'s up!</string>
     <string name="next_notification_text">It\'s time to move on to the next skill.</string>
+    <string name="practice_complete_detail">You\'ve finished the last skill in the session.</string>
 
     <string name="status_notification_title">Practicing</string>
 
     <string name="cancel_session_title">Stop practicing?</string>
     <string name="cancel_session_detail">Are you sure you want to end this session?</string>
+
+    <string name="updated_duration_practiced">Updated practice log.</string>
 
 </resources>
