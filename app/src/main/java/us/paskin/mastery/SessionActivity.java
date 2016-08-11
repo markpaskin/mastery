@@ -1,18 +1,15 @@
 package us.paskin.mastery;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.concurrent.TimeUnit;
@@ -64,20 +61,31 @@ public class SessionActivity extends AppCompatActivity {
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         fab.setVisibility(View.INVISIBLE);
+    }
 
-        // Launch a thread to sample the session.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                session = Session.sampleSession(schedule, model);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        layoutSession();
-                    }
-                });
-            }
-        }).start();
+    /**
+     * Inefficient way to make sure skill names are updated: redraw the page.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (session == null) {
+            // Launch a thread to sample the session.
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    session = Session.sampleSession(schedule, model);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            layoutSession();
+                        }
+                    });
+                }
+            }).start();
+        } else {
+            layoutSession();
+        }
     }
 
     /**
@@ -86,17 +94,28 @@ public class SessionActivity extends AppCompatActivity {
     private void layoutSession() {
         fab.setVisibility(View.VISIBLE);
         TableLayout container = (TableLayout) findViewById(R.id.session_slots_container);
+        container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
         int totalDurationInSecs = 0;
-        for (Session.Slot slot : session.getSlotList()) {
+        for (final Session.Slot slot : session.getSlotList()) {
             View slotView = inflater.inflate(R.layout.session_slot, container, false);
             TextView skillNameTextView = (TextView) slotView.findViewById(R.id.skill_name);
             if (slot.filled()) {
-                skillNameTextView.setText(slot.getSkill().getName());
+                Proto.Skill skill = model.getSkillById(slot.getSkillId());
+                skillNameTextView.setText(skill.getName());
                 TextView duration = (TextView) slotView.findViewById(R.id.slot_duration);
                 final int durationInMinutes = (int) TimeUnit.SECONDS.toMinutes(slot.getScheduleSlot().getDurationInSecs());
                 duration.setText(getResources().getQuantityString(R.plurals.num_min, durationInMinutes, durationInMinutes));
                 totalDurationInSecs += slot.getScheduleSlot().getDurationInSecs();
+                slotView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(SessionActivity.this, SkillDetailActivity.class);
+                        intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, slot.getSkillId());
+                        intent.putExtra(SkillDetailActivity.ARG_DISABLE_DELETE, true);
+                        SessionActivity.this.startActivity(intent);
+                    }
+                });
             } else {
                 skillNameTextView.setText(R.string.slot_not_filled);
                 skillNameTextView.setTypeface(null, Typeface.ITALIC);

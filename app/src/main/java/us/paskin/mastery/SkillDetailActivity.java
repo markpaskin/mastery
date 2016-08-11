@@ -40,6 +40,11 @@ public class SkillDetailActivity extends AppCompatActivity {
     public static final String ARG_SKILL_POSITION = "skill_pos";
 
     /**
+     * If supplied and true, then the skill cannot be deleted.
+     */
+    public static final String ARG_DISABLE_DELETE = "disable_delete";
+
+    /**
      * This intent type is used to identify results from child intents.
      */
     public static final int SELECT_SKILL_GROUP_TO_ADD = 1;
@@ -48,6 +53,11 @@ public class SkillDetailActivity extends AppCompatActivity {
      * True if we're adding a new skill; false if we're editing one.
      */
     private boolean addingSkill;
+
+    /**
+     * True if ARG_DELETE_DISABLED was part of the launching intent.
+     */
+    private boolean deleteDisabled;
 
     /**
      * If we're not adding a new skill, this is the previous skill data.
@@ -100,7 +110,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         data = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
-        addingSkill = !getIntent().hasExtra(ARG_SKILL_POSITION);
+        addingSkill = !getIntent().hasExtra(ARG_SKILL_ID);
         if (!addingSkill) {
             skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
             skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
@@ -109,6 +119,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         } else {
             skillBuilder = Proto.Skill.newBuilder();
         }
+        deleteDisabled = getIntent().getBooleanExtra(ARG_DISABLE_DELETE, false);
 
         setContentView(R.layout.activity_skill_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -243,7 +254,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.skill_detail, menu);
-        if (addingSkill) menu.findItem(R.id.delete_skill).setVisible(false);
+        if (addingSkill || deleteDisabled) menu.findItem(R.id.delete_skill).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 

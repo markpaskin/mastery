@@ -49,7 +49,7 @@ public class Session {
                 Slot slot = session.slots.get(slotIndex);
                 if (!slot.canBeFilledBy(skill)) continue;
                 if (!slot.filled() || random.nextFloat() < (weight / sumWeight[slotIndex])) {
-                    slot.fillWith(skillId, skill);
+                    slot.fillWith(skillId);
                 }
             }
         }
@@ -75,7 +75,6 @@ public class Session {
      */
     public class Slot {
         private long skillId = -1;
-        private Proto.Skill skill = null;
         private boolean hasSkill = false;
         final Proto.Schedule.Slot scheduleSlot;
 
@@ -86,9 +85,8 @@ public class Session {
         /**
          * Fills this schedule_slot with the supplied skill.
          */
-        public void fillWith(long skillId, Proto.Skill skill) {
+        public void fillWith(long skillId) {
             this.skillId = skillId;
-            this.skill = skill;
             hasSkill = true;
         }
 
@@ -105,10 +103,6 @@ public class Session {
 
         public long getSkillId() {
             return skillId;
-        }
-
-        public Proto.Skill getSkill() {
-            return skill;
         }
 
         /**
