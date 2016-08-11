@@ -114,4 +114,9 @@
     <!-- The argument will look like HH:MM:SS or the analogous localized form. -->
     <string name="duration_practiced_text">Total practice time: %1s"</string>
 
+    <string name="play_button_text">Start</string>
+    <string name="pause_button_text">Pause</string>
+    <string name="next_button_text">Next</string>
+    <string name="prev_button_text">Previous</string>
+
 </resources>

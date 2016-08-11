@@ -36,9 +36,9 @@ public class SessionActivity extends AppCompatActivity {
     private Session session = null;
 
     /**
-     * The FAB that starts the session.
+     * Contains the control button.
      */
-    private FloatingActionButton fab;
+    private View controlsContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,16 +51,9 @@ public class SessionActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        fab.setVisibility(View.INVISIBLE);
+        controlsContainer = findViewById(R.id.controls_container);
+        controlsContainer.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -92,7 +85,7 @@ public class SessionActivity extends AppCompatActivity {
      * Called when the session is available to be rendered.
      */
     private void layoutSession() {
-        fab.setVisibility(View.VISIBLE);
+        controlsContainer.setVisibility(View.VISIBLE);
         TableLayout container = (TableLayout) findViewById(R.id.session_slots_container);
         container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(container.getContext());

@@ -21,25 +21,71 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
-        <include
-            layout="@layout/session_content"
-            android:layout_width="match_parent" />
+        <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_weight="1">
+
+            <include layout="@layout/session_content" />
 
     </android.support.v4.widget.NestedScrollView>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        <RelativeLayout
+            android:layout_weight="0"
+            android:layout_gravity="bottom|center"
+            android:gravity="bottom|center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_media_play"
-        android:tint="@android:color/white" />
+            android:id="@+id/controls_container">
+
+            <ImageButton
+                android:id="@+id/prev_button"
+                android:text="@string/prev_button_text"
+                android:layout_width="@dimen/control_side"
+                android:layout_height="@dimen/control_side"
+                android:layout_weight="1"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_margin="@dimen/control_margin"
+                android:padding="@dimen/control_padding"
+                android:src="@drawable/prev"
+                android:scaleType="fitXY" />
+            <!-- TODO in RTL these buttons have confusing icons -->
+
+            <ImageButton
+                android:id="@+id/play_pause_button"
+                android:text="@string/play_button_text"
+                android:layout_width="@dimen/control_side"
+                android:layout_height="@dimen/control_side"
+                android:layout_weight="1"
+                android:layout_toRightOf="@+id/prev_button"
+                android:layout_toEndOf="@+id/prev_button"
+                android:layout_margin="@dimen/control_margin"
+                android:padding="@dimen/control_padding"
+                android:src="@drawable/play"
+                android:scaleType="fitXY" />
+
+            <ImageButton
+                android:id="@+id/next_button"
+                android:text="@string/next_button_text"
+                android:layout_width="@dimen/control_side"
+                android:layout_height="@dimen/control_side"
+                android:layout_weight="1"
+                android:layout_toRightOf="@+id/play_pause_button"
+                android:layout_toEndOf="@+id/play_pause_button"
+                android:layout_margin="@dimen/control_margin"
+                android:padding="@dimen/control_padding"
+                android:src="@drawable/next"
+                android:scaleType="fitXY" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
