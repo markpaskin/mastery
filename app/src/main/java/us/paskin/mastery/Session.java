@@ -49,7 +49,7 @@ public class Session {
                 Slot slot = session.slots.get(slotIndex);
                 if (!slot.canBeFilledBy(skill)) continue;
                 if (!slot.filled() || random.nextFloat() < (weight / sumWeight[slotIndex])) {
-                    slot.fillWith(skillId);
+                    slot.fillWith(skillId, skill);
                 }
             }
         }
@@ -71,11 +71,21 @@ public class Session {
     }
 
     /**
+     * Reloads the skills from the model.  Use this if the skills may have been updated.
+     */
+    public void refill() {
+        for (Slot slot : slots) {
+            if (slot.filled())
+                slot.fillWith(slot.getSkillId(), model.getSkillById(slot.getSkillId()));
+        }
+    }
+
+    /**
      * Represents an instantiated schedule_slot in a session.
      */
     public class Slot {
         private long skillId = -1;
-        private boolean hasSkill = false;
+        private Proto.Skill skill = null;
         final Proto.Schedule.Slot scheduleSlot;
 
         public Slot(Proto.Schedule.Slot scheduleSlot) {
@@ -85,16 +95,16 @@ public class Session {
         /**
          * Fills this schedule_slot with the supplied skill.
          */
-        public void fillWith(long skillId) {
+        public void fillWith(long skillId, Proto.Skill skill) {
             this.skillId = skillId;
-            hasSkill = true;
+            this.skill = skill;
         }
 
         /**
          * @return true if this schedule_slot is filled.
          */
         public boolean filled() {
-            return hasSkill;
+            return skill != null;
         }
 
         public Proto.Schedule.Slot getScheduleSlot() {
@@ -103,6 +113,10 @@ public class Session {
 
         public long getSkillId() {
             return skillId;
+        }
+
+        public Proto.Skill getSkill() {
+            return skill;
         }
 
         /**

@@ -3,15 +3,17 @@ package us.paskin.mastery;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
@@ -28,6 +30,11 @@ public class SessionActivity extends AppCompatActivity {
      * This activity requires its intent to have the session ID set.
      */
     public static String ARG_SESSION_ID = "session_id";
+
+    /**
+     * The ID of the status notification posted by this activity.
+     */
+    private static int STATUS_NOTIFICATION_ID = 1;
 
     /**
      * The application model.
@@ -99,8 +106,12 @@ public class SessionActivity extends AppCompatActivity {
     /**
      * Used to update the display while practicing.
      */
-    private Timer timer;
+    private Timer durationDisplayUpdateTimer;
 
+    /**
+     * Used to notify the user it's time to move on.
+     */
+    private Timer nextNotificationTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,12 +170,15 @@ public class SessionActivity extends AppCompatActivity {
         practicingSince = new Date();
         playPauseButton.setImageResource(R.drawable.pause);
         startDurationUpdates();
+        if (getSlotTotalSecondsPracticed(curSlotIndex) < schedule.getSlotList().get(curSlotIndex).getDurationInSecs()) {
+            scheduleNextNotification();
+        }
     }
 
     void startDurationUpdates() {
-        timer = new Timer();
+        durationDisplayUpdateTimer = new Timer();
         final long msInSec = TimeUnit.SECONDS.toMillis(1);
-        timer.scheduleAtFixedRate(new TimerTask() {
+        durationDisplayUpdateTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -178,29 +192,62 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     void stopDurationUpdates() {
-        timer.cancel();
-        timer.purge();
+        if (durationDisplayUpdateTimer == null) return;
+        durationDisplayUpdateTimer.cancel();
+        durationDisplayUpdateTimer.purge();
+    }
+
+    void scheduleNextNotification() {
+        if (mode != Mode.PLAY) return;
+        final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
+        final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
+        final int secondsLeftToPractice = secondsToPractice - secondsPracticed;
+        nextNotificationTimer = new Timer();
+        nextNotificationTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SessionActivity.this.generateNextNotification();
+                    }
+                });
+            }
+        }, TimeUnit.SECONDS.toMillis(secondsLeftToPractice));
+    }
+
+    void cancelNextNotification() {
+        if (nextNotificationTimer != null) {
+            nextNotificationTimer.cancel();
+            nextNotificationTimer.purge();
+        }
+    }
+
+    /**
+     * Returns the number of seconds (during this activity) that the slot has been practiced.
+     */
+    int getSlotTotalSecondsPracticed(int slotIndex) {
+        int secondsPracticed = 0;
+        if (practicingSince != null && slotIndex == curSlotIndex) {
+            Date now = new Date();
+            final long millisPracticed = now.getTime() - practicingSince.getTime();
+            secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
+        }
+        final int secondsPreviouslyPracticed = storedDurations[slotIndex];
+        return secondsPracticed + secondsPreviouslyPracticed;
     }
 
     synchronized void updateDuration() {
         if (practicingSince == null) return;
         TextView textView = slotDurationTextViewList.get(curSlotIndex);
         textView.setTypeface(null, Typeface.BOLD);
-        Date now = new Date();
-        final long millisPracticed = now.getTime() - practicingSince.getTime();
-        final int secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
-        final int secondsPreviouslyPracticed = storedDurations[curSlotIndex];
-        final int totalSecondsPracticed = secondsPracticed + secondsPreviouslyPracticed;
-        textView.setText(DateUtils.formatElapsedTime(totalSecondsPracticed));
-        if (totalSecondsPracticed > schedule.getSlotList().get(curSlotIndex).getDurationInSecs()) {
-            generateNotification();
-        }
+        textView.setText(DateUtils.formatElapsedTime(getSlotTotalSecondsPracticed(curSlotIndex)));
     }
 
     /**
      * Generates a notification that it's time to move on to the next slot.
      */
-    private void generateNotification() {
+    private void generateNextNotification() {
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -209,11 +256,32 @@ public class SessionActivity extends AppCompatActivity {
                         .setSmallIcon(R.drawable.play)
                         .setContentTitle(getResources().getString(R.string.next_notification_title))
                         .setContentText(getResources().getString(R.string.next_notification_text))
-                        .setContentIntent(intent);
-        int mNotificationId = 001;
+                        .setContentIntent(intent)
+                        .setAutoCancel(true)
+                        .setDefaults(Notification.DEFAULT_ALL);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
+    }
+
+
+    /**
+     * Generates a notification that shows that a practice is ongoing.
+     */
+    private void generatePracticingNotification() {
+        Intent notificationIntent = new Intent(this, SessionActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        NotificationCompat.Builder mBuilder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.play)
+                        .setContentTitle(getResources().getString(R.string.status_notification_title))
+                        .setContentText(session.getSlotList().get(curSlotIndex).getSkill().getName())
+                        .setContentIntent(intent)
+                        .setAutoCancel(false);
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
     }
 
     synchronized void pause() {
@@ -222,6 +290,7 @@ public class SessionActivity extends AppCompatActivity {
         playPauseButton.setImageResource(R.drawable.play);
         slotDurationTextViewList.get(curSlotIndex).setTypeface(null, Typeface.NORMAL);
         stopDurationUpdates();
+        cancelNextNotification();
     }
 
     synchronized void accumulatePracticeTime() {
@@ -277,9 +346,103 @@ public class SessionActivity extends AppCompatActivity {
                 }
             }).start();
         } else {
+            // Update the session in case the skills were updated.
+            session.refill();
             layoutSession();
         }
         if (mode == Mode.PLAY) startDurationUpdates();
+        cancelStatusNotification();
+    }
+
+    void cancelStatusNotification() {
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(STATUS_NOTIFICATION_ID);
+    }
+
+    boolean startedPractice() {
+        if (practicingSince != null) return true;
+        for (int secs : storedDurations) if (secs > 0) return true;
+        return false;
+    }
+
+    boolean finishedPractice() {
+        final int lastSlotIndex = schedule.getSlotCount() - 1;
+        return getSlotTotalSecondsPracticed(lastSlotIndex) >= schedule.getSlot(lastSlotIndex).getDurationInSecs();
+    }
+
+    /**
+     * Called if the user requests to revert changes.
+     */
+    void confirmExit() {
+        if (!startedPractice() || finishedPractice()) {
+            finish();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.cancel_session_title)
+                .setMessage(R.string.cancel_session_detail)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SessionActivity.this.finish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
+    }
+
+    // Confirms if it is safe to exit before doing so.
+    @Override
+    public void onBackPressed() {
+        confirmExit();
+    }
+
+    /**
+     * This is invoked if an option is select, e.g., the left arrow to return.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // This ID represents the Home or Up button. In the case of this
+            // activity, the Up button is shown. Use NavUtils to allow users
+            // to navigate up one level in the application structure. For
+            // more details, see the Navigation pattern on Android Design:
+            //
+            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
+            //
+            confirmExit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        pause();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopDurationUpdates();
+        if (mode == Mode.PLAY) generatePracticingNotification();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopDurationUpdates();
+        cancelStatusNotification();
     }
 
     /**
@@ -300,7 +463,7 @@ public class SessionActivity extends AppCompatActivity {
             TextView duration = (TextView) slotView.findViewById(R.id.slot_duration);
             slotDurationTextViewList.add(duration);
             if (slot.filled()) {
-                Proto.Skill skill = model.getSkillById(slot.getSkillId());
+                Proto.Skill skill = slot.getSkill();
                 skillNameTextView.setText(skill.getName());
                 final int durationInMinutes = (int) TimeUnit.SECONDS.toMinutes(slot.getScheduleSlot().getDurationInSecs());
                 duration.setText(getResources().getQuantityString(R.plurals.num_min, durationInMinutes, durationInMinutes));
@@ -329,5 +492,6 @@ public class SessionActivity extends AppCompatActivity {
         totalDurationTextView.setText(getResources().getQuantityString(
                 R.plurals.num_min, totalDurationInMinutes, totalDurationInMinutes));
 
+        updateDuration();
     }
 }
