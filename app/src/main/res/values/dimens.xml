@@ -13,6 +13,7 @@
     <dimen name="control_margin">16dp</dimen>
     <dimen name="control_padding">8dp</dimen>
     <dimen name="control_side">64dp</dimen>
+    <dimen name="control_elevation">15dp</dimen>
     <dimen name="internal_slot_padding">12dp</dimen>
     <dimen name="external_slot_padding">8dp</dimen>
 </resources>

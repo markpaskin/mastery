@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
@@ -20,13 +22,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TableLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -38,9 +39,15 @@ public class SessionActivity extends AppCompatActivity {
     public static String ARG_SESSION_ID = "session_id";
 
     /**
-     * The ID of the status notification posted by this activity.
+     * The ID of the notification posted by this activity when the user should move to the next
+     * slot or stop practicing.
      */
-    private static int STATUS_NOTIFICATION_ID = 1;
+    public static int UPDATE_NOTIFICATION_ID = 1;
+
+    /**
+     * The ID of the notification that is triggered during practice when the user leaves the activity.
+     */
+    public static int PRACTICING_NOTIFICATION_ID = 2;
 
     /**
      * The key to a float preference giving a [0, 1] weight for staleness.
@@ -200,7 +207,6 @@ public class SessionActivity extends AppCompatActivity {
         if (getSlotTotalSecondsPracticed(curSlotIndex) < schedule.getSlotList().get(curSlotIndex).getDurationInSecs()) {
             scheduleNextNotification();
         }
-        cancelStatusNotification();
     }
 
     void startDurationUpdates() {
@@ -223,33 +229,6 @@ public class SessionActivity extends AppCompatActivity {
         if (durationDisplayUpdateTimer == null) return;
         durationDisplayUpdateTimer.cancel();
         durationDisplayUpdateTimer.purge();
-    }
-
-    void scheduleNextNotification() {
-        if (!enableNotifications) return;
-        if (mode != Mode.PLAY) return;
-        final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
-        final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
-        final int secondsLeftToPractice = secondsToPractice - secondsPracticed;
-        nextNotificationTimer = new Timer();
-        nextNotificationTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        SessionActivity.this.generateNextNotification();
-                    }
-                });
-            }
-        }, TimeUnit.SECONDS.toMillis(secondsLeftToPractice));
-    }
-
-    void cancelNextNotification() {
-        if (nextNotificationTimer != null) {
-            nextNotificationTimer.cancel();
-            nextNotificationTimer.purge();
-        }
     }
 
     /**
@@ -294,14 +273,49 @@ public class SessionActivity extends AppCompatActivity {
         if (notificationsVibrate) mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
+        mNotifyMgr.notify(UPDATE_NOTIFICATION_ID, mBuilder.build());
     }
 
+    /**
+     * Schedules a "next" notification to be generated when the time for the current slot is up.
+     */
+    void scheduleNextNotification() {
+        if (!enableNotifications) return;
+        if (mode != Mode.PLAY) return;
+        final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
+        final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
+        final int secondsLeftToPractice = secondsToPractice - secondsPracticed;
+        nextNotificationTimer = new Timer();
+        nextNotificationTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SessionActivity.this.generateNextNotification();
+                    }
+                });
+            }
+        }, TimeUnit.SECONDS.toMillis(secondsLeftToPractice));
+    }
+
+    /**
+     * Cancels any existing or scheduled "next" notifications.
+     */
+    void cancelNextNotification() {
+        if (nextNotificationTimer != null) {
+            nextNotificationTimer.cancel();
+            nextNotificationTimer.purge();
+        }
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(UPDATE_NOTIFICATION_ID);
+    }
 
     /**
      * Generates a notification that shows that a practice is ongoing.
      */
-    private void generatePracticingNotification() {
+    private void startPracticingNotification() {
         if (!enableNotifications) return;
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -315,8 +329,19 @@ public class SessionActivity extends AppCompatActivity {
                         .setAutoCancel(false);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
+        mNotifyMgr.notify(PRACTICING_NOTIFICATION_ID, mBuilder.build());
     }
+
+    /**
+     * Cancels the notification created by startPracticingNotification.
+     */
+    void stopPracticingNotification() {
+        if (!enableNotifications) return;
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(PRACTICING_NOTIFICATION_ID);
+    }
+
 
     synchronized void pause() {
         mode = Mode.PAUSE;
@@ -325,7 +350,6 @@ public class SessionActivity extends AppCompatActivity {
         slotDurationTextViewList.get(curSlotIndex).setTypeface(null, Typeface.NORMAL);
         stopDurationUpdates();
         cancelNextNotification();
-        cancelStatusNotification();
     }
 
     synchronized void accumulatePracticeTime() {
@@ -341,12 +365,23 @@ public class SessionActivity extends AppCompatActivity {
         practicingSince = null;
     }
 
+    /**
+     * Visually alters the appearance of a slot to be (not) emphasized.
+     *
+     * @param slotIndex
+     * @param emphasize
+     */
+    private void setSlotEmphasis(int slotIndex, boolean emphasize) {
+        View view = slotViewList.get(slotIndex);
+        ViewCompat.setElevation(view, emphasize ? 25.0f : 5.0f);
+    }
+
     synchronized void handlePrevButtonClick(View view) {
         if (curSlotIndex < 1) throw new InternalError("prev from first");
         pause();
-        slotViewList.get(curSlotIndex).setBackgroundResource(0);
+        setSlotEmphasis(curSlotIndex, false);
         curSlotIndex -= 1;
-        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
+        setSlotEmphasis(curSlotIndex, true);
         if (curSlotIndex == 0) prevButton.setEnabled(false);
         nextButton.setEnabled(true);
     }
@@ -355,9 +390,9 @@ public class SessionActivity extends AppCompatActivity {
         int numSlots = session.getSlotList().size();
         if (curSlotIndex >= numSlots) throw new InternalError("next from last");
         pause();
-        slotViewList.get(curSlotIndex).setBackgroundResource(0);
+        setSlotEmphasis(curSlotIndex, false);
         curSlotIndex += 1;
-        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
+        setSlotEmphasis(curSlotIndex, true);
         if (curSlotIndex == numSlots - 1) nextButton.setEnabled(false);
         prevButton.setEnabled(true);
     }
@@ -388,7 +423,7 @@ public class SessionActivity extends AppCompatActivity {
             layoutSession();
         }
         if (mode == Mode.PLAY) startDurationUpdates();
-        cancelStatusNotification();
+        stopPracticingNotification();
 
         // Get the staleness importance preference.  It should be in [0, 1].
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -400,15 +435,6 @@ public class SessionActivity extends AppCompatActivity {
         notificationsVibrate = sharedPreferences.getBoolean(PREF_NOTIFICATION_VIBRATE, true);
         notificationRingtoneUri = sharedPreferences.getString(PREF_NOTIFICATION_RINGTONE,
                 Settings.System.DEFAULT_NOTIFICATION_URI.toString());
-
-        System.out.println(notificationRingtoneUri);
-    }
-
-    void cancelStatusNotification() {
-        if (!enableNotifications) return;
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(STATUS_NOTIFICATION_ID);
     }
 
     boolean startedPractice() {
@@ -483,7 +509,7 @@ public class SessionActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         stopDurationUpdates();
-        if (mode == Mode.PLAY) generatePracticingNotification();
+        if (mode == Mode.PLAY) startPracticingNotification();
     }
 
     /**
@@ -493,7 +519,8 @@ public class SessionActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         stopDurationUpdates();
-        cancelStatusNotification();
+        cancelNextNotification();
+        stopPracticingNotification();
     }
 
     /**
@@ -501,12 +528,13 @@ public class SessionActivity extends AppCompatActivity {
      */
     private void layoutSession() {
         controlsContainer.setVisibility(View.VISIBLE);
-        TableLayout container = (TableLayout) findViewById(R.id.session_slots_container);
+        LinearLayout container = (LinearLayout) findViewById(R.id.session_slots_container);
         container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
         int totalDurationInSecs = 0;
         slotDurationTextViewList = new ArrayList<TextView>();
         slotViewList = new ArrayList<View>();
+        int slotIndex = 0;
         for (final Session.Slot slot : session.getSlotList()) {
             View slotView = inflater.inflate(R.layout.session_slot, container, false);
             slotViewList.add(slotView);
@@ -536,8 +564,9 @@ public class SessionActivity extends AppCompatActivity {
             TextView groupNameTextView = (TextView) slotView.findViewById(R.id.group_name);
             groupNameTextView.setText(model.getSkillGroupById(slot.getScheduleSlot().getGroupId()).getName());
             container.addView(slotView);
+            setSlotEmphasis(slotIndex, slotIndex == curSlotIndex);
+            ++slotIndex;
         }
-        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
 
         TextView totalDurationTextView = (TextView) findViewById(R.id.total_duration);
 

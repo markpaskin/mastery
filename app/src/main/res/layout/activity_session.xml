@@ -46,6 +46,7 @@
 
             <ImageButton
                 android:id="@+id/prev_button"
+                android:tint="@color/background"
                 android:text="@string/prev_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
@@ -55,11 +56,14 @@
                 android:layout_margin="@dimen/control_margin"
                 android:padding="@dimen/control_padding"
                 android:src="@drawable/prev"
-                android:scaleType="fitXY" />
+                android:scaleType="fitXY"
+                android:background="@drawable/control_background"
+                android:elevation="@dimen/control_elevation" />
             <!-- TODO in RTL these buttons have confusing icons -->
 
             <ImageButton
                 android:id="@+id/play_pause_button"
+                android:tint="@color/background"
                 android:text="@string/play_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
@@ -69,10 +73,13 @@
                 android:layout_margin="@dimen/control_margin"
                 android:padding="@dimen/control_padding"
                 android:src="@drawable/play"
-                android:scaleType="fitXY" />
+                android:scaleType="fitXY"
+                android:background="@drawable/control_background"
+                android:elevation="@dimen/control_elevation" />
 
             <ImageButton
                 android:id="@+id/next_button"
+                android:tint="@color/background"
                 android:text="@string/next_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
@@ -82,7 +89,9 @@
                 android:layout_margin="@dimen/control_margin"
                 android:padding="@dimen/control_padding"
                 android:src="@drawable/next"
-                android:scaleType="fitXY" />
+                android:scaleType="fitXY"
+                android:background="@drawable/control_background"
+                android:elevation="@dimen/control_elevation" />
 
         </RelativeLayout>
 

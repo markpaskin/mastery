@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/external_slot_padding"
-    android:layout_marginBottom="@dimen/external_slot_padding">
-
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/external_slot_padding"
+        android:background="@drawable/slot_background"
         android:padding="@dimen/internal_slot_padding">
 
         <TextView
@@ -36,4 +32,3 @@
 
     </RelativeLayout>
 
-</TableRow>
