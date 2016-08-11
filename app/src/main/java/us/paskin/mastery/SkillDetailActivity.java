@@ -133,9 +133,13 @@ public class SkillDetailActivity extends AppCompatActivity {
 
         EditText nameEditText = ((EditText) findViewById(R.id.skill_name_edit_text));
         TextView lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
+        TextView durationPracticedText = ((TextView) findViewById(R.id.duration_practiced));
 
         // Hide the last practiced text if we're adding a new skill.
-        if (addingSkill) lastPracticedText.setVisibility(View.GONE);
+        if (addingSkill) {
+            lastPracticedText.setVisibility(View.GONE);
+            durationPracticedText.setVisibility(View.GONE);
+        }
 
         // Set up the priority picker
         NumberPicker practicePriorityPicker = ((NumberPicker) findViewById(R.id.priority_picker));
@@ -147,6 +151,12 @@ public class SkillDetailActivity extends AppCompatActivity {
             updateTitle(skill.getName());
             nameEditText.setText(skill.getName());
             lastPracticedText.setText(Model.getLastPracticedText(skill, getResources()));
+            String durationPracticed = Model.getDurationPracticedText(skill, getResources());
+            if (durationPracticed != null) {
+                durationPracticedText.setText(durationPracticed);
+            } else {
+                durationPracticedText.setVisibility(View.GONE);
+            }
             practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : Model.MAX_PRIORITY);
         } else {
             skillBuilder.setPriority(Model.MAX_PRIORITY);

@@ -21,6 +21,9 @@ message Skill {
 
   // The IDs of the groups this skill is a member of.
   repeated int64 group_id = 4;
+
+  // The total number of seconds this skill has been practiced.
+  optional uint64 seconds_practiced = 5;
 }
 
 // Represents a group of skills.

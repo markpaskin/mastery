@@ -111,5 +111,7 @@
     <string name="slot_not_filled">No skills in this group</string>
     <string name="duration">Duration:</string>
     <string name="session_activity_title">Practice session</string>
+    <!-- The argument will look like HH:MM:SS or the analogous localized form. -->
+    <string name="duration_practiced_text">Total practice time: %1s"</string>
 
 </resources>

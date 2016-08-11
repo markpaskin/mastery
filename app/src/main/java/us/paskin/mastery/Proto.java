@@ -99,6 +99,24 @@ public final class Proto {
      * </pre>
      */
     long getGroupId(int index);
+
+    /**
+     * <code>optional uint64 seconds_practiced = 5;</code>
+     * <p/>
+     * <pre>
+     * The total number of seconds this skill has been practiced.
+     * </pre>
+     */
+    boolean hasSecondsPracticed();
+
+    /**
+     * <code>optional uint64 seconds_practiced = 5;</code>
+     * <p/>
+     * <pre>
+     * The total number of seconds this skill has been practiced.
+     * </pre>
+     */
+    long getSecondsPracticed();
   }
   /**
    * Protobuf type {@code us.paskin.mastery.Skill}
@@ -121,6 +139,7 @@ public final class Proto {
       dateLastPracticed_ = 0L;
       priority_ = 10;
       groupId_ = java.util.Collections.emptyList();
+      secondsPracticed_ = 0L;
     }
 
     @java.lang.Override
@@ -128,6 +147,7 @@ public final class Proto {
     getUnknownFields() {
       return this.unknownFields;
     }
+
     private Skill(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
@@ -187,6 +207,11 @@ public final class Proto {
               input.popLimit(limit);
               break;
             }
+            case 40: {
+              bitField0_ |= 0x00000008;
+              secondsPracticed_ = input.readUInt64();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -204,12 +229,12 @@ public final class Proto {
       }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
-    getDescriptor() {
+        getDescriptor() {
       return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-    internalGetFieldAccessorTable() {
+        internalGetFieldAccessorTable() {
       return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_fieldAccessorTable
               .ensureFieldAccessorsInitialized(
                       us.paskin.mastery.Proto.Skill.class, us.paskin.mastery.Proto.Skill.Builder.class);
@@ -240,8 +265,8 @@ public final class Proto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
-                (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           name_ = s;
@@ -257,12 +282,12 @@ public final class Proto {
      * </pre>
      */
     public com.google.protobuf.ByteString
-    getNameBytes() {
+        getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b =
                 com.google.protobuf.ByteString.copyFromUtf8(
-                        (java.lang.String) ref);
+                (java.lang.String) ref);
         name_ = b;
         return b;
       } else {
@@ -328,7 +353,7 @@ public final class Proto {
      * </pre>
      */
     public java.util.List<java.lang.Long>
-    getGroupIdList() {
+        getGroupIdList() {
       return groupId_;
     }
     /**
@@ -352,6 +377,31 @@ public final class Proto {
       return groupId_.get(index);
     }
 
+    public static final int SECONDS_PRACTICED_FIELD_NUMBER = 5;
+    private long secondsPracticed_;
+
+    /**
+     * <code>optional uint64 seconds_practiced = 5;</code>
+     * <p/>
+     * <pre>
+     * The total number of seconds this skill has been practiced.
+     * </pre>
+     */
+    public boolean hasSecondsPracticed() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+
+    /**
+     * <code>optional uint64 seconds_practiced = 5;</code>
+     * <p/>
+     * <pre>
+     * The total number of seconds this skill has been practiced.
+     * </pre>
+     */
+    public long getSecondsPracticed() {
+      return secondsPracticed_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -363,7 +413,7 @@ public final class Proto {
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
+                        throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 1, name_);
       }
@@ -375,6 +425,9 @@ public final class Proto {
       }
       for (int i = 0; i < groupId_.size(); i++) {
         output.writeInt64(4, groupId_.get(i));
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeUInt64(5, secondsPracticed_);
       }
       unknownFields.writeTo(output);
     }
@@ -389,20 +442,24 @@ public final class Proto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeUInt64Size(2, dateLastPracticed_);
+          .computeUInt64Size(2, dateLastPracticed_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeInt32Size(3, priority_);
+          .computeInt32Size(3, priority_);
       }
       {
         int dataSize = 0;
         for (int i = 0; i < groupId_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-                  .computeInt64SizeNoTag(groupId_.get(i));
+            .computeInt64SizeNoTag(groupId_.get(i));
         }
         size += dataSize;
         size += 1 * getGroupIdList().size();
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(5, secondsPracticed_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -410,34 +467,39 @@ public final class Proto {
     }
 
     private static final long serialVersionUID = 0L;
+
     public static us.paskin.mastery.Proto.Skill parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static us.paskin.mastery.Proto.Skill parseFrom(
             com.google.protobuf.ByteString data,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static us.paskin.mastery.Proto.Skill parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static us.paskin.mastery.Proto.Skill parseFrom(
             byte[] data,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static us.paskin.mastery.Proto.Skill parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
@@ -445,20 +507,22 @@ public final class Proto {
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
+
     public static us.paskin.mastery.Proto.Skill parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static us.paskin.mastery.Proto.Skill parseFrom(
-            com.google.protobuf.CodedInputStream input)
+        com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
+
     public static us.paskin.mastery.Proto.Skill parseFrom(
             com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
@@ -470,14 +534,15 @@ public final class Proto {
     public static Builder newBuilder(us.paskin.mastery.Proto.Skill prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
-              ? new Builder() : new Builder().mergeFrom(this);
+          ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -492,7 +557,7 @@ public final class Proto {
     public static final class Builder extends
             com.google.protobuf.GeneratedMessage.Builder<Builder> implements
             // @@protoc_insertion_point(builder_implements:us.paskin.mastery.Skill)
-            us.paskin.mastery.Proto.SkillOrBuilder {
+        us.paskin.mastery.Proto.SkillOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_descriptor;
@@ -502,7 +567,7 @@ public final class Proto {
           internalGetFieldAccessorTable() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Skill_fieldAccessorTable
                 .ensureFieldAccessorsInitialized(
-                        us.paskin.mastery.Proto.Skill.class, us.paskin.mastery.Proto.Skill.Builder.class);
+                us.paskin.mastery.Proto.Skill.class, us.paskin.mastery.Proto.Skill.Builder.class);
       }
 
       // Construct using us.paskin.mastery.Proto.Skill.newBuilder()
@@ -511,7 +576,7 @@ public final class Proto {
       }
 
       private Builder(
-              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -529,6 +594,8 @@ public final class Proto {
         bitField0_ = (bitField0_ & ~0x00000004);
         groupId_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000008);
+        secondsPracticed_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -570,6 +637,10 @@ public final class Proto {
           bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.groupId_ = groupId_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.secondsPracticed_ = secondsPracticed_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -607,6 +678,9 @@ public final class Proto {
           }
           onChanged();
         }
+        if (other.hasSecondsPracticed()) {
+          setSecondsPracticed(other.getSecondsPracticed());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -618,7 +692,7 @@ public final class Proto {
 
       public Builder mergeFrom(
               com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         us.paskin.mastery.Proto.Skill parsedMessage = null;
         try {
@@ -657,7 +731,7 @@ public final class Proto {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
-                  (com.google.protobuf.ByteString) ref;
+              (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             name_ = s;
@@ -675,11 +749,11 @@ public final class Proto {
        * </pre>
        */
       public com.google.protobuf.ByteString
-          getNameBytes() {
+      getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-                  com.google.protobuf.ByteString.copyFromUtf8(
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
           return b;
@@ -725,7 +799,7 @@ public final class Proto {
        * </pre>
        */
       public Builder setNameBytes(
-              com.google.protobuf.ByteString value) {
+          com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -840,7 +914,7 @@ public final class Proto {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           groupId_ = new java.util.ArrayList<java.lang.Long>(groupId_);
           bitField0_ |= 0x00000008;
-        }
+         }
       }
       /**
        * <code>repeated int64 group_id = 4;</code>
@@ -850,7 +924,7 @@ public final class Proto {
        * </pre>
        */
       public java.util.List<java.lang.Long>
-      getGroupIdList() {
+          getGroupIdList() {
         return java.util.Collections.unmodifiableList(groupId_);
       }
       /**
@@ -881,7 +955,7 @@ public final class Proto {
        * </pre>
        */
       public Builder setGroupId(
-              int index, long value) {
+          int index, long value) {
         ensureGroupIdIsMutable();
         groupId_.set(index, value);
         onChanged();
@@ -908,10 +982,10 @@ public final class Proto {
        * </pre>
        */
       public Builder addAllGroupId(
-              java.lang.Iterable<? extends java.lang.Long> values) {
+          java.lang.Iterable<? extends java.lang.Long> values) {
         ensureGroupIdIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                values, groupId_);
+            values, groupId_);
         onChanged();
         return this;
       }
@@ -929,11 +1003,64 @@ public final class Proto {
         return this;
       }
 
+      private long secondsPracticed_;
+
+      /**
+       * <code>optional uint64 seconds_practiced = 5;</code>
+       * <p/>
+       * <pre>
+       * The total number of seconds this skill has been practiced.
+       * </pre>
+       */
+      public boolean hasSecondsPracticed() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+
+      /**
+       * <code>optional uint64 seconds_practiced = 5;</code>
+       * <p/>
+       * <pre>
+       * The total number of seconds this skill has been practiced.
+       * </pre>
+       */
+      public long getSecondsPracticed() {
+        return secondsPracticed_;
+      }
+
+      /**
+       * <code>optional uint64 seconds_practiced = 5;</code>
+       * <p/>
+       * <pre>
+       * The total number of seconds this skill has been practiced.
+       * </pre>
+       */
+      public Builder setSecondsPracticed(long value) {
+        bitField0_ |= 0x00000010;
+        secondsPracticed_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 seconds_practiced = 5;</code>
+       * <p/>
+       * <pre>
+       * The total number of seconds this skill has been practiced.
+       * </pre>
+       */
+      public Builder clearSecondsPracticed() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        secondsPracticed_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:us.paskin.mastery.Skill)
     }
 
     // @@protoc_insertion_point(class_scope:us.paskin.mastery.Skill)
     private static final us.paskin.mastery.Proto.Skill DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new us.paskin.mastery.Proto.Skill();
     }
@@ -943,7 +1070,7 @@ public final class Proto {
     }
 
     @java.lang.Deprecated public static final com.google.protobuf.Parser<Skill>
-            PARSER = new com.google.protobuf.AbstractParser<Skill>() {
+        PARSER = new com.google.protobuf.AbstractParser<Skill>() {
       public Skill parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -977,8 +1104,8 @@ public final class Proto {
   }
 
   public interface SkillGroupOrBuilder extends
-          // @@protoc_insertion_point(interface_extends:us.paskin.mastery.SkillGroup)
-          com.google.protobuf.MessageOrBuilder {
+      // @@protoc_insertion_point(interface_extends:us.paskin.mastery.SkillGroup)
+      com.google.protobuf.MessageOrBuilder {
 
     /**
      * <code>optional int64 id = 1;</code>
@@ -1021,7 +1148,7 @@ public final class Proto {
      * </pre>
      */
     com.google.protobuf.ByteString
-    getNameBytes();
+        getNameBytes();
 
     /**
      * <code>repeated int64 parent_id = 3;</code>
@@ -1048,6 +1175,7 @@ public final class Proto {
      */
     long getParentId(int index);
   }
+
   /**
    * Protobuf type {@code us.paskin.mastery.SkillGroup}
    *
@@ -1055,10 +1183,10 @@ public final class Proto {
    * Represents a group of skills.
    * </pre>
    */
-  public static final class SkillGroup extends
-          com.google.protobuf.GeneratedMessage implements
-          // @@protoc_insertion_point(message_implements:us.paskin.mastery.SkillGroup)
-          SkillGroupOrBuilder {
+  public  static final class SkillGroup extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:us.paskin.mastery.SkillGroup)
+      SkillGroupOrBuilder {
     // Use SkillGroup.newBuilder() to construct.
     private SkillGroup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1074,13 +1202,14 @@ public final class Proto {
     getUnknownFields() {
       return this.unknownFields;
     }
+
     private SkillGroup(
             com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
       this();
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-              com.google.protobuf.UnknownFieldSet.newBuilder();
+          com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
         boolean done = false;
         while (!done) {
@@ -1091,7 +1220,7 @@ public final class Proto {
               break;
             default: {
               if (!parseUnknownField(input, unknownFields,
-                      extensionRegistry, tag)) {
+                                     extensionRegistry, tag)) {
                 done = true;
               }
               break;
@@ -1134,8 +1263,8 @@ public final class Proto {
         throw new RuntimeException(e.setUnfinishedMessage(this));
       } catch (java.io.IOException e) {
         throw new RuntimeException(
-                new com.google.protobuf.InvalidProtocolBufferException(
-                        e.getMessage()).setUnfinishedMessage(this));
+            new com.google.protobuf.InvalidProtocolBufferException(
+                e.getMessage()).setUnfinishedMessage(this));
       } finally {
         if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           parentId_ = java.util.Collections.unmodifiableList(parentId_);
@@ -1144,16 +1273,17 @@ public final class Proto {
         makeExtensionsImmutable();
       }
     }
+
     public static final com.google.protobuf.Descriptors.Descriptor
-    getDescriptor() {
+        getDescriptor() {
       return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
     internalGetFieldAccessorTable() {
       return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable
-              .ensureFieldAccessorsInitialized(
-                      us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
+          .ensureFieldAccessorsInitialized(
+              us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
     }
 
     private int bitField0_;
@@ -1204,8 +1334,8 @@ public final class Proto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
-                (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           name_ = s;
@@ -1221,12 +1351,12 @@ public final class Proto {
      * </pre>
      */
     public com.google.protobuf.ByteString
-    getNameBytes() {
+        getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-                com.google.protobuf.ByteString.copyFromUtf8(
-                        (java.lang.String) ref);
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
         name_ = b;
         return b;
       } else {
@@ -1244,7 +1374,7 @@ public final class Proto {
      * </pre>
      */
     public java.util.List<java.lang.Long>
-    getParentIdList() {
+        getParentIdList() {
       return parentId_;
     }
     /**
@@ -1279,7 +1409,7 @@ public final class Proto {
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
+                        throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeInt64(1, id_);
       }
@@ -1299,7 +1429,7 @@ public final class Proto {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeInt64Size(1, id_);
+          .computeInt64Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(2, name_);
@@ -1308,7 +1438,7 @@ public final class Proto {
         int dataSize = 0;
         for (int i = 0; i < parentId_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-                  .computeInt64SizeNoTag(parentId_.get(i));
+            .computeInt64SizeNoTag(parentId_.get(i));
         }
         size += dataSize;
         size += 1 * getParentIdList().size();
@@ -1319,37 +1449,41 @@ public final class Proto {
     }
 
     private static final long serialVersionUID = 0L;
+
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
             com.google.protobuf.ByteString data)
             throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(byte[] data)
             throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(java.io.InputStream input)
             throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
+
     public static us.paskin.mastery.Proto.SkillGroup parseDelimitedFrom(java.io.InputStream input)
             throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
@@ -1357,9 +1491,10 @@ public final class Proto {
     public static us.paskin.mastery.Proto.SkillGroup parseDelimitedFrom(
             java.io.InputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
+
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
             com.google.protobuf.CodedInputStream input)
             throws java.io.IOException {
@@ -1367,31 +1502,31 @@ public final class Proto {
     }
     public static us.paskin.mastery.Proto.SkillGroup parseFrom(
             com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() {
-      return newBuilder();
-    }
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(us.paskin.mastery.Proto.SkillGroup prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
-              ? new Builder() : new Builder().mergeFrom(this);
+          ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+
     /**
      * Protobuf type {@code us.paskin.mastery.SkillGroup}
      *
@@ -1401,18 +1536,18 @@ public final class Proto {
      */
     public static final class Builder extends
             com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:us.paskin.mastery.SkillGroup)
-            us.paskin.mastery.Proto.SkillGroupOrBuilder {
+        // @@protoc_insertion_point(builder_implements:us.paskin.mastery.SkillGroup)
+        us.paskin.mastery.Proto.SkillGroupOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
-      getDescriptor() {
+          getDescriptor() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
+            .ensureFieldAccessorsInitialized(
+                    us.paskin.mastery.Proto.SkillGroup.class, us.paskin.mastery.Proto.SkillGroup.Builder.class);
       }
 
       // Construct using us.paskin.mastery.Proto.SkillGroup.newBuilder()
@@ -1421,7 +1556,7 @@ public final class Proto {
       }
 
       private Builder(
-              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1441,7 +1576,7 @@ public final class Proto {
       }
 
       public com.google.protobuf.Descriptors.Descriptor
-      getDescriptorForType() {
+          getDescriptorForType() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_SkillGroup_descriptor;
       }
 
@@ -1481,7 +1616,7 @@ public final class Proto {
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof us.paskin.mastery.Proto.SkillGroup) {
-          return mergeFrom((us.paskin.mastery.Proto.SkillGroup) other);
+          return mergeFrom((us.paskin.mastery.Proto.SkillGroup)other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -1518,9 +1653,9 @@ public final class Proto {
       }
 
       public Builder mergeFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
         us.paskin.mastery.Proto.SkillGroup parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
@@ -1536,7 +1671,7 @@ public final class Proto {
       }
       private int bitField0_;
 
-      private long id_;
+      private long id_ ;
       /**
        * <code>optional int64 id = 1;</code>
        *
@@ -1606,7 +1741,7 @@ public final class Proto {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
-                  (com.google.protobuf.ByteString) ref;
+              (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             name_ = s;
@@ -1624,18 +1759,19 @@ public final class Proto {
        * </pre>
        */
       public com.google.protobuf.ByteString
-      getNameBytes() {
+          getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-                  com.google.protobuf.ByteString.copyFromUtf8(
-                          (java.lang.String) ref);
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
+
       /**
        * <code>optional string name = 2;</code>
        *
@@ -1644,11 +1780,11 @@ public final class Proto {
        * </pre>
        */
       public Builder setName(
-              java.lang.String value) {
+          java.lang.String value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000002;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
@@ -1666,6 +1802,7 @@ public final class Proto {
         onChanged();
         return this;
       }
+
       /**
        * <code>optional string name = 2;</code>
        *
@@ -1674,11 +1811,11 @@ public final class Proto {
        * </pre>
        */
       public Builder setNameBytes(
-              com.google.protobuf.ByteString value) {
+          com.google.protobuf.ByteString value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000002;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
@@ -1689,7 +1826,7 @@ public final class Proto {
         if (!((bitField0_ & 0x00000004) == 0x00000004)) {
           parentId_ = new java.util.ArrayList<java.lang.Long>(parentId_);
           bitField0_ |= 0x00000004;
-        }
+         }
       }
       /**
        * <code>repeated int64 parent_id = 3;</code>
@@ -1699,7 +1836,7 @@ public final class Proto {
        * </pre>
        */
       public java.util.List<java.lang.Long>
-      getParentIdList() {
+          getParentIdList() {
         return java.util.Collections.unmodifiableList(parentId_);
       }
       /**
@@ -1730,7 +1867,7 @@ public final class Proto {
        * </pre>
        */
       public Builder setParentId(
-              int index, long value) {
+          int index, long value) {
         ensureParentIdIsMutable();
         parentId_.set(index, value);
         onChanged();
@@ -1749,6 +1886,7 @@ public final class Proto {
         onChanged();
         return this;
       }
+
       /**
        * <code>repeated int64 parent_id = 3;</code>
        *
@@ -1757,10 +1895,10 @@ public final class Proto {
        * </pre>
        */
       public Builder addAllParentId(
-              java.lang.Iterable<? extends java.lang.Long> values) {
+          java.lang.Iterable<? extends java.lang.Long> values) {
         ensureParentIdIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                values, parentId_);
+            values, parentId_);
         onChanged();
         return this;
       }
@@ -1783,6 +1921,7 @@ public final class Proto {
 
     // @@protoc_insertion_point(class_scope:us.paskin.mastery.SkillGroup)
     private static final us.paskin.mastery.Proto.SkillGroup DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new us.paskin.mastery.Proto.SkillGroup();
     }
@@ -1795,16 +1934,16 @@ public final class Proto {
     public static final com.google.protobuf.Parser<SkillGroup>
             PARSER = new com.google.protobuf.AbstractParser<SkillGroup>() {
       public SkillGroup parsePartialFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
               throws com.google.protobuf.InvalidProtocolBufferException {
         try {
           return new SkillGroup(input, extensionRegistry);
         } catch (RuntimeException e) {
           if (e.getCause() instanceof
-                  com.google.protobuf.InvalidProtocolBufferException) {
+              com.google.protobuf.InvalidProtocolBufferException) {
             throw (com.google.protobuf.InvalidProtocolBufferException)
-                    e.getCause();
+                e.getCause();
           }
           throw e;
         }
@@ -1827,21 +1966,20 @@ public final class Proto {
   }
 
   public interface ScheduleOrBuilder extends
-          // @@protoc_insertion_point(interface_extends:us.paskin.mastery.Schedule)
+      // @@protoc_insertion_point(interface_extends:us.paskin.mastery.Schedule)
           com.google.protobuf.MessageOrBuilder {
 
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
      */
     boolean hasName();
-
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
@@ -1850,38 +1988,36 @@ public final class Proto {
 
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
      */
     com.google.protobuf.ByteString
-    getNameBytes();
+        getNameBytes();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
-    java.util.List<us.paskin.mastery.Proto.Schedule.Slot>
-    getSlotList();
+    java.util.List<us.paskin.mastery.Proto.Schedule.Slot> 
+        getSlotList();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     us.paskin.mastery.Proto.Schedule.Slot getSlot(int index);
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     int getSlotCount();
-
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
-    java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
-    getSlotOrBuilderList();
-
+    java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder> 
+        getSlotOrBuilderList();
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
             int index);
@@ -1889,16 +2025,16 @@ public final class Proto {
 
   /**
    * Protobuf type {@code us.paskin.mastery.Schedule}
-   * <p/>
+   *
    * <pre>
    * A schedule is an abstract session: a sequence of slots, each of which has a group
    * and a duration.
    * </pre>
    */
-  public static final class Schedule extends
-          com.google.protobuf.GeneratedMessage implements
-          // @@protoc_insertion_point(message_implements:us.paskin.mastery.Schedule)
-          ScheduleOrBuilder {
+  public  static final class Schedule extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:us.paskin.mastery.Schedule)
+      ScheduleOrBuilder {
     // Use Schedule.newBuilder() to construct.
     private Schedule(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1917,11 +2053,11 @@ public final class Proto {
 
     private Schedule(
             com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
       this();
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-              com.google.protobuf.UnknownFieldSet.newBuilder();
+          com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
         boolean done = false;
         while (!done) {
@@ -1932,7 +2068,7 @@ public final class Proto {
               break;
             default: {
               if (!parseUnknownField(input, unknownFields,
-                      extensionRegistry, tag)) {
+                                     extensionRegistry, tag)) {
                 done = true;
               }
               break;
@@ -1957,8 +2093,8 @@ public final class Proto {
         throw new RuntimeException(e.setUnfinishedMessage(this));
       } catch (java.io.IOException e) {
         throw new RuntimeException(
-                new com.google.protobuf.InvalidProtocolBufferException(
-                        e.getMessage()).setUnfinishedMessage(this));
+            new com.google.protobuf.InvalidProtocolBufferException(
+                e.getMessage()).setUnfinishedMessage(this));
       } finally {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           slot_ = java.util.Collections.unmodifiableList(slot_);
@@ -1969,7 +2105,7 @@ public final class Proto {
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
-    getDescriptor() {
+        getDescriptor() {
       return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_descriptor;
     }
 
@@ -1981,14 +2117,13 @@ public final class Proto {
     }
 
     public interface SlotOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:us.paskin.mastery.Schedule.Slot)
-            com.google.protobuf.MessageOrBuilder {
+        // @@protoc_insertion_point(interface_extends:us.paskin.mastery.Schedule.Slot)
+        com.google.protobuf.MessageOrBuilder {
 
       /**
        * <code>optional int64 group_id = 1;</code>
        */
       boolean hasGroupId();
-
       /**
        * <code>optional int64 group_id = 1;</code>
        */
@@ -1998,7 +2133,6 @@ public final class Proto {
        * <code>optional int32 duration_in_secs = 2;</code>
        */
       boolean hasDurationInSecs();
-
       /**
        * <code>optional int32 duration_in_secs = 2;</code>
        */
@@ -2007,15 +2141,15 @@ public final class Proto {
 
     /**
      * Protobuf type {@code us.paskin.mastery.Schedule.Slot}
-     * <p/>
+     *
      * <pre>
      * The slots in this schedule that must be filled by items.
      * </pre>
      */
-    public static final class Slot extends
-            com.google.protobuf.GeneratedMessage implements
-            // @@protoc_insertion_point(message_implements:us.paskin.mastery.Schedule.Slot)
-            SlotOrBuilder {
+    public  static final class Slot extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:us.paskin.mastery.Schedule.Slot)
+        SlotOrBuilder {
       // Use Slot.newBuilder() to construct.
       private Slot(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
@@ -2034,11 +2168,11 @@ public final class Proto {
 
       private Slot(
               com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry) {
         this();
         int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                com.google.protobuf.UnknownFieldSet.newBuilder();
+            com.google.protobuf.UnknownFieldSet.newBuilder();
         try {
           boolean done = false;
           while (!done) {
@@ -2049,7 +2183,7 @@ public final class Proto {
                 break;
               default: {
                 if (!parseUnknownField(input, unknownFields,
-                        extensionRegistry, tag)) {
+                                       extensionRegistry, tag)) {
                   done = true;
                 }
                 break;
@@ -2070,8 +2204,8 @@ public final class Proto {
           throw new RuntimeException(e.setUnfinishedMessage(this));
         } catch (java.io.IOException e) {
           throw new RuntimeException(
-                  new com.google.protobuf.InvalidProtocolBufferException(
-                          e.getMessage()).setUnfinishedMessage(this));
+              new com.google.protobuf.InvalidProtocolBufferException(
+                      e.getMessage()).setUnfinishedMessage(this));
         } finally {
           this.unknownFields = unknownFields.build();
           makeExtensionsImmutable();
@@ -2079,28 +2213,26 @@ public final class Proto {
       }
 
       public static final com.google.protobuf.Descriptors.Descriptor
-      getDescriptor() {
+          getDescriptor() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_Slot_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_Slot_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        us.paskin.mastery.Proto.Schedule.Slot.class, us.paskin.mastery.Proto.Schedule.Slot.Builder.class);
+            .ensureFieldAccessorsInitialized(
+                us.paskin.mastery.Proto.Schedule.Slot.class, us.paskin.mastery.Proto.Schedule.Slot.Builder.class);
       }
 
       private int bitField0_;
       public static final int GROUP_ID_FIELD_NUMBER = 1;
       private long groupId_;
-
       /**
        * <code>optional int64 group_id = 1;</code>
        */
       public boolean hasGroupId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional int64 group_id = 1;</code>
        */
@@ -2110,14 +2242,12 @@ public final class Proto {
 
       public static final int DURATION_IN_SECS_FIELD_NUMBER = 2;
       private int durationInSecs_;
-
       /**
        * <code>optional int32 duration_in_secs = 2;</code>
        */
       public boolean hasDurationInSecs() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional int32 duration_in_secs = 2;</code>
        */
@@ -2126,7 +2256,6 @@ public final class Proto {
       }
 
       private byte memoizedIsInitialized = -1;
-
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized == 1) return true;
@@ -2137,7 +2266,7 @@ public final class Proto {
       }
 
       public void writeTo(com.google.protobuf.CodedOutputStream output)
-              throws java.io.IOException {
+                          throws java.io.IOException {
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           output.writeInt64(1, groupId_);
         }
@@ -2154,11 +2283,11 @@ public final class Proto {
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-                  .computeInt64Size(1, groupId_);
+            .computeInt64Size(1, groupId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
-                  .computeInt32Size(2, durationInSecs_);
+            .computeInt32Size(2, durationInSecs_);
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -2166,13 +2295,11 @@ public final class Proto {
       }
 
       private static final long serialVersionUID = 0L;
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseFrom(
               com.google.protobuf.ByteString data)
               throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseFrom(
               com.google.protobuf.ByteString data,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2184,11 +2311,10 @@ public final class Proto {
               throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseFrom(
-              byte[] data,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws com.google.protobuf.InvalidProtocolBufferException {
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
       }
 
@@ -2196,11 +2322,10 @@ public final class Proto {
               throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseFrom(
               java.io.InputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          throws java.io.IOException {
         return PARSER.parseFrom(input, extensionRegistry);
       }
 
@@ -2208,11 +2333,10 @@ public final class Proto {
               throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input);
       }
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseDelimitedFrom(
-              java.io.InputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
 
@@ -2221,18 +2345,14 @@ public final class Proto {
               throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static us.paskin.mastery.Proto.Schedule.Slot parseFrom(
               com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
         return PARSER.parseFrom(input, extensionRegistry);
       }
 
-      public Builder newBuilderForType() {
-        return newBuilder();
-      }
-
+      public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder() {
         return DEFAULT_INSTANCE.toBuilder();
       }
@@ -2243,37 +2363,37 @@ public final class Proto {
 
       public Builder toBuilder() {
         return this == DEFAULT_INSTANCE
-                ? new Builder() : new Builder().mergeFrom(this);
+            ? new Builder() : new Builder().mergeFrom(this);
       }
 
       @java.lang.Override
       protected Builder newBuilderForType(
-              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
 
       /**
        * Protobuf type {@code us.paskin.mastery.Schedule.Slot}
-       * <p/>
+       *
        * <pre>
        * The slots in this schedule that must be filled by items.
        * </pre>
        */
       public static final class Builder extends
-              com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-              // @@protoc_insertion_point(builder_implements:us.paskin.mastery.Schedule.Slot)
-              us.paskin.mastery.Proto.Schedule.SlotOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:us.paskin.mastery.Schedule.Slot)
+          us.paskin.mastery.Proto.Schedule.SlotOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+            getDescriptor() {
           return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_Slot_descriptor;
         }
 
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
           return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_Slot_fieldAccessorTable
-                  .ensureFieldAccessorsInitialized(
-                          us.paskin.mastery.Proto.Schedule.Slot.class, us.paskin.mastery.Proto.Schedule.Slot.Builder.class);
+              .ensureFieldAccessorsInitialized(
+                  us.paskin.mastery.Proto.Schedule.Slot.class, us.paskin.mastery.Proto.Schedule.Slot.Builder.class);
         }
 
         // Construct using us.paskin.mastery.Proto.Schedule.Slot.newBuilder()
@@ -2282,16 +2402,14 @@ public final class Proto {
         }
 
         private Builder(
-                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
-
         private void maybeForceBuilderInitialization() {
           if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           }
         }
-
         public Builder clear() {
           super.clear();
           groupId_ = 0L;
@@ -2302,7 +2420,7 @@ public final class Proto {
         }
 
         public com.google.protobuf.Descriptors.Descriptor
-        getDescriptorForType() {
+            getDescriptorForType() {
           return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_Slot_descriptor;
         }
 
@@ -2337,7 +2455,7 @@ public final class Proto {
 
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof us.paskin.mastery.Proto.Schedule.Slot) {
-            return mergeFrom((us.paskin.mastery.Proto.Schedule.Slot) other);
+            return mergeFrom((us.paskin.mastery.Proto.Schedule.Slot)other);
           } else {
             super.mergeFrom(other);
             return this;
@@ -2362,9 +2480,9 @@ public final class Proto {
         }
 
         public Builder mergeFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
           us.paskin.mastery.Proto.Schedule.Slot parsedMessage = null;
           try {
             parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
@@ -2378,25 +2496,21 @@ public final class Proto {
           }
           return this;
         }
-
         private int bitField0_;
 
-        private long groupId_;
-
+        private long groupId_ ;
         /**
          * <code>optional int64 group_id = 1;</code>
          */
         public boolean hasGroupId() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-
         /**
          * <code>optional int64 group_id = 1;</code>
          */
         public long getGroupId() {
           return groupId_;
         }
-
         /**
          * <code>optional int64 group_id = 1;</code>
          */
@@ -2417,22 +2531,19 @@ public final class Proto {
           return this;
         }
 
-        private int durationInSecs_;
-
+        private int durationInSecs_ ;
         /**
          * <code>optional int32 duration_in_secs = 2;</code>
          */
         public boolean hasDurationInSecs() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-
         /**
          * <code>optional int32 duration_in_secs = 2;</code>
          */
         public int getDurationInSecs() {
           return durationInSecs_;
         }
-
         /**
          * <code>optional int32 duration_in_secs = 2;</code>
          */
@@ -2442,7 +2553,6 @@ public final class Proto {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional int32 duration_in_secs = 2;</code>
          */
@@ -2471,16 +2581,16 @@ public final class Proto {
       public static final com.google.protobuf.Parser<Slot>
               PARSER = new com.google.protobuf.AbstractParser<Slot>() {
         public Slot parsePartialFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
                 throws com.google.protobuf.InvalidProtocolBufferException {
           try {
             return new Slot(input, extensionRegistry);
           } catch (RuntimeException e) {
             if (e.getCause() instanceof
-                    com.google.protobuf.InvalidProtocolBufferException) {
+                com.google.protobuf.InvalidProtocolBufferException) {
               throw (com.google.protobuf.InvalidProtocolBufferException)
-                      e.getCause();
+                  e.getCause();
             }
             throw e;
           }
@@ -2505,10 +2615,9 @@ public final class Proto {
     private int bitField0_;
     public static final int NAME_FIELD_NUMBER = 1;
     private volatile java.lang.Object name_;
-
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
@@ -2516,10 +2625,9 @@ public final class Proto {
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
@@ -2529,8 +2637,8 @@ public final class Proto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
-                (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           name_ = s;
@@ -2538,21 +2646,20 @@ public final class Proto {
         return s;
       }
     }
-
     /**
      * <code>optional string name = 1;</code>
-     * <p/>
+     *
      * <pre>
      * The name of this schedule.  This must be non-empty.
      * </pre>
      */
     public com.google.protobuf.ByteString
-    getNameBytes() {
+        getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-                com.google.protobuf.ByteString.copyFromUtf8(
-                        (java.lang.String) ref);
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
         name_ = b;
         return b;
       } else {
@@ -2564,44 +2671,40 @@ public final class Proto {
     private java.util.List<us.paskin.mastery.Proto.Schedule.Slot> slot_;
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     public java.util.List<us.paskin.mastery.Proto.Schedule.Slot> getSlotList() {
       return slot_;
     }
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     public java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
     getSlotOrBuilderList() {
       return slot_;
     }
-
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     public int getSlotCount() {
       return slot_.size();
     }
-
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     public us.paskin.mastery.Proto.Schedule.Slot getSlot(int index) {
       return slot_.get(index);
     }
-
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
      */
     public us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
-            int index) {
+        int index) {
       return slot_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
-
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -2612,7 +2715,7 @@ public final class Proto {
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
+                        throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 1, name_);
       }
@@ -2646,11 +2749,10 @@ public final class Proto {
             throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-
     public static us.paskin.mastery.Proto.Schedule parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
@@ -2658,23 +2760,21 @@ public final class Proto {
             throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-
     public static us.paskin.mastery.Proto.Schedule parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
     public static us.paskin.mastery.Proto.Schedule parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-
     public static us.paskin.mastery.Proto.Schedule parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
@@ -2682,11 +2782,10 @@ public final class Proto {
             throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-
     public static us.paskin.mastery.Proto.Schedule parseDelimitedFrom(
             java.io.InputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
 
@@ -2697,39 +2796,34 @@ public final class Proto {
     }
 
     public static us.paskin.mastery.Proto.Schedule parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
-    public Builder newBuilderForType() {
-      return newBuilder();
-    }
-
+    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-
     public static Builder newBuilder(us.paskin.mastery.Proto.Schedule prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
-              ? new Builder() : new Builder().mergeFrom(this);
+          ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
     protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
 
     /**
      * Protobuf type {@code us.paskin.mastery.Schedule}
-     * <p/>
+     *
      * <pre>
      * A schedule is an abstract session: a sequence of slots, each of which has a group
      * and a duration.
@@ -2737,18 +2831,18 @@ public final class Proto {
      */
     public static final class Builder extends
             com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:us.paskin.mastery.Schedule)
-            us.paskin.mastery.Proto.ScheduleOrBuilder {
+        // @@protoc_insertion_point(builder_implements:us.paskin.mastery.Schedule)
+        us.paskin.mastery.Proto.ScheduleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
-      getDescriptor() {
+          getDescriptor() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        us.paskin.mastery.Proto.Schedule.class, us.paskin.mastery.Proto.Schedule.Builder.class);
+            .ensureFieldAccessorsInitialized(
+                    us.paskin.mastery.Proto.Schedule.class, us.paskin.mastery.Proto.Schedule.Builder.class);
       }
 
       // Construct using us.paskin.mastery.Proto.Schedule.newBuilder()
@@ -2757,17 +2851,15 @@ public final class Proto {
       }
 
       private Builder(
-              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
-
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getSlotFieldBuilder();
         }
       }
-
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -2782,7 +2874,7 @@ public final class Proto {
       }
 
       public com.google.protobuf.Descriptors.Descriptor
-      getDescriptorForType() {
+          getDescriptorForType() {
         return us.paskin.mastery.Proto.internal_static_us_paskin_mastery_Schedule_descriptor;
       }
 
@@ -2822,7 +2914,7 @@ public final class Proto {
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof us.paskin.mastery.Proto.Schedule) {
-          return mergeFrom((us.paskin.mastery.Proto.Schedule) other);
+          return mergeFrom((us.paskin.mastery.Proto.Schedule)other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -2854,9 +2946,9 @@ public final class Proto {
               slotBuilder_ = null;
               slot_ = other.slot_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              slotBuilder_ =
-                      com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                              getSlotFieldBuilder() : null;
+              slotBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getSlotFieldBuilder() : null;
             } else {
               slotBuilder_.addAllMessages(other.slot_);
             }
@@ -2872,9 +2964,9 @@ public final class Proto {
       }
 
       public Builder mergeFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
         us.paskin.mastery.Proto.Schedule parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
@@ -2888,14 +2980,12 @@ public final class Proto {
         }
         return this;
       }
-
       private int bitField0_;
 
       private java.lang.Object name_ = "";
-
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
@@ -2903,10 +2993,9 @@ public final class Proto {
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
@@ -2915,7 +3004,7 @@ public final class Proto {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
-                  (com.google.protobuf.ByteString) ref;
+              (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             name_ = s;
@@ -2925,21 +3014,20 @@ public final class Proto {
           return (java.lang.String) ref;
         }
       }
-
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
        */
       public com.google.protobuf.ByteString
-      getNameBytes() {
+          getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b =
                   com.google.protobuf.ByteString.copyFromUtf8(
-                          (java.lang.String) ref);
+                  (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
@@ -2949,25 +3037,24 @@ public final class Proto {
 
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
        */
       public Builder setName(
-              java.lang.String value) {
+          java.lang.String value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000001;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
@@ -2981,25 +3068,24 @@ public final class Proto {
 
       /**
        * <code>optional string name = 1;</code>
-       * <p/>
+       *
        * <pre>
        * The name of this schedule.  This must be non-empty.
        * </pre>
        */
       public Builder setNameBytes(
-              com.google.protobuf.ByteString value) {
+          com.google.protobuf.ByteString value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000001;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
         return this;
       }
 
       private java.util.List<us.paskin.mastery.Proto.Schedule.Slot> slot_ =
-              java.util.Collections.emptyList();
-
+        java.util.Collections.emptyList();
       private void ensureSlotIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
           slot_ = new java.util.ArrayList<us.paskin.mastery.Proto.Schedule.Slot>(slot_);
@@ -3008,10 +3094,10 @@ public final class Proto {
       }
 
       private com.google.protobuf.RepeatedFieldBuilder<
-              us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder> slotBuilder_;
+          us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder> slotBuilder_;
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public java.util.List<us.paskin.mastery.Proto.Schedule.Slot> getSlotList() {
         if (slotBuilder_ == null) {
@@ -3022,7 +3108,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public int getSlotCount() {
         if (slotBuilder_ == null) {
@@ -3031,9 +3117,8 @@ public final class Proto {
           return slotBuilder_.getCount();
         }
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot getSlot(int index) {
         if (slotBuilder_ == null) {
@@ -3042,12 +3127,11 @@ public final class Proto {
           return slotBuilder_.getMessage(index);
         }
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder setSlot(
-              int index, us.paskin.mastery.Proto.Schedule.Slot value) {
+          int index, us.paskin.mastery.Proto.Schedule.Slot value) {
         if (slotBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -3060,12 +3144,11 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder setSlot(
-              int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
+          int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
         if (slotBuilder_ == null) {
           ensureSlotIsMutable();
           slot_.set(index, builderForValue.build());
@@ -3075,9 +3158,8 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder addSlot(us.paskin.mastery.Proto.Schedule.Slot value) {
         if (slotBuilder_ == null) {
@@ -3092,12 +3174,11 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder addSlot(
-              int index, us.paskin.mastery.Proto.Schedule.Slot value) {
+          int index, us.paskin.mastery.Proto.Schedule.Slot value) {
         if (slotBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -3110,12 +3191,11 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder addSlot(
-              us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
+          us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
         if (slotBuilder_ == null) {
           ensureSlotIsMutable();
           slot_.add(builderForValue.build());
@@ -3125,12 +3205,11 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder addSlot(
-              int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
+          int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
         if (slotBuilder_ == null) {
           ensureSlotIsMutable();
           slot_.add(index, builderForValue.build());
@@ -3140,25 +3219,23 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder addAllSlot(
-              java.lang.Iterable<? extends us.paskin.mastery.Proto.Schedule.Slot> values) {
+          java.lang.Iterable<? extends us.paskin.mastery.Proto.Schedule.Slot> values) {
         if (slotBuilder_ == null) {
           ensureSlotIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                  values, slot_);
+              values, slot_);
           onChanged();
         } else {
           slotBuilder_.addAllMessages(values);
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder clearSlot() {
         if (slotBuilder_ == null) {
@@ -3170,9 +3247,8 @@ public final class Proto {
         }
         return this;
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public Builder removeSlot(int index) {
         if (slotBuilder_ == null) {
@@ -3186,15 +3262,14 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder getSlotBuilder(
-              int index) {
+          int index) {
         return getSlotFieldBuilder().getBuilder(index);
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
               int index) {
@@ -3204,9 +3279,8 @@ public final class Proto {
           return slotBuilder_.getMessageOrBuilder(index);
         }
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
       getSlotOrBuilderList() {
@@ -3218,36 +3292,34 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder addSlotBuilder() {
         return getSlotFieldBuilder().addBuilder(
-                us.paskin.mastery.Proto.Schedule.Slot.getDefaultInstance());
+            us.paskin.mastery.Proto.Schedule.Slot.getDefaultInstance());
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder addSlotBuilder(
               int index) {
         return getSlotFieldBuilder().addBuilder(
                 index, us.paskin.mastery.Proto.Schedule.Slot.getDefaultInstance());
       }
-
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
        */
       public java.util.List<us.paskin.mastery.Proto.Schedule.Slot.Builder>
       getSlotBuilderList() {
         return getSlotFieldBuilder().getBuilderList();
       }
-
       private com.google.protobuf.RepeatedFieldBuilder<
               us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
       getSlotFieldBuilder() {
         if (slotBuilder_ == null) {
           slotBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-                  us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder>(
+              us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder>(
                   slot_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -3277,14 +3349,14 @@ public final class Proto {
       public Schedule parsePartialFrom(
               com.google.protobuf.CodedInputStream input,
               com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws com.google.protobuf.InvalidProtocolBufferException {
+          throws com.google.protobuf.InvalidProtocolBufferException {
         try {
           return new Schedule(input, extensionRegistry);
         } catch (RuntimeException e) {
           if (e.getCause() instanceof
-                  com.google.protobuf.InvalidProtocolBufferException) {
+              com.google.protobuf.InvalidProtocolBufferException) {
             throw (com.google.protobuf.InvalidProtocolBufferException)
-                    e.getCause();
+                e.getCause();
           }
           throw e;
         }
@@ -3307,9 +3379,9 @@ public final class Proto {
   }
 
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_us_paskin_mastery_Skill_descriptor;
+          internal_static_us_paskin_mastery_Skill_descriptor;
   private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internal_static_us_paskin_mastery_Skill_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
           internal_static_us_paskin_mastery_SkillGroup_descriptor;
@@ -3320,53 +3392,53 @@ public final class Proto {
           internal_static_us_paskin_mastery_Schedule_descriptor;
   private static
   com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internal_static_us_paskin_mastery_Schedule_fieldAccessorTable;
+      internal_static_us_paskin_mastery_Schedule_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
           internal_static_us_paskin_mastery_Schedule_Slot_descriptor;
   private static
-  com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_us_paskin_mastery_Schedule_Slot_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
   getDescriptor() {
     return descriptor;
   }
-
   private static com.google.protobuf.Descriptors.FileDescriptor
-          descriptor;
+      descriptor;
 
   static {
     java.lang.String[] descriptorData = {
             "\n\035us/paskin/mastery/skill.proto\022\021us.pask" +
-                    "in.mastery\"Z\n\005Skill\022\014\n\004name\030\001 \001(\t\022\033\n\023dat" +
-      "e_last_practiced\030\002 \001(\004\022\024\n\010priority\030\003 \001(\005" +
-      ":\00210\022\020\n\010group_id\030\004 \003(\003\"9\n\nSkillGroup\022\n\n\002" +
-                    "id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022\021\n\tparent_id\030\003 \003(" +
-      "\003\"|\n\010Schedule\022\014\n\004name\030\001 \001(\t\022.\n\004slot\030\002 \003(" +
-                    "\0132 .us.paskin.mastery.Schedule.Slot\0322\n\004S" +
-                    "lot\022\020\n\010group_id\030\001 \001(\003\022\030\n\020duration_in_sec" +
-      "s\030\002 \001(\005B\032\n\021us.paskin.masteryB\005Proto"
+                    "in.mastery\"u\n\005Skill\022\014\n\004name\030\001 \001(\t\022\033\n\023dat" +
+                    "e_last_practiced\030\002 \001(\004\022\024\n\010priority\030\003 \001(\005" +
+                    ":\00210\022\020\n\010group_id\030\004 \003(\003\022\031\n\021seconds_practi" +
+                    "ced\030\005 \001(\004\"9\n\nSkillGroup\022\n\n\002id\030\001 \001(\003\022\014\n\004n" +
+                    "ame\030\002 \001(\t\022\021\n\tparent_id\030\003 \003(\003\"|\n\010Schedule" +
+      "\022\014\n\004name\030\001 \001(\t\022.\n\004slot\030\002 \003(\0132 .us.paskin" +
+      ".mastery.Schedule.Slot\0322\n\004Slot\022\020\n\010group_" +
+      "id\030\001 \001(\003\022\030\n\020duration_in_secs\030\002 \001(\005B\032\n\021us" +
+      ".paskin.masteryB\005Proto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
           public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
+                  com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;
           }
         };
     com.google.protobuf.Descriptors.FileDescriptor
-            .internalBuildGeneratedFileFrom(descriptorData,
-                    new com.google.protobuf.Descriptors.FileDescriptor[]{
-                    }, assigner);
+      .internalBuildGeneratedFileFrom(descriptorData,
+              new com.google.protobuf.Descriptors.FileDescriptor[]{
+              }, assigner);
     internal_static_us_paskin_mastery_Skill_descriptor =
             getDescriptor().getMessageTypes().get(0);
     internal_static_us_paskin_mastery_Skill_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-            internal_static_us_paskin_mastery_Skill_descriptor,
-            new java.lang.String[]{"Name", "DateLastPracticed", "Priority", "GroupId",});
+        internal_static_us_paskin_mastery_Skill_descriptor,
+        new java.lang.String[] { "Name", "DateLastPracticed", "Priority", "GroupId", "SecondsPracticed", });
     internal_static_us_paskin_mastery_SkillGroup_descriptor =
-            getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(1);
     internal_static_us_paskin_mastery_SkillGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_us_paskin_mastery_SkillGroup_descriptor,

@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -156,6 +157,9 @@ public class Model {
                 throw new IllegalArgumentException("Skill in invalid group");
             }
         }
+        if (skill.hasDateLastPracticed() && skill.getDateLastPracticed() < 0) {
+            throw new IllegalArgumentException("date last practiced is negative");
+        }
     }
 
     // The ID of the skill is returned.
@@ -221,7 +225,8 @@ public class Model {
         if (!skill.hasDateLastPracticed()) {
             return resources.getString(R.string.last_practiced_never);
         }
-        final long millis = new Date().getTime() - new Date(skill.getDateLastPracticed()).getTime();
+        final long millis = new Date().getTime()
+                - new Date(TimeUnit.SECONDS.toMillis(skill.getDateLastPracticed())).getTime();
         final long diffInDays = TimeUnit.MILLISECONDS.toDays(millis);
         if (diffInDays == 0) {
             return resources.getString(R.string.last_practiced_recently);
@@ -235,6 +240,25 @@ public class Model {
             return resources.getQuantityString(R.plurals.last_practiced_weeks, (int) diffInWeeks, (int) diffInWeeks);
         }
         return resources.getQuantityString(R.plurals.last_practiced_months, (int) diffInMonths, (int) diffInMonths);
+    }
+
+    /**
+     * Returns a localized string like "Practiced for 4 hours" or null if it has not been practiced.
+     *
+     * @param skill
+     * @param resources
+     * @return
+     */
+    public static
+    @Nullable
+    String getDurationPracticedText(Skill skill, Resources resources) {
+        if (!skill.hasSecondsPracticed()) {
+            return null;
+        } else {
+            DateUtils dateUtils = new DateUtils();
+            return String.format(resources.getString(R.string.duration_practiced_text),
+                    DateUtils.formatElapsedTime(skill.getSecondsPracticed()));
+        }
     }
 
     // Returns a cursor with two columns: SkillGroupEntry._ID and SkillGroupEntry.COLUMN_NAME_PROTO.
@@ -406,17 +430,20 @@ public class Model {
                 .build());
 
         // Add skills
+        final long dateInSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
         addSkill(Skill.newBuilder()
                 .setName("Carcassi Op. 60 No. 7")
-                .setDateLastPracticed(new Date().getTime() - TimeUnit.DAYS.toMillis(2))
+                .setDateLastPracticed(dateInSecs - TimeUnit.DAYS.toSeconds(2))
                 .setPriority(6)
                 .addGroupId(1)
+                .setSecondsPracticed(345)
                 .build());
         addSkill(Skill.newBuilder()
                 .setName("Shearer Scale p. 253")
-                .setDateLastPracticed(new Date().getTime() - TimeUnit.HOURS.toMillis(7))
+                .setDateLastPracticed(dateInSecs - TimeUnit.HOURS.toSeconds(7))
                 .setPriority(2)
                 .addGroupId(-1)
+                .setSecondsPracticed(34)
                 .build());
 
         // Add a schedule
