@@ -43,9 +43,7 @@ public class Model {
 
     public static synchronized Model getInstance(Context context) {
         if (singleton == null) {
-            context.deleteDatabase(DatabaseOpenHelper.DATABASE_NAME); // TODO: remove
             singleton = new Model(context);
-            singleton.initWithFakeData();  // TODO remove
         }
         return singleton;
     }

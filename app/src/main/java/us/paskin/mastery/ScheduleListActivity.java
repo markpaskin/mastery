@@ -42,7 +42,8 @@ public class ScheduleListActivity extends DrawerActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
+        // Override the title, which was set to the app title in the manifest so it looks right in the launcher.
+        toolbar.setTitle(getResources().getString(R.string.title_schedule_list));
         super.onCreateDrawer();
 
         View recyclerView = findViewById(R.id.schedule_list);

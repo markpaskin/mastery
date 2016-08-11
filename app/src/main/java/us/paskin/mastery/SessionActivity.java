@@ -306,7 +306,6 @@ public class SessionActivity extends AppCompatActivity {
             final int secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
             long skillId = session.getSlotList().get(curSlotIndex).getSkillId();
             model.addPracticeSecondsToSkill(secondsPracticed, skillId);
-            Toast.makeText(getApplicationContext(), R.string.updated_duration_practiced, Toast.LENGTH_SHORT).show();
             storedDurations[curSlotIndex] += secondsPracticed;
         }
         practicingSince = null;
@@ -315,8 +314,9 @@ public class SessionActivity extends AppCompatActivity {
     synchronized void handlePrevButtonClick(View view) {
         if (curSlotIndex < 1) throw new InternalError("prev from first");
         pause();
+        slotViewList.get(curSlotIndex).setBackgroundResource(0);
         curSlotIndex -= 1;
-        play();
+        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
         if (curSlotIndex == 0) prevButton.setEnabled(false);
         nextButton.setEnabled(true);
     }
@@ -325,8 +325,9 @@ public class SessionActivity extends AppCompatActivity {
         int numSlots = session.getSlotList().size();
         if (curSlotIndex >= numSlots) throw new InternalError("next from last");
         pause();
+        slotViewList.get(curSlotIndex).setBackgroundResource(0);
         curSlotIndex += 1;
-        play();
+        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
         if (curSlotIndex == numSlots - 1) nextButton.setEnabled(false);
         prevButton.setEnabled(true);
     }
@@ -492,6 +493,8 @@ public class SessionActivity extends AppCompatActivity {
             groupNameTextView.setText(model.getSkillGroupById(slot.getScheduleSlot().getGroupId()).getName());
             container.addView(slotView);
         }
+        slotViewList.get(curSlotIndex).setBackgroundResource(R.drawable.current_slot_border);
+
         TextView totalDurationTextView = (TextView) findViewById(R.id.total_duration);
 
         final int totalDurationInMinutes = (int) TimeUnit.SECONDS.toMinutes(totalDurationInSecs);
