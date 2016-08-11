@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="highlight_background">#FFFBCC</color>
     <color name="error_background">#FFCCCC</color>
+    <color name="playing_slot_background">#CCFFCC</color>
     <color name="background">#FFFFFF</color>
     <color name="deemphasized_text">#555555</color>
 </resources>

@@ -197,6 +197,16 @@ public class Model {
     }
 
     /**
+     * Updates the model to reflect that the skill has been practiced for an additional amount of time.
+     */
+    public synchronized void addPracticeSecondsToSkill(int seconds, long skillId) {
+        Skill.Builder skillBuilder = getSkillById(skillId).toBuilder();
+        skillBuilder.setSecondsPracticed(skillBuilder.getSecondsPracticed() + seconds)
+                .setDateLastPracticed(TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()));
+        updateSkill(skillId, skillBuilder.build());
+    }
+
+    /**
      * Deletes a skill from the database.
      *
      * @param id the ID of the skill to delete.  Throws IllegalArgumentException if this is invalid.

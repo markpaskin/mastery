@@ -119,4 +119,7 @@
     <string name="next_button_text">Next</string>
     <string name="prev_button_text">Previous</string>
 
+    <string name="next_notification_title">Time\'s up!</string>
+    <string name="next_notification_text">It\'s time to move on to the next skill.</string>
+
 </resources>
