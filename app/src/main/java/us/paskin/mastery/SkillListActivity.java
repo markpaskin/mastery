@@ -84,7 +84,7 @@ public class SkillListActivity extends DrawerActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
         final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
-        final int skillId = data.getIntExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
+        final long skillId = data.getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
         final boolean deleted = skillId == -1;
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_list);
         SimpleItemRecyclerViewAdapter adaptor =

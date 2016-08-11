@@ -15,9 +15,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/duration_label"
-        android:layout_toEndOf="@id/duration_label"
-        android:layout_alignBaseline="@id/duration_label"
+        android:layout_toRightOf="@+id/duration_label"
+        android:layout_toEndOf="@+id/duration_label"
+        android:layout_alignBaseline="@+id/duration_label"
         android:layout_margin="@dimen/text_margin"
         android:id="@+id/total_duration"
         style="@style/HeaderText" />
@@ -26,7 +26,7 @@
         android:id="@+id/session_slots_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/duration_label"
+        android:layout_below="@+id/duration_label"
         android:divider="@drawable/divider"
         android:orientation="vertical"
         android:showDividers="middle"

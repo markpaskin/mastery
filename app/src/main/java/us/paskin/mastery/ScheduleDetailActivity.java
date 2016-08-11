@@ -164,7 +164,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 unsavedChanges = true;
                 scheduleBuilder.setName(editable.toString());
-                updateTitle(editable);
+                updateTitle(editable.toString());
             }
         });
 
@@ -424,7 +424,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * Updates the title.
      */
-    void updateTitle(CharSequence title) {
+    void updateTitle(String title) {
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) appBarLayout.setTitle(title);
     }

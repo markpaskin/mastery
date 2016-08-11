@@ -131,7 +131,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        EditText nameEditText = ((EditText) findViewById(R.id.skill_name));
+        EditText nameEditText = ((EditText) findViewById(R.id.skill_name_edit_text));
         TextView lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
 
         // Hide the last practiced text if we're adding a new skill.
@@ -165,8 +165,9 @@ public class SkillDetailActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 unsavedChanges = true;
-                skillBuilder.setName(editable.toString());
-                updateTitle(editable);
+                String name = editable.toString();
+                skillBuilder.setName(name);
+                updateTitle(name);
             }
         });
         practicePriorityPicker.setOnValueChangedListener(
@@ -335,7 +336,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     /**
      * Updates the title.
      */
-    void updateTitle(CharSequence title) {
+    void updateTitle(String title) {
         CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) appBarLayout.setTitle(title);
     }
