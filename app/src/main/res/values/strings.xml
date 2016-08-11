@@ -108,5 +108,8 @@
     <string name="no_slot_group_title">Missing skill group</string>
     <string name="no_slot_group_detail">Every slot must have a skill group.</string>
     <string name="title_activity_session">SessionActivity</string>
+    <string name="slot_not_filled">No skills in this group</string>
+    <string name="duration">Duration:</string>
+    <string name="session_activity_title">Practice session</string>
 
 </resources>

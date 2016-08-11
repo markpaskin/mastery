@@ -1859,29 +1859,29 @@ public final class Proto {
     getNameBytes();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     java.util.List<us.paskin.mastery.Proto.Schedule.Slot>
     getSlotList();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     us.paskin.mastery.Proto.Schedule.Slot getSlot(int index);
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     int getSlotCount();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
     getSlotOrBuilderList();
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
             int index);
@@ -2564,14 +2564,14 @@ public final class Proto {
     private java.util.List<us.paskin.mastery.Proto.Schedule.Slot> slot_;
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     public java.util.List<us.paskin.mastery.Proto.Schedule.Slot> getSlotList() {
       return slot_;
     }
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     public java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
     getSlotOrBuilderList() {
@@ -2579,21 +2579,21 @@ public final class Proto {
     }
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     public int getSlotCount() {
       return slot_.size();
     }
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     public us.paskin.mastery.Proto.Schedule.Slot getSlot(int index) {
       return slot_.get(index);
     }
 
     /**
-     * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+     * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
      */
     public us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
             int index) {
@@ -3011,7 +3011,7 @@ public final class Proto {
               us.paskin.mastery.Proto.Schedule.Slot, us.paskin.mastery.Proto.Schedule.Slot.Builder, us.paskin.mastery.Proto.Schedule.SlotOrBuilder> slotBuilder_;
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public java.util.List<us.paskin.mastery.Proto.Schedule.Slot> getSlotList() {
         if (slotBuilder_ == null) {
@@ -3022,7 +3022,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public int getSlotCount() {
         if (slotBuilder_ == null) {
@@ -3033,7 +3033,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot getSlot(int index) {
         if (slotBuilder_ == null) {
@@ -3044,7 +3044,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder setSlot(
               int index, us.paskin.mastery.Proto.Schedule.Slot value) {
@@ -3062,7 +3062,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder setSlot(
               int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
@@ -3077,7 +3077,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder addSlot(us.paskin.mastery.Proto.Schedule.Slot value) {
         if (slotBuilder_ == null) {
@@ -3094,7 +3094,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder addSlot(
               int index, us.paskin.mastery.Proto.Schedule.Slot value) {
@@ -3112,7 +3112,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder addSlot(
               us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
@@ -3127,7 +3127,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder addSlot(
               int index, us.paskin.mastery.Proto.Schedule.Slot.Builder builderForValue) {
@@ -3142,7 +3142,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder addAllSlot(
               java.lang.Iterable<? extends us.paskin.mastery.Proto.Schedule.Slot> values) {
@@ -3158,7 +3158,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder clearSlot() {
         if (slotBuilder_ == null) {
@@ -3172,7 +3172,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public Builder removeSlot(int index) {
         if (slotBuilder_ == null) {
@@ -3186,7 +3186,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder getSlotBuilder(
               int index) {
@@ -3194,7 +3194,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.SlotOrBuilder getSlotOrBuilder(
               int index) {
@@ -3206,7 +3206,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public java.util.List<? extends us.paskin.mastery.Proto.Schedule.SlotOrBuilder>
       getSlotOrBuilderList() {
@@ -3218,7 +3218,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder addSlotBuilder() {
         return getSlotFieldBuilder().addBuilder(
@@ -3226,7 +3226,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public us.paskin.mastery.Proto.Schedule.Slot.Builder addSlotBuilder(
               int index) {
@@ -3235,7 +3235,7 @@ public final class Proto {
       }
 
       /**
-       * <code>repeated .us.paskin.mastery.Schedule.Slot slot = 2;</code>
+       * <code>repeated .us.paskin.mastery.Schedule.Slot schedule_slot = 2;</code>
        */
       public java.util.List<us.paskin.mastery.Proto.Schedule.Slot.Builder>
       getSlotBuilderList() {

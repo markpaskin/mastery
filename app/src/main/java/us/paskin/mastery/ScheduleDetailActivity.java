@@ -2,12 +2,10 @@ package us.paskin.mastery;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -90,7 +88,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList<Proto.Schedule.Slot.Builder>();
 
     /**
-     * A map from slot index to a TextView rendering the skill group name.
+     * A map from schedule_slot index to a TextView rendering the skill group name.
      */
     private ArrayList<TextView> slotGroupNameTextViews = new ArrayList<TextView>();
 
@@ -245,7 +243,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Launches a dialog to choose the duration of a slot.
+     * Launches a dialog to choose the duration of a schedule_slot.
      *
      * @param slotBuilder
      */
@@ -284,7 +282,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Launches a dialog to choose the skill group of the slot with the supplied index.
+     * Launches a dialog to choose the skill group of the schedule_slot with the supplied index.
      */
     void launchChooseSkillGroup(final int slotIndex) {
         Intent intent = new Intent(this, SkillGroupListActivity.class);
@@ -294,11 +292,11 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a new view which renders the slot.
+     * Creates a new view which renders the schedule_slot.
      */
     View makeSlotView(final int index, final Proto.Schedule.Slot.Builder slotBuilder) {
         LayoutInflater inflater = LayoutInflater.from(slotList.getRoot().getContext());
-        View slotView = inflater.inflate(R.layout.slot, slotList.getRoot(), false);
+        View slotView = inflater.inflate(R.layout.schedule_slot, slotList.getRoot(), false);
         TextView groupName = (TextView) slotView.findViewById(R.id.slot_group_name);
         if (index < slotGroupNameTextViews.size()) {
             slotGroupNameTextViews.set(index, groupName);
@@ -311,7 +309,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             Proto.SkillGroup skillGroup = model.getSkillGroupById(slotBuilder.getGroupId());
             groupName.setText(skillGroup.getName());
         } else {
-            // Newly added slot without initialized group.
+            // Newly added schedule_slot without initialized group.
             groupName.setText(R.string.choose_skill_group);
             groupName.setTypeface(null, Typeface.ITALIC);
             groupName.setBackgroundColor(getResources().getColor(R.color.highlight_background));

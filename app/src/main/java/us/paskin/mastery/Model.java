@@ -482,10 +482,10 @@ public class Model {
         }
         for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
             if (!slot.hasDurationInSecs() || slot.getDurationInSecs() <= 0) {
-                throw new IllegalArgumentException("non-positive slot duration");
+                throw new IllegalArgumentException("non-positive schedule_slot duration");
             }
             if (!slot.hasGroupId() || !isValidSkillGroupId(slot.getGroupId())) {
-                throw new IllegalArgumentException("slot has missing/invalid group id");
+                throw new IllegalArgumentException("schedule_slot has missing/invalid group id");
             }
         }
     }

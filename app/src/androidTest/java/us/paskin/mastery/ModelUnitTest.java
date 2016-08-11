@@ -305,7 +305,7 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
             model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
                     Proto.Schedule.Slot.newBuilder().setDurationInSecs(60)).build());
         } catch (IllegalArgumentException x) {
-            assertEquals("slot has missing/invalid group id", x.getMessage());
+            assertEquals("schedule_slot has missing/invalid group id", x.getMessage());
             return;
         }
         fail("did not throw an error");
@@ -317,7 +317,7 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
             model.addSchedule(Proto.Schedule.newBuilder().setName("S").addSlot(
                     Proto.Schedule.Slot.newBuilder().setGroupId(1).setDurationInSecs(60)).build());
         } catch (IllegalArgumentException x) {
-            assertEquals("slot has missing/invalid group id", x.getMessage());
+            assertEquals("schedule_slot has missing/invalid group id", x.getMessage());
             return;
         }
         fail("did not throw an error");
