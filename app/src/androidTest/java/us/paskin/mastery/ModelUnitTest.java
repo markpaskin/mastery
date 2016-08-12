@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashSet;
+
 /**
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
  */
@@ -213,6 +215,74 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
         assertEquals(skillGroup, retrieved);
     }
 
+    @Test
+    public void testReplaceSkillGroupReplacesInSkills() {
+        final long toReplaceGroupId = 1;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("A").setId(toReplaceGroupId).build());
+        final long replacementGroupId = 2;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("B").setId(replacementGroupId).build());
+        final long skillId = model.addSkill(
+                Proto.Skill.newBuilder().setName("C").setPriority(Model.DEFAULT_PRIORITY)
+                        .addGroupId(toReplaceGroupId).addGroupId(replacementGroupId).build());
+        model.replaceSkillGroup(toReplaceGroupId, replacementGroupId);
+        Proto.Skill skill = model.getSkillById(skillId);
+        assertEquals(1, skill.getGroupIdCount());
+        assertEquals(replacementGroupId, skill.getGroupId(0));
+    }
+
+    @Test
+    public void testReplaceSkillGroupReplacesInParents() {
+        final long toReplaceGroupId = 1;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("A").setId(toReplaceGroupId).build());
+        final long replacementGroupId = 2;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("B").setId(replacementGroupId).build());
+        final long childGroupId = 3;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("C").setId(childGroupId)
+                .addParentId(toReplaceGroupId).build());
+        model.replaceSkillGroup(toReplaceGroupId, replacementGroupId);
+        Proto.SkillGroup skillGroup = model.getSkillGroupById(childGroupId);
+        assertEquals(1, skillGroup.getParentIdCount());
+        assertEquals(replacementGroupId, skillGroup.getParentId(0));
+    }
+
+    @Test
+    public void testReplaceSkillGroupChecksCycles() {
+        final long toReplaceGroupId = 1;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("A").setId(toReplaceGroupId).build());
+        final long childGroupId = 2;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("C").setId(childGroupId)
+                .addParentId(toReplaceGroupId).build());
+        try {
+            model.replaceSkillGroup(toReplaceGroupId, childGroupId);
+        } catch (IllegalArgumentException x) {
+            assertEquals("cannot replace skill group with a descendant", x.getMessage());
+            return;
+        }
+        final long replacementGroupId = 3;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("B").setId(replacementGroupId)
+                .addParentId(childGroupId).build());
+        try {
+            model.replaceSkillGroup(toReplaceGroupId, replacementGroupId);
+        } catch (IllegalArgumentException x) {
+            assertEquals("cannot replace skill group with a descendant", x.getMessage());
+            return;
+        }
+        fail("missing expected exception");
+    }
+
+    @Test
+    public void testReplaceSkillGroupReplacesInSlots() {
+        final long toReplaceGroupId = 1;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("A").setId(toReplaceGroupId).build());
+        final long scheduleId = model.addSchedule(Proto.Schedule.newBuilder().setName("D").addSlot(
+                Proto.Schedule.Slot.newBuilder().setGroupId(toReplaceGroupId).setDurationInSecs(60).build()).build());
+        final long replacementGroupId = 3;
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("E").setId(replacementGroupId).build());
+        model.replaceSkillGroup(toReplaceGroupId, replacementGroupId);
+        Proto.Schedule schedule = model.getScheduleById(scheduleId);
+        assertEquals(replacementGroupId, schedule.getSlot(0).getGroupId());
+    }
+
     private void addFakeData() {
         // Add skill groups.  Note these must be done in reverse dependency order.
         model.addSkillGroup(Proto.SkillGroup.newBuilder()
@@ -391,20 +461,35 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
     }
 
     @Test
-    public void testInitWithData() {
-        // Add fake data.
-        addFakeData();
-        assertEquals(2, model.getSkillList().getCount());
-        assertEquals(3, model.getSkillGroupList().getCount());
-        assertTrue(model.isAncestorOf(0, -1));
-        assertFalse(model.isAncestorOf(-1, 0));
-
+    public void testAncestry() {
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("0").setId(0).build());
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("1").setId(1).addParentId(0).build());
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("2").setId(2).addParentId(1).build());
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("3").setId(3).addParentId(1).build());
+        model.addSkillGroup(Proto.SkillGroup.newBuilder().setName("4").setId(4).addParentId(2).addParentId(3).build());
+        testAncestryHelper();
         // Now rebuild the object; this should cause us to reload/reinitialize.
         model = new Model(context, TEST_DATABASE_NAME);
-        // Check that everything's in order.
-        assertEquals(2, model.getSkillList().getCount());
-        assertEquals(3, model.getSkillGroupList().getCount());
-        assertTrue(model.isAncestorOf(0, -1));
-        assertFalse(model.isAncestorOf(-1, 0));
+        testAncestryHelper();
     }
+
+    private void testAncestryHelper() {
+        assertTrue(model.isAncestorOf(0, 1));
+        assertTrue(model.isAncestorOf(1, 2));
+        assertTrue(model.isAncestorOf(1, 3));
+        assertTrue(model.isAncestorOf(1, 4));
+        assertTrue(model.isAncestorOf(2, 4));
+        assertTrue(model.isAncestorOf(3, 4));
+
+        assertFalse(model.isAncestorOf(0, 0));
+        assertFalse(model.isAncestorOf(2, 1));
+        assertFalse(model.isAncestorOf(4, 0));
+
+        assertTrue(null == model.getAncestorGroups(0));
+        assertEquals(1, model.getAncestorGroups(1).size());
+        assertEquals(2, model.getAncestorGroups(2).size());
+        assertEquals(2, model.getAncestorGroups(3).size());
+        assertEquals(4, model.getAncestorGroups(4).size());
+    }
+
 }

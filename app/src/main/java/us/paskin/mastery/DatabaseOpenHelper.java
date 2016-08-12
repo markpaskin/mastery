@@ -21,7 +21,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Skills DB statements
     private static final String SQL_CREATE_SKILLS =
             "CREATE TABLE " + DatabaseContract.SkillEntry.TABLE_NAME + " (" +
-                    DatabaseContract.SkillEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
+                    DatabaseContract.SkillEntry._ID + " INTEGER PRIMARY KEY" +
                     COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_NAME + TEXT_TYPE + UNIQUE +
                     COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
@@ -32,7 +32,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Skill groups DB statements
     private static final String SQL_CREATE_SKILL_GROUPS =
             "CREATE TABLE " + DatabaseContract.SkillGroupEntry.TABLE_NAME + " (" +
-                    DatabaseContract.SkillGroupEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
+                    DatabaseContract.SkillGroupEntry._ID + " INTEGER PRIMARY KEY" +
                     COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE + UNIQUE +
                     COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
@@ -42,8 +42,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Schedule DB statements
     private static final String SQL_CREATE_SCHEDULES =
             "CREATE TABLE " + DatabaseContract.ScheduleEntry.TABLE_NAME + " (" +
-                    DatabaseContract.ScheduleEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
-                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + UNIQUE + TEXT_TYPE +
+                    DatabaseContract.ScheduleEntry._ID + " INTEGER PRIMARY KEY" +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE + UNIQUE +
                     COMMA_SEP + DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
     private static final String SQL_DROP_SCHEDULES =

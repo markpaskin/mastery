@@ -12,9 +12,14 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.function.UnaryOperator;
 
 import us.paskin.mastery.Proto.Skill;
 
@@ -362,7 +367,10 @@ public class Model {
     }
 
     private synchronized void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
-        parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+        if (skillGroup.getParentIdCount() > 0)
+            parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+        else
+            parentGroups.put(skillGroup.getId(), null);
     }
 
     /**
@@ -423,6 +431,82 @@ public class Model {
     }
 
     /**
+     * All references to the group ID prevId are replaced by references to newId.  Throws IllegalArgumentException if
+     * either ID is invalid.
+     * prevId may not be an ancestor of newId.
+     */
+    public synchronized void replaceSkillGroup(final long prevId, final long newId) throws IllegalArgumentException {
+        if (prevId == newId) return;
+        if (!isValidSkillGroupId(newId) || !isValidSkillGroupId(prevId)) {
+            throw new IllegalArgumentException("invalid skill group ID");
+        }
+        if (isAncestorOf(prevId, newId)) {
+            throw new IllegalArgumentException("cannot replace skill group with a descendant");
+        }
+        try {
+            // Go through the skill table, performing the replacement in parent groups.
+            Cursor cursor = getSkillList();
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                final long skillId = cursor.getLong(0);
+                Skill.Builder skillBuilder = Skill.parseFrom(cursor.getBlob(1)).toBuilder();
+                HashSet<Long> groups = new HashSet<Long>(skillBuilder.getGroupIdList());
+                groups.remove(Long.valueOf(prevId));
+                groups.add(Long.valueOf(newId));
+                skillBuilder.clearGroupId().addAllGroupId(groups);
+                updateSkill(skillId, skillBuilder.build());
+            }
+            // Go through the skill group table, performing the replacement in parent groups.
+            cursor = getSkillGroupList();
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                final long skillGroupId = cursor.getLong(0);
+                Proto.SkillGroup.Builder skillGroupBuilder = Proto.SkillGroup.parseFrom(cursor.getBlob(1)).toBuilder();
+                HashSet<Long> parents = new HashSet<Long>(skillGroupBuilder.getParentIdList());
+                parents.remove(Long.valueOf(prevId));
+                parents.add(Long.valueOf(newId));
+                skillGroupBuilder.clearParentId().addAllParentId(parents);
+                updateSkillGroup(skillGroupBuilder.build());
+            }
+            // Go through the schedule table, replacing the group in slots.
+            cursor = getScheduleList();
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                final long scheduleId = cursor.getLong(0);
+                Proto.Schedule schedule = Proto.Schedule.parseFrom(cursor.getBlob(1));
+                List<Proto.Schedule.Slot> slots = schedule.getSlotList();
+                List<Proto.Schedule.Slot> updatedSlots = new LinkedList<Proto.Schedule.Slot>();
+                for (Proto.Schedule.Slot slot : slots) {
+                    Proto.Schedule.Slot.Builder slotBuilder = slot.toBuilder();
+                    if (slotBuilder.getGroupId() == prevId) slotBuilder.setGroupId(newId);
+                    updatedSlots.add(slotBuilder.build());
+                }
+                Proto.Schedule.Builder scheduleBuilder = schedule.toBuilder().clearSlot().addAllSlot(updatedSlots);
+                updateSchedule(scheduleId, scheduleBuilder.build());
+            }
+        } catch (InvalidProtocolBufferException x) {
+            throw new InternalError("cannot parse protocol buffer");
+        }
+    }
+
+    /**
+     * Deletes a skill group from the database.  All references to the group are replaced
+     * by references to another group.  Throws IllegalArgumentException if either ID is invalid.
+     */
+
+    public synchronized void deleteSkillGroup(long idToDelete, long replacementId) throws IllegalArgumentException {
+        replaceSkillGroup(idToDelete, replacementId);
+        // Delete the old ID.
+        String selection = DatabaseContract.SkillGroupEntry._ID + " = " + idToDelete;
+        final int numDeleted = db.delete(DatabaseContract.SkillGroupEntry.TABLE_NAME, selection, null);
+        switch (numDeleted) {
+            case 1:
+                return;
+            case 0:
+                throw new IllegalArgumentException("invalid id: " + idToDelete);
+            default:
+                throw new InternalError("id had multiple records");
+        }
+    }
+
+    /**
      * Returns a set of ancestor group IDs, or null if there are none.
      *
      * @param groupId
@@ -431,30 +515,55 @@ public class Model {
     public synchronized
     @Nullable
     Set<Long> getAncestorGroups(long groupId) {
-        return parentGroups.get(groupId); // TODO: handle indirect relationships
+        Set<Long> parents = parentGroups.get(groupId);
+        if (parents == null) return null;
+        LinkedList<Long> toProcess = new LinkedList<Long>(parents);
+        Set<Long> ancestors = new HashSet<Long>();
+        while (!toProcess.isEmpty()) {
+            final long ancestor = toProcess.removeFirst();
+            if (ancestor == groupId) throw new InternalError("parent cycle");
+            if (ancestors.contains(ancestor)) continue;
+            ancestors.add(ancestor);
+            Set<Long> ancestorParents = parentGroups.get(ancestor);
+            if (ancestorParents != null) toProcess.addAll(ancestorParents);
+        }
+        return ancestors;
     }
 
     /**
      * Returns true if ancestorGroupId is an ancestor of groupId.
      */
     public synchronized boolean isAncestorOf(long ancestorGroupId, long groupId) {
-        Set<Long> ancestorGroups = getAncestorGroups(groupId);
-        if (ancestorGroups == null) return false;
-        else return ancestorGroups.contains(Long.valueOf(ancestorGroupId));  // TODO: optimize
+        Set<Long> parents = parentGroups.get(groupId);
+        if (parents == null) return false;
+        LinkedList<Long> toProcess = new LinkedList<Long>(parents);
+        Set<Long> ancestors = new HashSet<Long>();
+        while (!toProcess.isEmpty()) {
+            final long ancestor = toProcess.removeFirst();
+            if (ancestor == groupId) throw new InternalError("parent cycle");
+            if (ancestor == ancestorGroupId) return true;
+            if (ancestors.contains(ancestor)) continue;
+            ancestors.add(ancestor);
+            Set<Long> ancestorParents = parentGroups.get(ancestor);
+            if (ancestorParents != null) toProcess.addAll(ancestorParents);
+        }
+        return false;
     }
 
     /**
      * Returns a list of the IDs of all skill groups this skill is in, directly or indirectly.
-     *
-     * @param skill
-     * @return
      */
     public synchronized Set<Long> getAllSkillGroupIds(Skill skill) {
         Set<Long> result = new TreeSet<Long>();
         for (long directGroupId : skill.getGroupIdList()) {
             result.add(directGroupId);
             Set<Long> ancestors = getAncestorGroups(directGroupId);
-            if (ancestors != null) result.addAll(getAncestorGroups(directGroupId));
+            if (ancestors != null) {
+                Set<Long> ancestorGroups = getAncestorGroups(directGroupId);
+                if (ancestorGroups != null) {
+                    result.addAll(ancestorGroups);
+                }
+            }
         }
         return result;
     }
@@ -465,6 +574,7 @@ public class Model {
     public synchronized void clearAllData() {
         db.delete(DatabaseContract.SkillEntry.TABLE_NAME, null, null);
         db.delete(DatabaseContract.SkillGroupEntry.TABLE_NAME, null, null);
+        db.delete(DatabaseContract.ScheduleEntry.TABLE_NAME, null, null);
     }
 
     /**
