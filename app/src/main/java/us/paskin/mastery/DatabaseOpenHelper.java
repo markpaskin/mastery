@@ -75,14 +75,12 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO: upgrade policy is to simply to discard the data and start over
-        db.execSQL(SQL_DROP_SKILLS);
-        db.execSQL(SQL_DROP_SKILL_GROUPS);
-        db.execSQL(SQL_DROP_SCHEDULES);
+        // Right now there is only one version.
         onCreate(db);
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Right now there is only one version.
         onUpgrade(db, oldVersion, newVersion);
     }
 }

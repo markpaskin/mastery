@@ -163,6 +163,4 @@ public class SliderPreference extends DialogPreference {
         }
         super.onDialogClosed(positiveResult);
     }
-
-    // TODO: Save and restore preference state.
 }
