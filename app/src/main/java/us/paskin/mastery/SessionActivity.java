@@ -1,15 +1,17 @@
 package us.paskin.mastery;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.view.ViewCompat;
@@ -23,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -39,15 +40,10 @@ public class SessionActivity extends AppCompatActivity {
     public static String ARG_SCHEDULE_ID = "schedule_id";
 
     /**
-     * The ID of the notification posted by this activity when the user should move to the next
-     * slot or stop practicing.
+     * The ID of the notification posted by this activity to show the current skill, or when the
+     * user should move to the next slot or stop practicing.
      */
-    public static int UPDATE_NOTIFICATION_ID = 1;
-
-    /**
-     * The ID of the notification that is triggered during practice when the user leaves the activity.
-     */
-    public static int PRACTICING_NOTIFICATION_ID = 2;
+    public static int STATUS_NOTIFICATION_ID = 1;
 
     /**
      * The key to a float preference giving a [0, 1] weight for staleness.
@@ -143,9 +139,11 @@ public class SessionActivity extends AppCompatActivity {
     private Timer durationDisplayUpdateTimer;
 
     /**
-     * Used to notify the user it's time to move on.
+     * If not null, then this is a pending intent that has been scheduled for later delivery.
+     * It is retained in case we need to cancel it.
      */
-    private Timer nextNotificationTimer;
+    private PendingIntent pendingIntentToNotify;
+    private static final String STATE_pendingIntentToNotify = "pendingIntentToNotify";
 
     /**
      * Cached preferences.
@@ -168,6 +166,9 @@ public class SessionActivity extends AppCompatActivity {
             outState.putLong(STATE_practicingSince, practicingSince.getTime());
         }
         outState.putIntArray(STATE_storedDurations, storedDurations);
+        if (pendingIntentToNotify != null) {
+            outState.putParcelable(STATE_pendingIntentToNotify, pendingIntentToNotify);
+        }
     }
 
     @Override
@@ -230,6 +231,9 @@ public class SessionActivity extends AppCompatActivity {
             }
             storedDurations = savedInstanceState.getIntArray(STATE_storedDurations);
             initSkillsArrayFromSession(model);
+            if (savedInstanceState.containsKey(STATE_pendingIntentToNotify)) {
+                pendingIntentToNotify = savedInstanceState.getParcelable(STATE_pendingIntentToNotify);
+            }
         } else {
             mode = PAUSE;
             storedDurations = new int[schedule.getSlotList().size()];
@@ -276,7 +280,7 @@ public class SessionActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         if (mode == PLAY) startDurationUpdates();
-        stopPracticingNotification();
+        clearCurrentNotifications();
     }
 
     synchronized void handlePlayPauseButtonClick(View view) {
@@ -298,9 +302,7 @@ public class SessionActivity extends AppCompatActivity {
         practicingSince = new Date();
         playPauseButton.setImageResource(R.drawable.pause);
         startDurationUpdates();
-        if (getSlotTotalSecondsPracticed(curSlotIndex) < schedule.getSlotList().get(curSlotIndex).getDurationInSecs()) {
-            scheduleNextNotification();
-        }
+        scheduleNextNotification();
     }
 
     void startDurationUpdates() {
@@ -347,15 +349,25 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     /**
-     * Generates a notification that it's time to move on to the next slot.
+     * Schedules a "next" notification to be generated when the time for the current slot is up.
      */
-    private void generateNextNotification() {
+    void scheduleNextNotification() {
         if (!enableNotifications) return;
+        if (mode != PLAY) return;
+
+        // Figure out the delay.
+        final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
+        final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
+        final int secondsLeftToPractice = secondsToPractice - secondsPracticed;
+        if (secondsLeftToPractice <= 0) return;
+        final long futureInMillis = SystemClock.elapsedRealtime() + TimeUnit.SECONDS.toMillis(secondsLeftToPractice);
+
+        // Create the notification.
         Intent notificationIntent = new Intent(this, SessionActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         final boolean atLastSlot = curSlotIndex == schedule.getSlotCount() - 1;
-        NotificationCompat.Builder mBuilder =
+        NotificationCompat.Builder notificationBuilder =
                 (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.play)
                         .setContentTitle(getResources().getString(R.string.next_notification_title))
@@ -364,48 +376,41 @@ public class SessionActivity extends AppCompatActivity {
                         .setContentIntent(intent)
                         .setAutoCancel(true)
                         .setSound(Uri.parse(notificationRingtoneUri));
-        if (notificationsVibrate) mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(UPDATE_NOTIFICATION_ID, mBuilder.build());
-        // Clear the status notification.
-        mNotifyMgr.cancel(PRACTICING_NOTIFICATION_ID);
+        if (notificationsVibrate) notificationBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+        Notification notification = notificationBuilder.build();
+
+        // Store that notification as an extra in an intent that will be launched after a delay to the
+        // NotificationRelay service, which will actually generate the notification (since this activity
+        // may not be running).
+        Intent intentToNotify = new Intent(this, NotificationRelay.class);
+        intentToNotify.putExtra(NotificationRelay.NOTIFICATION_ID, STATUS_NOTIFICATION_ID);
+        intentToNotify.putExtra(NotificationRelay.NOTIFICATION, notification);
+        pendingIntentToNotify = PendingIntent.getBroadcast(this, 0, intentToNotify, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Schedule the alarm manager to launch the intent-to-notify.
+        System.out.println("scheduling for " + secondsLeftToPractice);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntentToNotify);
     }
 
     /**
-     * Schedules a "next" notification to be generated when the time for the current slot is up.
+     * Cancels any existing or scheduled notifications.
      */
-    void scheduleNextNotification() {
-        if (!enableNotifications) return;
-        if (mode != PLAY) return;
-        final int secondsPracticed = getSlotTotalSecondsPracticed(curSlotIndex);
-        final int secondsToPractice = schedule.getSlot(curSlotIndex).getDurationInSecs();
-        final int secondsLeftToPractice = secondsToPractice - secondsPracticed;
-        nextNotificationTimer = new Timer();
-        nextNotificationTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        SessionActivity.this.generateNextNotification();
-                    }
-                });
-            }
-        }, TimeUnit.SECONDS.toMillis(secondsLeftToPractice));
-    }
-
-    /**
-     * Cancels any existing or scheduled "next" notifications.
-     */
-    void cancelNextNotification() {
-        if (nextNotificationTimer != null) {
-            nextNotificationTimer.cancel();
-            nextNotificationTimer.purge();
+    void cancelFutureNotifications() {
+        if (pendingIntentToNotify != null) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            alarmManager.cancel(pendingIntentToNotify);
+            pendingIntentToNotify = null;
         }
+    }
+
+    /**
+     * Cancels any existing or scheduled notifications.
+     */
+    void clearCurrentNotifications() {
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(UPDATE_NOTIFICATION_ID);
+        mNotifyMgr.cancel(STATUS_NOTIFICATION_ID);
     }
 
     /**
@@ -425,19 +430,8 @@ public class SessionActivity extends AppCompatActivity {
                         .setAutoCancel(false);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(PRACTICING_NOTIFICATION_ID, mBuilder.build());
+        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
     }
-
-    /**
-     * Cancels the notification created by startPracticingNotification.
-     */
-    void stopPracticingNotification() {
-        if (!enableNotifications) return;
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(PRACTICING_NOTIFICATION_ID);
-    }
-
 
     /**
      * Called to start PAUSE mode.  (This has nothing to do with onPause.)
@@ -448,7 +442,8 @@ public class SessionActivity extends AppCompatActivity {
         playPauseButton.setImageResource(R.drawable.play);
         slotDurationTextViewList.get(curSlotIndex).setTypeface(null, Typeface.NORMAL);
         stopDurationUpdates();
-        cancelNextNotification();
+        cancelFutureNotifications();
+        clearCurrentNotifications();
     }
 
     synchronized void accumulatePracticeTime() {
@@ -568,17 +563,6 @@ public class SessionActivity extends AppCompatActivity {
         super.onStop();
         stopDurationUpdates();
         if (mode == PLAY) startPracticingNotification();
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopDurationUpdates();
-        cancelNextNotification();
-        stopPracticingNotification();
     }
 
     /**
