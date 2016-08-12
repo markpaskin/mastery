@@ -83,6 +83,8 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      */
     EditableList parentGroupList;
 
+    MenuItem revertMenuItem;
+
     /**
      * Called to save the activity's state.
      */
@@ -154,7 +156,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 skillGroupBuilder.setName(editable.toString());
                 updateTitle(editable.toString());
             }
@@ -184,6 +186,11 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         }
     }
 
+    void noteUnsavedChanges() {
+        unsavedChanges = true;
+        if (revertMenuItem != null) revertMenuItem.setVisible(true);
+    }
+    
     private void tryAddParentGroup(long parentGroupId) {
         if (!addingSkillGroup && parentGroupId == skillGroupId) {
             Toast.makeText(getApplicationContext(), R.string.skill_self_parent, Toast.LENGTH_SHORT).show();
@@ -203,7 +210,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             return;
         }
         skillGroupBuilder.addParentId(parentGroupId);
-        unsavedChanges = true;
+        noteUnsavedChanges();
         addParentGroupToTable(parentGroupId);
         Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
     }
@@ -224,11 +231,13 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.skill_group_detail, menu);
+        revertMenuItem = menu.findItem(R.id.revert_changes);
+        revertMenuItem.setVisible(unsavedChanges);
         return super.onCreateOptionsMenu(menu);
     }
 
     private void removeParentGroup(long skillGroupId) {
-        unsavedChanges = true;
+        noteUnsavedChanges();
         LinkedList<Long> groupIds = new LinkedList<Long>(skillGroupBuilder.getParentIdList());
         if (!groupIds.remove(skillGroupId)) {
             throw new InternalError("Could not remove " + skillGroupId);

@@ -99,7 +99,8 @@ public class SkillDetailActivity extends AppCompatActivity {
      */
     EditableList skillGroupList;
 
-
+    MenuItem revertMenuItem;
+    
     /**
      * Called to save the activity's state.
      */
@@ -201,7 +202,7 @@ public class SkillDetailActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 String name = editable.toString();
                 skillBuilder.setName(name);
                 updateTitle(name);
@@ -211,7 +212,7 @@ public class SkillDetailActivity extends AppCompatActivity {
                 new NumberPicker.OnValueChangeListener() {
                     @Override
                     public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
-                        unsavedChanges = true;
+                        noteUnsavedChanges();
                         skillBuilder.setPriority(newVal);
                     }
                 }
@@ -246,6 +247,11 @@ public class SkillDetailActivity extends AppCompatActivity {
         }
     }
 
+    void noteUnsavedChanges() {
+        unsavedChanges = true;
+        if (revertMenuItem != null) revertMenuItem.setVisible(true);
+    }
+    
     /**
      * Handles results from intents launched by this activity.
      */
@@ -256,7 +262,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             final long skillGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
             if (!skillBuilder.getGroupIdList().contains(skillGroupId)) {
                 skillBuilder.addGroupId(skillGroupId);
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 addParentGroupToTable(skillGroupId);
                 Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
             } else {
@@ -266,7 +272,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     private void removeFromSkillGroup(long skillGroupId) {
-        unsavedChanges = true;
+        noteUnsavedChanges();
         LinkedList<Long> groupIds = new LinkedList<Long>(skillBuilder.getGroupIdList());
         if (!groupIds.remove(skillGroupId)) {
             throw new InternalError("Could not remove " + skillGroupId);
@@ -297,6 +303,8 @@ public class SkillDetailActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.skill_detail, menu);
         if (addingSkill || deleteDisabled) menu.findItem(R.id.delete_skill).setVisible(false);
+        revertMenuItem = menu.findItem(R.id.revert_changes);
+        revertMenuItem.setVisible(unsavedChanges);
         return super.onCreateOptionsMenu(menu);
     }
 

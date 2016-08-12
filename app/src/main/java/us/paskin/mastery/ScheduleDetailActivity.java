@@ -107,6 +107,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
      */
     EditableList slotList;
 
+    MenuItem revertMenuItem;
+    
     /**
      * Called to save the activity's state.
      */
@@ -186,7 +188,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 scheduleBuilder.setName(editable.toString());
                 updateTitle(editable.toString());
             }
@@ -197,7 +199,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        unsavedChanges = true;
+                        noteUnsavedChanges();
                         Proto.Schedule.Slot.Builder slotBuilder = Proto.Schedule.Slot.newBuilder();
                         slotBuilder.setDurationInSecs(Model.DEFAULT_SLOT_DURATION_IN_SECS);
                         slotBuilders.add(slotBuilder);
@@ -210,7 +212,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     public void onItemRemoved(int index) {
                         slotBuilders.remove(index);
                         slotGroupNameTextViews.remove(index);
-                        unsavedChanges = true;
+                        noteUnsavedChanges();
                         Toast.makeText(getApplicationContext(), R.string.slot_removed, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -225,13 +227,18 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (addingSchedule)
-                    unsavedChanges = true;  // forces us to try to save even if no edits
+                    noteUnsavedChanges();  // forces us to try to save even if no edits
                 if (saveSchedule()) play();
             }
         });
         if (!addingSchedule) fab.requestFocus();
     }
 
+    void noteUnsavedChanges() {
+        unsavedChanges = true;
+        if (revertMenuItem != null) revertMenuItem.setVisible(true);
+    }
+    
     /**
      * Handles results from intents launched by this activity.
      */
@@ -247,7 +254,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     return;
                 }
                 slotBuilder.setGroupId(skillGroupId);
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 TextView groupName = slotGroupNameTextViews.get(position);
                 groupName.setText(model.getSkillGroupById(slotBuilder.getGroupId()).getName());
                 groupName.setTypeface(null, Typeface.NORMAL);
@@ -291,7 +298,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int durationInMinutes = durationPicker.getValue();
                 slotBuilder.setDurationInSecs((int) TimeUnit.MINUTES.toSeconds(durationInMinutes));
-                unsavedChanges = true;
+                noteUnsavedChanges();
                 durationText.setText(getResources().getQuantityString(R.plurals.num_min, durationInMinutes, durationInMinutes));
                 dialog.dismiss();
             }
@@ -368,6 +375,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.schedule_detail, menu);
         if (addingSchedule) menu.findItem(R.id.delete_schedule).setVisible(false);
+        revertMenuItem = menu.findItem(R.id.revert_changes);
+        revertMenuItem.setVisible(unsavedChanges);
         return super.onCreateOptionsMenu(menu);
     }
 
