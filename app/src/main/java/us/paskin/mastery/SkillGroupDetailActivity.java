@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import java.util.LinkedList;
 
 /**
@@ -39,9 +41,9 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     public static final int SELECT_PARENT_GROUP_TO_ADD = 1;
 
     /**
-     * A handle on the data model.
+     * A handle on the model model.
      */
-    private Model data;
+    private Model model;
 
     /**
      * True if we're adding a new skill group; false if we're editing one.
@@ -59,24 +61,22 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     private int skillGroupPosition = -1;
 
     /**
-     * The skill group before any updates.  This is null if a new group is being created.
-     */
-    private Proto.SkillGroup skillGroup;
-
-    /**
      * The builder that is used to update the skill group.
      */
     private Proto.SkillGroup.Builder skillGroupBuilder;
+    private static final String STATE_skillGroupBuilder = "skillGroupBuilder";
 
     /**
      * This is true if there have been changes that weren't committed.
      */
     private boolean unsavedChanges = false;
+    private static final String STATE_unsavedChanges = "unsavedChanges";
 
     /**
      * This is true if there were changes saved.
      */
     private boolean savedChanges = false;
+    private static final String STATE_savedChanges = "savedChanges";
 
     /**
      * This is the table of parent groups this group is in.
@@ -84,22 +84,44 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     EditableList parentGroupList;
 
     /**
+     * Called to save the activity's state.
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putByteArray(STATE_skillGroupBuilder, skillGroupBuilder.build().toByteArray());
+        outState.putBoolean(STATE_unsavedChanges, unsavedChanges);
+        outState.putBoolean(STATE_savedChanges, savedChanges);
+    }
+
+    /**
      * Sets up the activity.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = Model.getInstance(this);
+        model = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
         addingSkillGroup = !getIntent().hasExtra(ARG_SKILL_GROUP_ID);
-        if (addingSkillGroup) {
-            skillGroupBuilder = Proto.SkillGroup.newBuilder();
-        } else {
+        if (!addingSkillGroup) {
             skillGroupPosition = getIntent().getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
             skillGroupId = getIntent().getLongExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
-            skillGroup = data.getSkillGroupById(skillGroupId);
-            skillGroupBuilder = skillGroup.toBuilder();
+        }
+        // Initialize the state variables.
+        if (savedInstanceState != null) {
+            unsavedChanges = savedInstanceState.getBoolean(STATE_unsavedChanges);
+            savedChanges = savedInstanceState.getBoolean(STATE_savedChanges);
+            try {
+                skillGroupBuilder = Proto.SkillGroup.parseFrom(
+                        savedInstanceState.getByteArray(STATE_skillGroupBuilder)).toBuilder();
+            } catch (InvalidProtocolBufferException x) {
+                throw new InternalError("cannot parse protocol buffer");
+            }
+        } else if (addingSkillGroup) {
+            skillGroupBuilder = Proto.SkillGroup.newBuilder();
+        } else {
+            skillGroupBuilder = model.getSkillGroupById(skillGroupId).toBuilder();
         }
 
         setContentView(R.layout.activity_skill_group_detail);
@@ -115,9 +137,9 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         EditText nameEditText = ((EditText) findViewById(R.id.skill_group_name));
 
         // Initialize the controls with pre-existing values or defaults.
-        if (skillGroup != null) {
-            updateTitle(skillGroup.getName());
-            nameEditText.setText(skillGroup.getName());
+        if (!addingSkillGroup) {
+            updateTitle(skillGroupBuilder.getName());
+            nameEditText.setText(skillGroupBuilder.getName());
         }
 
         // Set up listeners (after setting initial values, so we don't get events for those).
@@ -155,15 +177,15 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                     }
                 });
 
-        if (skillGroup != null) {
-            for (final long groupId : skillGroup.getParentIdList()) {
+        if (!addingSkillGroup) {
+            for (final long groupId : skillGroupBuilder.getParentIdList()) {
                 addParentGroupToTable(groupId);
             }
         }
     }
 
     private void tryAddParentGroup(long parentGroupId) {
-        if (!addingSkillGroup && parentGroupId == skillGroup.getId()) {
+        if (!addingSkillGroup && parentGroupId == skillGroupId) {
             Toast.makeText(getApplicationContext(), R.string.skill_self_parent, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -171,7 +193,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), R.string.skill_group_already_present, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!addingSkillGroup && data.isAncestorOf(skillGroup.getId(), parentGroupId)) {
+        if (!addingSkillGroup && model.isAncestorOf(skillGroupId, parentGroupId)) {
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(R.string.skill_group_cycle_title)
@@ -219,7 +241,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      * Adds an entry to the parent skill group table.
      */
     private void addParentGroupToTable(final long skillGroupId) {
-        Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
+        Proto.SkillGroup skillGroup = model.getSkillGroupById(skillGroupId);
         parentGroupList.addTextItem(
                 skillGroup.getName(),
                 new View.OnClickListener() {
@@ -310,12 +332,12 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         if (!unsavedChanges) return true;
         if (!validate()) return false;
         if (!addingSkillGroup) {
-            data.updateSkillGroup(skillGroupBuilder.build());
+            model.updateSkillGroup(skillGroupBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill_group, Toast.LENGTH_SHORT).show();
         } else {
             skillGroupBuilder.setId(Fingerprint.forString(skillGroupBuilder.getName()));
             skillGroupId = skillGroupBuilder.getId();
-            data.addSkillGroup(skillGroupBuilder.build());
+            model.addSkillGroup(skillGroupBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
         }
         unsavedChanges = false;
