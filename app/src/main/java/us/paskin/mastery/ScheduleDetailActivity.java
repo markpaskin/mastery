@@ -262,7 +262,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private void play() {
         if (scheduleId == -1) throw new InternalError("Schedule ID missing");
         Intent intent = new Intent(this, SessionActivity.class);
-        intent.putExtra(SessionActivity.ARG_SESSION_ID, scheduleId);
+        intent.putExtra(SessionActivity.ARG_SCHEDULE_ID, scheduleId);
         startActivity(intent);
     }
 

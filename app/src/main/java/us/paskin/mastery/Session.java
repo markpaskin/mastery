@@ -18,23 +18,20 @@ import java.util.concurrent.TimeUnit;
  * Represents a concrete practice session.
  */
 public class Session {
-    private Proto.Schedule schedule;
-    private Model model;
-    private ArrayList<Slot> slots;
 
     /**
      * Generates a new session for the provided schedule.  Note that a schedule_slot may not be filled
      * if no skills were in its associated group.  Also, the same skill may be assigned to multiple
      * slots.
      */
-    public static Session sampleSession(Proto.Schedule schedule,
-                                        Model model,
-                                        float stalenessWeight) {
-        Session session = new Session(schedule, model);
-        HashSet<Long> sampledSkillIds = new HashSet<Long>();
+    public static long[] sampleSession(Proto.Schedule schedule,
+                                       Model model,
+                                       float stalenessWeight) {
+        final int numSlots = schedule.getSlotCount();
+        long session[] = new long[numSlots];
+        for (int i = 0; i < numSlots; ++i) session[i] = -1;
         // Scan through the skills, sampling as we go.
         Cursor cursor = model.getSkillList();
-        final int numSlots = session.slots.size();
         float sumWeight[] = new float[numSlots];
         for (int i = 0; i < numSlots; ++i) {
             sumWeight[i] = 0.0f;
@@ -50,10 +47,9 @@ public class Session {
             }
             final float weight = weight(skill, stalenessWeight);
             for (int slotIndex = 0; slotIndex < numSlots; ++slotIndex) {
-                Slot slot = session.slots.get(slotIndex);
-                if (!slot.canBeFilledBy(skill)) continue;
-                if (!slot.filled() || random.nextFloat() < (weight / sumWeight[slotIndex])) {
-                    slot.fillWith(skillId, skill);
+                if (!slotCanBeFilledBy(schedule.getSlot(slotIndex), skill, model)) continue;
+                if (session[slotIndex] == -1 || random.nextFloat() < (weight / sumWeight[slotIndex])) {
+                    session[slotIndex] = skillId;
                 }
             }
         }
@@ -61,90 +57,17 @@ public class Session {
     }
 
     /**
-     * @return the schedule from which this session was sampled
+     * Returns true if the supplied skill can be placed in this schedule_slot.
      */
-    public Proto.Schedule getSchedule() {
-        return schedule;
-    }
-
-    /**
-     * @return a list of slots, parallel to those in the schedule
-     */
-    public ArrayList<Slot> getSlotList() {
-        return slots;
-    }
-
-    /**
-     * Reloads the skills from the model.  Use this if the skills may have been updated.
-     */
-    public void refill() {
-        for (Slot slot : slots) {
-            if (slot.filled())
-                slot.fillWith(slot.getSkillId(), model.getSkillById(slot.getSkillId()));
-        }
-    }
-
-    /**
-     * Represents an instantiated schedule_slot in a session.
-     */
-    public class Slot {
-        private long skillId = -1;
-        private Proto.Skill skill = null;
-        final Proto.Schedule.Slot scheduleSlot;
-
-        public Slot(Proto.Schedule.Slot scheduleSlot) {
-            this.scheduleSlot = scheduleSlot;
-        }
-
-        /**
-         * Fills this schedule_slot with the supplied skill.
-         */
-        public void fillWith(long skillId, Proto.Skill skill) {
-            this.skillId = skillId;
-            this.skill = skill;
-        }
-
-        /**
-         * @return true if this schedule_slot is filled.
-         */
-        public boolean filled() {
-            return skill != null;
-        }
-
-        public Proto.Schedule.Slot getScheduleSlot() {
-            return scheduleSlot;
-        }
-
-        public long getSkillId() {
-            return skillId;
-        }
-
-        public Proto.Skill getSkill() {
-            return skill;
-        }
-
-        /**
-         * Returns true if the supplied skill can be placed in this schedule_slot.
-         */
-        public boolean canBeFilledBy(Proto.Skill skill) {
-            for (long skillGroupId : skill.getGroupIdList()) {
-                if ((this.scheduleSlot.getGroupId() == skillGroupId) ||
-                        model.isAncestorOf(scheduleSlot.getGroupId(), skillGroupId)) {
-                    return true;
-                }
+    public static boolean slotCanBeFilledBy(Proto.Schedule.Slot slot, Proto.Skill skill,
+                                            Model model) {
+        for (long skillGroupId : skill.getGroupIdList()) {
+            if ((slot.getGroupId() == skillGroupId) ||
+                    model.isAncestorOf(slot.getGroupId(), skillGroupId)) {
+                return true;
             }
-            return false;
         }
-    }
-
-    private Session(Proto.Schedule schedule,
-                    Model model) {
-        this.schedule = schedule;
-        this.model = model;
-        slots = new ArrayList<Slot>();
-        for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
-            slots.add(new Slot(slot));
-        }
+        return false;
     }
 
     /**
