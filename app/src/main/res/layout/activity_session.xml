@@ -58,7 +58,8 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/prev"
                 android:text="@string/prev_button_text"
-                android:tint="@color/background" />
+                android:tint="@color/background"
+                style="@style/Base.Widget.AppCompat.ActionButton" />
             <!-- TODO in RTL these buttons have confusing icons -->
 
             <ImageButton
@@ -92,7 +93,8 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/next"
                 android:text="@string/next_button_text"
-                android:tint="@color/background" />
+                android:tint="@color/background"
+                style="@style/Base.Widget.AppCompat.ActionButton" />
 
         </RelativeLayout>
 

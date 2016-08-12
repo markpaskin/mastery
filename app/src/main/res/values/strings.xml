@@ -7,7 +7,7 @@
     <string name="action_settings">Settings</string>
     <string name="Skills">Skills</string>
     <string name="SkillGroups">Skill Groups</string>
-    <string name="Schedules">Schedules</string>
+    <string name="Schedules">Practice Schedules</string>
     <string name="Settings">Settings</string>
 
     <string name="title_skill_list">Skills</string>
@@ -83,7 +83,7 @@
     <string name="delete_skill_confirm_title">Delete skill?</string>
     <string name="cannot_undo_detail">This action cannot be undone.</string>
 
-    <string name="title_schedule_list">Schedules</string>
+    <string name="title_schedule_list">Practice Schedules</string>
     <string name="title_schedule_detail">Schedule Details</string>
 
     <string name="delete_schedule">Delete schedule</string>

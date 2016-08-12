@@ -477,6 +477,7 @@ public class SessionActivity extends AppCompatActivity {
         setSlotEmphasis(curSlotIndex, true);
         if (curSlotIndex == 0) prevButton.setEnabled(false);
         nextButton.setEnabled(true);
+        playPauseButton.setEnabled(session[curSlotIndex] != -1);
     }
 
     synchronized void handleNextButtonClick(View view) {
@@ -488,6 +489,7 @@ public class SessionActivity extends AppCompatActivity {
         setSlotEmphasis(curSlotIndex, true);
         if (curSlotIndex == numSlots - 1) nextButton.setEnabled(false);
         prevButton.setEnabled(true);
+        playPauseButton.setEnabled(session[curSlotIndex] != -1);
     }
 
     boolean startedPractice() {
@@ -569,6 +571,9 @@ public class SessionActivity extends AppCompatActivity {
      * Called when the session is available to be rendered.
      */
     private void layoutSession() {
+        if (curSlotIndex == 0) prevButton.setEnabled(false);
+        if (curSlotIndex == session.length - 1) nextButton.setEnabled(false);
+        playPauseButton.setEnabled(session[curSlotIndex] != -1);
         controlsContainer.setVisibility(View.VISIBLE);
         LinearLayout container = (LinearLayout) findViewById(R.id.session_slots_container);
         container.removeAllViews();
