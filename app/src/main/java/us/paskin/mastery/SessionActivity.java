@@ -368,6 +368,8 @@ public class SessionActivity extends AppCompatActivity {
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(UPDATE_NOTIFICATION_ID, mBuilder.build());
+        // Clear the status notification.
+        mNotifyMgr.cancel(PRACTICING_NOTIFICATION_ID);
     }
 
     /**
