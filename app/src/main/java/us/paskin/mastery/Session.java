@@ -153,14 +153,12 @@ public class Session {
     private static float weight(Proto.Skill skill, float stalenessWeight) {
         // Scale the priority to [0, 1].
         float priorityZeroOne = ((float) (skill.getPriority()) / ((float) (Model.MAX_PRIORITY)));
-
-        // Map the time from last practice to [0, 1].
-        final long curDateSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
-        final long secondsSincePracticed = Math.max(0L, curDateSecs - skill.getDateLastPracticed());
-        final long halfPoint = TimeUnit.DAYS.toSeconds(100);
-        final double stalenessZeroOne = ((double) secondsSincePracticed / (double) (secondsSincePracticed + halfPoint));
+        // Map the estimated amount of practice time in the past 100 days to a staleness value in [0, 1].
+        final long estHoursPracticed = TimeUnit.SECONDS.toHours(skill.getEstSecondsPracticed100Days());
+        final long halfPoint = 5;
+        final double stalenessZeroOne = ((double) estHoursPracticed / (double) (estHoursPracticed + halfPoint));
+        // Compute a weighted sum.
         final float priorityWeight = 1.0f - stalenessWeight;
-
         return stalenessWeight * (float) stalenessZeroOne + priorityWeight * priorityZeroOne;
     }
 }

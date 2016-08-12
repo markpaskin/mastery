@@ -150,6 +150,10 @@ public class SessionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // On the first creation, this is null.  If it's not null, the activity is being re-created.
+        if (savedInstanceState != null) return;
+
         model = Model.getInstance(this);
         schedule = model.getScheduleById(getIntent().getLongExtra(ARG_SESSION_ID, -1));
         setTitle(R.string.session_activity_title);
@@ -199,6 +203,9 @@ public class SessionActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called to start PLAY mode.
+     */
     void play() {
         mode = Mode.PLAY;
         practicingSince = new Date();
@@ -343,6 +350,9 @@ public class SessionActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Called to start PAUSE mode.  (This has nothing to do with onPause.)
+     */
     synchronized void pause() {
         mode = Mode.PAUSE;
         accumulatePracticeTime();
@@ -401,10 +411,11 @@ public class SessionActivity extends AppCompatActivity {
      * Inefficient way to make sure skill names are updated: redraw the page.
      */
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+        // Make sure we have a rendered session.
         if (session == null) {
-            // Launch a thread to sample the session.
+            // We don't have a session yet.  Launch a thread to sample one and then render it.
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -418,7 +429,7 @@ public class SessionActivity extends AppCompatActivity {
                 }
             }).start();
         } else {
-            // Update the session in case the skills were updated.
+            // Update the session in case the skills were updated by the previous activity.
             session.refill();
             layoutSession();
         }
@@ -506,8 +517,8 @@ public class SessionActivity extends AppCompatActivity {
      *
      */
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         stopDurationUpdates();
         if (mode == Mode.PLAY) startPracticingNotification();
     }

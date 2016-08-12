@@ -199,8 +199,21 @@ public class Model {
      */
     public synchronized void addPracticeSecondsToSkill(int seconds, long skillId) {
         Skill.Builder skillBuilder = getSkillById(skillId).toBuilder();
+        final long curDateInSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
         skillBuilder.setSecondsPracticed(skillBuilder.getSecondsPracticed() + seconds)
-                .setDateLastPracticed(TimeUnit.MILLISECONDS.toSeconds(new Date().getTime()));
+                .setDateLastPracticed(curDateInSecs);
+        // Update est_seconds_practiced_100_days.  If it's been less than 100 days since the last
+        // practice, then we assume the practice time was distributed uniformly across the 100 day
+        // period leading up to the last practice.
+        if (skillBuilder.hasDateLastPracticed()) {
+            final long prevEst = skillBuilder.getEstSecondsPracticed100Days();
+            final long secsIn100Days = TimeUnit.DAYS.toSeconds(100);
+            final long secsSinceLastPractice = curDateInSecs - skillBuilder.getDateLastPracticed();
+            final double forgetFrac = Math.max(1.0, (double) secsSinceLastPractice / (double) secsIn100Days);
+            skillBuilder.setEstSecondsPracticed100Days(seconds + (long) ((1.0 - forgetFrac) * prevEst));
+        } else {
+            skillBuilder.setEstSecondsPracticed100Days(seconds);
+        }
         updateSkill(skillId, skillBuilder.build());
     }
 

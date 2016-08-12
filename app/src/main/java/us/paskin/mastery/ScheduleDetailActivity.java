@@ -25,6 +25,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -73,14 +75,10 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     private long scheduleId = -1;
 
     /**
-     * The schedule before any updates.  This is null if a new schedule is being added.
-     */
-    private Proto.Schedule schedule;
-
-    /**
      * The builder that is used to update the schedule.  Its fields reflect the model entered by the user.
      */
     private Proto.Schedule.Builder scheduleBuilder;
+    private static final String STATE_scheduleBuilder = "scheduleBuilder";
 
     /**
      * Builders for each of the slots in the schedule.
@@ -96,16 +94,32 @@ public class ScheduleDetailActivity extends AppCompatActivity {
      * This is true if there have been changes that weren't committed.
      */
     private boolean unsavedChanges = false;
+    private static final String STATE_unsavedChanges = "unsavedChanges";
 
     /**
      * This is true if there were changes saved.
      */
     private boolean savedChanges = false;
+    private static final String STATE_savedChanges = "savedChanges";
 
     /**
      * This is the table used to render the schedule groups this schedule is in.
      */
     EditableList slotList;
+
+    /**
+     * Called to save the activity's state.
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
+            scheduleBuilder.addSlot(slotBuilder);
+        }
+        outState.putByteArray(STATE_scheduleBuilder, scheduleBuilder.build().toByteArray());
+        outState.putBoolean(STATE_unsavedChanges, unsavedChanges);
+        outState.putBoolean(STATE_savedChanges, savedChanges);
+    }
 
     /**
      * Sets up the activity.
@@ -122,15 +136,25 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         if (!addingSchedule) {
             scheduleIndex = getIntent().getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
             scheduleId = getIntent().getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
-            schedule = model.getScheduleById(scheduleId);
-            scheduleBuilder = schedule.toBuilder();
-            for (Proto.Schedule.Slot slot : schedule.getSlotList()) {
-                slotBuilders.add(slot.toBuilder());
-            }
-            scheduleBuilder.clearSlot();
-        } else {
-            scheduleBuilder = Proto.Schedule.newBuilder();
         }
+        // Initialize the scheduleBuilder.
+        if (savedInstanceState != null) {
+            unsavedChanges = savedInstanceState.getBoolean(STATE_unsavedChanges);
+            savedChanges = savedInstanceState.getBoolean(STATE_savedChanges);
+            try {
+                scheduleBuilder = Proto.Schedule.parseFrom(savedInstanceState.getByteArray(STATE_scheduleBuilder)).toBuilder();
+            } catch (InvalidProtocolBufferException x) {
+                throw new InternalError("cannot parse protocol buffer");
+            }
+        } else if (addingSchedule) {
+            scheduleBuilder = Proto.Schedule.newBuilder();
+        } else {
+            scheduleBuilder = model.getScheduleById(scheduleId).toBuilder();
+        }
+        for (Proto.Schedule.Slot slot : scheduleBuilder.getSlotList()) {
+            slotBuilders.add(slot.toBuilder());
+        }
+        scheduleBuilder.clearSlot();
 
         setContentView(R.layout.activity_schedule_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -145,9 +169,9 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         EditText nameEditText = ((EditText) findViewById(R.id.schedule_name));
 
         // Initialize the controls with pre-existing values or defaults.
-        if (schedule != null) {
-            updateTitle(schedule.getName());
-            nameEditText.setText(schedule.getName());
+        if (!addingSchedule) {
+            updateTitle(scheduleBuilder.getName());
+            nameEditText.setText(scheduleBuilder.getName());
         }
 
         // Set up listeners (after setting initial values, so we don't get events for those).
