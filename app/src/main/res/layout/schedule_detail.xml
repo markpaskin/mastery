@@ -26,6 +26,13 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/slots_in_schedule_title"
+        style="@style/HeaderText"
+        android:padding="@dimen/text_margin" />
+
     <include
         layout="@layout/editable_list"
         android:layout_width="match_parent"

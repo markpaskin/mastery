@@ -147,6 +147,8 @@
     <string name="duplicate_name_title">Duplicate name</string>
     <string name="duplicate_name_detail">This name is already in use.  Please choose another.</string>
 
+    <string name="slots_in_schedule_title">Slots</string>
+
     <!-- Strings related to Settings -->
 
     <string name="pref_header_scheduling">Scheduling</string>
