@@ -344,6 +344,15 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             model.updateSkillGroup(skillGroupBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill_group, Toast.LENGTH_SHORT).show();
         } else {
+            if (model.hasSkillGroupWithName(skillGroupBuilder.getName())) {
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.duplicate_name_title)
+                        .setMessage(R.string.duplicate_name_detail)
+                        .setPositiveButton(R.string.yes, null)
+                        .show();
+                return false;
+            }
             skillGroupBuilder.setId(Fingerprint.forString(skillGroupBuilder.getName()));
             skillGroupId = skillGroupBuilder.getId();
             model.addSkillGroup(skillGroupBuilder.build());

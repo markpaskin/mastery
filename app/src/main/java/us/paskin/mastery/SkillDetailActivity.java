@@ -427,6 +427,15 @@ public class SkillDetailActivity extends AppCompatActivity {
             model.updateSkill(skillId, skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         } else {
+            if (model.hasSkillWithName(skillBuilder.getName())) {
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.duplicate_name_title)
+                        .setMessage(R.string.duplicate_name_detail)
+                        .setPositiveButton(R.string.yes, null)
+                        .show();
+                return false;
+            }
             skillId = model.addSkill(skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
         }

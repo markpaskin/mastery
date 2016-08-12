@@ -144,6 +144,9 @@
 
     <string name="updated_skill_group">Updated skill group.</string>
 
+    <string name="duplicate_name_title">Duplicate name</string>
+    <string name="duplicate_name_detail">This name is already in use.  Please choose another.</string>
+
     <!-- Strings related to Settings -->
 
     <string name="pref_header_scheduling">Scheduling</string>

@@ -160,6 +160,25 @@ public class Model {
         }
     }
 
+    /**
+     * Returns true if there is a skill with the supplied name in the database.
+     * No two skills are permitted to have the same name.
+     */
+    public synchronized boolean hasSkillWithName(String name) {
+        String[] projection = {DatabaseContract.SkillEntry._ID};
+        String selection = DatabaseContract.SkillEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        Cursor c = db.query(
+                DatabaseContract.SkillEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        return c.getCount() > 0;
+    }
+
     // The ID of the skill is returned.
     public synchronized long addSkill(Skill skill) {
         validateSkill(skill);
@@ -344,6 +363,25 @@ public class Model {
 
     private synchronized void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
         parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+    }
+
+    /**
+     * Returns true if there is a skill group with the supplied name in the database.
+     * No two skill groups are permitted to have the same name.
+     */
+    public synchronized boolean hasSkillGroupWithName(String name) {
+        String[] projection = {DatabaseContract.SkillGroupEntry._ID};
+        String selection = DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        Cursor c = db.query(
+                DatabaseContract.SkillGroupEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        return c.getCount() > 0;
     }
 
     public synchronized void addSkillGroup(Proto.SkillGroup skillGroup) {
@@ -536,6 +574,25 @@ public class Model {
                 throw new IllegalArgumentException("schedule_slot has missing/invalid group id");
             }
         }
+    }
+
+    /**
+     * Returns true if there is a schedule with the supplied name in the database.
+     * No two schedules are permitted to have the same name.
+     */
+    public synchronized boolean hasScheduleWithName(String name) {
+        String[] projection = {DatabaseContract.ScheduleEntry._ID};
+        String selection = DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        Cursor c = db.query(
+                DatabaseContract.ScheduleEntry.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                      // The sort order
+        );
+        return c.getCount() > 0;
     }
 
     // The ID of the skill is returned.

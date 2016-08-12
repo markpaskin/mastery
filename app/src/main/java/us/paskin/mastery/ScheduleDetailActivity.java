@@ -517,6 +517,15 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             model.updateSchedule(scheduleId, scheduleBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_schedule, Toast.LENGTH_SHORT).show();
         } else {
+            if (model.hasScheduleWithName(scheduleBuilder.getName())) {
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.duplicate_name_title)
+                        .setMessage(R.string.duplicate_name_detail)
+                        .setPositiveButton(R.string.yes, null)
+                        .show();
+                return false;
+            }
             scheduleId = model.addSchedule(scheduleBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.added_schedule, Toast.LENGTH_SHORT).show();
         }

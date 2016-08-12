@@ -15,13 +15,14 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Generic constants
     private static final String TEXT_TYPE = " TEXT";
     private static final String BLOB_TYPE = " BLOB";
+    private static final String UNIQUE = " NOT NULL UNIQUE";
     private static final String COMMA_SEP = ",";
 
     // Skills DB statements
     private static final String SQL_CREATE_SKILLS =
             "CREATE TABLE " + DatabaseContract.SkillEntry.TABLE_NAME + " (" +
-                    DatabaseContract.SkillEntry._ID + " INTEGER PRIMARY KEY" +
-                    COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_NAME + TEXT_TYPE +
+                    DatabaseContract.SkillEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
+                    COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_NAME + TEXT_TYPE + UNIQUE +
                     COMMA_SEP + DatabaseContract.SkillEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
     private static final String SQL_DROP_SKILLS =
@@ -31,8 +32,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Skill groups DB statements
     private static final String SQL_CREATE_SKILL_GROUPS =
             "CREATE TABLE " + DatabaseContract.SkillGroupEntry.TABLE_NAME + " (" +
-                    DatabaseContract.SkillGroupEntry._ID + " INTEGER PRIMARY KEY" +
-                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE +
+                    DatabaseContract.SkillGroupEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE + UNIQUE +
                     COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
     private static final String SQL_DROP_SKILL_GROUPS =
@@ -41,8 +42,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
     // Schedule DB statements
     private static final String SQL_CREATE_SCHEDULES =
             "CREATE TABLE " + DatabaseContract.ScheduleEntry.TABLE_NAME + " (" +
-                    DatabaseContract.ScheduleEntry._ID + " INTEGER PRIMARY KEY" +
-                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + TEXT_TYPE +
+                    DatabaseContract.ScheduleEntry._ID + " INTEGER PRIMARY KEY" + UNIQUE +
+                    COMMA_SEP + DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + UNIQUE + TEXT_TYPE +
                     COMMA_SEP + DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO + BLOB_TYPE +
                     " )";
     private static final String SQL_DROP_SCHEDULES =
