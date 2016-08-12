@@ -25,6 +25,9 @@ public class DrawerActivity extends AppCompatActivity
     private Toolbar toolbar;
     private CharSequence title;
 
+    /**
+     * Called by subclasses to set up the drawer.
+     */
     protected void onCreateDrawer() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -59,7 +62,7 @@ public class DrawerActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -70,13 +73,13 @@ public class DrawerActivity extends AppCompatActivity
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        toggle.syncState();
+        if (drawer != null) toggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        toggle.onConfigurationChanged(newConfig);
+        if (drawer != null) toggle.onConfigurationChanged(newConfig);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

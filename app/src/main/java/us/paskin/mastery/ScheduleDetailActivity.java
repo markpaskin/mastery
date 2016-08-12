@@ -259,6 +259,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 groupName.setText(model.getSkillGroupById(slotBuilder.getGroupId()).getName());
                 groupName.setTypeface(null, Typeface.NORMAL);
                 groupName.setBackgroundColor(getResources().getColor(R.color.background));
+                Toast.makeText(getApplicationContext(), R.string.updated_skill_group, Toast.LENGTH_SHORT).show();
                 break;
         }
     }

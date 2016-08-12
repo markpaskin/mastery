@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -74,7 +75,15 @@ public class SkillGroupListActivity extends DrawerActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-        super.onCreateDrawer();
+        if (selectMode) {
+            // Show the Up button in the action bar.
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        } else {
+            super.onCreateDrawer();
+        }
 
         View recyclerView = findViewById(R.id.skill_group_list);
         assert recyclerView != null;
@@ -94,7 +103,10 @@ public class SkillGroupListActivity extends DrawerActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.add_skill_group) {
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        } else if (id == R.id.add_skill_group) {
             handleAddSkillGroup();
             return true;
         }
