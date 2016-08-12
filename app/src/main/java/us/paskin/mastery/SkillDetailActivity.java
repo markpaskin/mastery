@@ -20,6 +20,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import java.util.LinkedList;
 
 /**
@@ -60,14 +62,14 @@ public class SkillDetailActivity extends AppCompatActivity {
     private boolean deleteDisabled;
 
     /**
-     * If we're not adding a new skill, this is the previous skill data.
+     * If we're not adding a new skill, this is the previous skill model.
      */
-    private Model data;
+    private Model model;
 
     /**
      * The index of the skill being edited (or -1 if it's being added).
      */
-    private int skillIndex = -1;
+    private int skillPosition = -1;
 
     /**
      * The ID of the skill being edited (or -1 if it's being added).
@@ -75,29 +77,39 @@ public class SkillDetailActivity extends AppCompatActivity {
     private long skillId = -1;
 
     /**
-     * The skill before any updates.  This is null if a new skill is being added.
-     */
-    private Proto.Skill skill;
-
-    /**
-     * The builder that is used to update the skill.  Its fields reflect the data entered by the user.
+     * The builder that is used to update the skill.  Its fields reflect the model entered by the user.
      */
     private Proto.Skill.Builder skillBuilder;
+    private static final String STATE_skillBuilder = "skillBuilder";
 
     /**
      * This is true if there have been changes that weren't committed.
      */
     private boolean unsavedChanges = false;
+    private static final String STATE_unsavedChanges = "unsavedChanges";
 
     /**
      * This is true if there were changes saved.
      */
     private boolean savedChanges = false;
+    private static final String STATE_savedChanges = "savedChanges";
 
     /**
      * This is the table used to render the skill groups this skill is in.
      */
     EditableList skillGroupList;
+
+
+    /**
+     * Called to save the activity's state.
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putByteArray(STATE_skillBuilder, skillBuilder.build().toByteArray());
+        outState.putBoolean(STATE_unsavedChanges, unsavedChanges);
+        outState.putBoolean(STATE_savedChanges, savedChanges);
+    }
 
     /**
      * Sets up the activity.
@@ -107,19 +119,34 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        data = Model.getInstance(this);
+        model = Model.getInstance(this);
 
         // Initialize this object from the intent arguments.
         addingSkill = !getIntent().hasExtra(ARG_SKILL_ID);
         if (!addingSkill) {
-            skillIndex = getIntent().getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
-            skillId = getIntent().getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
-            skill = data.getSkillById(skillId);
-            skillBuilder = skill.toBuilder();
-        } else {
-            skillBuilder = Proto.Skill.newBuilder();
+            skillId = getIntent().getLongExtra(ARG_SKILL_ID, -1);
+            skillPosition = getIntent().getIntExtra(ARG_SKILL_POSITION, -1);
         }
+
         deleteDisabled = getIntent().getBooleanExtra(ARG_DISABLE_DELETE, false);
+
+        // Initialize the state.
+        Proto.Skill skill = null;  // null if addingSkill
+        if (savedInstanceState != null) {
+            unsavedChanges = savedInstanceState.getBoolean(STATE_unsavedChanges);
+            savedChanges = savedInstanceState.getBoolean(STATE_savedChanges);
+            try {
+                skillBuilder = Proto.Skill.parseFrom(savedInstanceState.getByteArray(STATE_skillBuilder)).toBuilder();
+            } catch (InvalidProtocolBufferException x) {
+                throw new InternalError("cannot parse protocol buffer");
+            }
+            skill = skillBuilder.build();
+        } else if (addingSkill) {
+            skillBuilder = Proto.Skill.newBuilder();
+        } else {
+            skill = model.getSkillById(skillId);
+            skillBuilder = skill.toBuilder();
+        }
 
         setContentView(R.layout.activity_skill_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -147,9 +174,9 @@ public class SkillDetailActivity extends AppCompatActivity {
         practicePriorityPicker.setMaxValue(Model.MAX_PRIORITY);
 
         // Initialize the controls with pre-existing values or defaults.
-        if (skill != null) {
-            updateTitle(skill.getName());
-            nameEditText.setText(skill.getName());
+        if (!addingSkill) {
+            updateTitle(skillBuilder.getName());
+            nameEditText.setText(skillBuilder.getName());
             lastPracticedText.setText(Model.getLastPracticedText(skill, getResources()));
             String durationPracticed = Model.getDurationPracticedText(skill, getResources());
             if (durationPracticed != null) {
@@ -157,7 +184,7 @@ public class SkillDetailActivity extends AppCompatActivity {
             } else {
                 durationPracticedText.setVisibility(View.GONE);
             }
-            practicePriorityPicker.setValue(skill.hasPriority() ? skill.getPriority() : Model.MAX_PRIORITY);
+            practicePriorityPicker.setValue(skillBuilder.hasPriority() ? skillBuilder.getPriority() : Model.MAX_PRIORITY);
         } else {
             skillBuilder.setPriority(Model.MAX_PRIORITY);
         }
@@ -189,7 +216,11 @@ public class SkillDetailActivity extends AppCompatActivity {
                     }
                 }
         );
-        practicePriorityPicker.setValue(Model.DEFAULT_PRIORITY);
+        if (addingSkill) {
+            practicePriorityPicker.setValue(Model.DEFAULT_PRIORITY);
+        } else {
+            practicePriorityPicker.setValue(skillBuilder.getPriority());
+        }
 
         skillGroupList = new EditableList(
                 (TableLayout) findViewById(R.id.parent_group_list),
@@ -208,8 +239,8 @@ public class SkillDetailActivity extends AppCompatActivity {
                     }
                 });
 
-        if (skill != null) {
-            for (final long groupId : skill.getGroupIdList()) {
+        if (!addingSkill) {
+            for (final long groupId : skillBuilder.getGroupIdList()) {
                 addParentGroupToTable(groupId);
             }
         }
@@ -248,7 +279,7 @@ public class SkillDetailActivity extends AppCompatActivity {
      * Adds an entry to the parent skill group table.
      */
     private void addParentGroupToTable(final long skillGroupId) {
-        Proto.SkillGroup skillGroup = data.getSkillGroupById(skillGroupId);
+        Proto.SkillGroup skillGroup = model.getSkillGroupById(skillGroupId);
         skillGroupList.addTextItem(
                 skillGroup.getName(),
                 new View.OnClickListener() {
@@ -314,7 +345,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     void deleteAndFinish() {
-        if (!addingSkill) data.deleteSkill(skillId);
+        if (!addingSkill) model.deleteSkill(skillId);
         skillId = -1;
         unsavedChanges = false;
         savedChanges = true;
@@ -385,10 +416,10 @@ public class SkillDetailActivity extends AppCompatActivity {
         if (!unsavedChanges) return true;
         if (!validate()) return false;
         if (!addingSkill) {
-            data.updateSkill(skillId, skillBuilder.build());
+            model.updateSkill(skillId, skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_skill, Toast.LENGTH_SHORT).show();
         } else {
-            skillId = data.addSkill(skillBuilder.build());
+            skillId = model.addSkill(skillBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.added_skill, Toast.LENGTH_SHORT).show();
         }
         unsavedChanges = false;
@@ -410,7 +441,7 @@ public class SkillDetailActivity extends AppCompatActivity {
     public void finish() {
         Intent intent = new Intent();
         if (savedChanges) {
-            intent.putExtra(ARG_SKILL_POSITION, skillIndex);
+            intent.putExtra(ARG_SKILL_POSITION, skillPosition);
             intent.putExtra(ARG_SKILL_ID, skillId);
             setResult(Activity.RESULT_OK, intent);
         } else {
