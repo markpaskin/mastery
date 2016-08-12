@@ -5,6 +5,6 @@
         android:id="@+id/revert_changes"
         android:title="@string/revert_changes"
         android:icon="@android:drawable/ic_menu_revert"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         android:orderInCategory="1" />
 </menu>

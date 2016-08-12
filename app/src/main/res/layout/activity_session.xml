@@ -75,7 +75,8 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/play"
                 android:text="@string/play_button_text"
-                android:tint="@color/background" />
+                android:tint="@color/background"
+                style="@style/Base.Widget.AppCompat.ActionButton" />
 
             <ImageButton
                 android:id="@+id/next_button"

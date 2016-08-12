@@ -8,4 +8,5 @@
     <color name="playing_slot_background">#CCFFCC</color>
     <color name="background">#FFFFFF</color>
     <color name="deemphasized_text">#555555</color>
+    <color name="image_button_tint">#555555</color>
 </resources>

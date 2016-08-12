@@ -6,13 +6,15 @@
     <LinearLayout
         android:id="@+id/item"
         android:layout_margin="@dimen/text_margin"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical|start" />
 
     <ImageButton
+        android:layout_weight="1"
         android:id="@+id/remove_button"
         android:src="@android:drawable/ic_input_delete"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|end"
         android:layout_margin="@dimen/small_button_margin"
-        android:tint="@android:color/white" />
+        android:tint="@color/image_button_tint"
+        style="@style/Base.Widget.AppCompat.Button.Borderless" />
 
 </TableRow>
