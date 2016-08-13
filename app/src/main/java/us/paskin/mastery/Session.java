@@ -54,6 +54,7 @@ public class Session {
      */
     public static boolean slotCanBeFilledBy(Proto.Schedule.Slot slot, Proto.Skill skill,
                                             Model model) {
+        if (!slot.hasGroupId()) return true;
         for (long skillGroupId : skill.getGroupIdList()) {
             if ((slot.getGroupId() == skillGroupId) ||
                     model.isAncestorOf(slot.getGroupId(), skillGroupId)) {

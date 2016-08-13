@@ -55,9 +55,6 @@
     <string name="missing_schedule_name_title">Schedule name empty</string>
     <string name="missing_schedule_name_detail">Please enter a name for this schedule.</string>
 
-    <string name="no_skill_groups_title">No skill groups</string>
-    <string name="no_skill_groups_detail">Skills are scheduled for practice through their membership in groups.  Please add this skill to one or more groups.</string>
-
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
@@ -79,10 +76,10 @@
     <string name="delete_skill_confirm_title">Delete skill?</string>
     <string name="cannot_undo_detail">This action cannot be undone.</string>
 
-    <string name="delete_skill_group">Delete skill group</string>
+    <string name="delete_skill_group">Delete</string>
     <string name="delete_skill_group_confirm_title">Delete skill group?</string>
     <string name="delete_skill_group_confirm_detail">
-        To delete this skill group, you must select another group for its skills and slots.
+        If you delete this skill group, it will be removed from all skills, child groups, and slots.
     </string>
     <string name="select_skill_group_replacement">Choose Replacement</string>
     <string name="deleted_skill_group">Deleted skill group.</string>
@@ -108,7 +105,7 @@
     <string name="duration_dialog_title">Slot length</string>
     <string name="duration_dialog_detail">Choose the length of this slot in minutes:</string>
     <string name="slot_removed">Slot removed.</string>
-    <string name="choose_skill_group">Choose skill group</string>
+    <string name="slot_without_group_label">Any skill</string>
 
     <string name="no_slot_group_title">Missing skill group</string>
     <string name="no_slot_group_detail">Every slot must have a skill group.</string>

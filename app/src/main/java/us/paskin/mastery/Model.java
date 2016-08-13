@@ -431,17 +431,23 @@ public class Model {
     }
 
     /**
-     * All references to the group ID prevId are replaced by references to newId.  Throws IllegalArgumentException if
-     * either ID is invalid.
+     * All references to the group ID prevId are replaced by references to newId.  If newId is -1,
+     * then references to prevId are removed.  Throws IllegalArgumentException if
+     * either ID is invalid (except for newId == -1).
      * prevId may not be an ancestor of newId.
      */
     public synchronized void replaceSkillGroup(final long prevId, final long newId) throws IllegalArgumentException {
-        if (prevId == newId) return;
-        if (!isValidSkillGroupId(newId) || !isValidSkillGroupId(prevId)) {
+        if (!isValidSkillGroupId(prevId)) {
             throw new IllegalArgumentException("invalid skill group ID");
         }
-        if (isAncestorOf(prevId, newId)) {
-            throw new IllegalArgumentException("cannot replace skill group with a descendant");
+        if (newId != -1) {
+            if (prevId == newId) return;
+            if (!isValidSkillGroupId(newId)) {
+                throw new IllegalArgumentException("invalid skill group ID");
+            }
+            if (isAncestorOf(prevId, newId)) {
+                throw new IllegalArgumentException("cannot replace skill group with a descendant");
+            }
         }
         try {
             // Go through the skill table, performing the replacement in parent groups.
@@ -450,7 +456,7 @@ public class Model {
                 final long skillId = cursor.getLong(0);
                 Skill.Builder skillBuilder = Skill.parseFrom(cursor.getBlob(1)).toBuilder();
                 HashSet<Long> groups = new HashSet<>(skillBuilder.getGroupIdList());
-                if (groups.remove(prevId)) {
+                if (groups.remove(prevId) && newId != -1) {
                     groups.add(newId);
                 }
                 skillBuilder.clearGroupId().addAllGroupId(groups);
@@ -461,7 +467,7 @@ public class Model {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 Proto.SkillGroup.Builder skillGroupBuilder = Proto.SkillGroup.parseFrom(cursor.getBlob(1)).toBuilder();
                 HashSet<Long> parents = new HashSet<>(skillGroupBuilder.getParentIdList());
-                if (parents.remove(prevId)) {
+                if (parents.remove(prevId) && newId != -1) {
                     parents.add(newId);
                 }
                 skillGroupBuilder.clearParentId().addAllParentId(parents);
@@ -476,7 +482,12 @@ public class Model {
                 List<Proto.Schedule.Slot> updatedSlots = new LinkedList<>();
                 for (Proto.Schedule.Slot slot : slots) {
                     Proto.Schedule.Slot.Builder slotBuilder = slot.toBuilder();
-                    if (slotBuilder.getGroupId() == prevId) slotBuilder.setGroupId(newId);
+                    if (slotBuilder.getGroupId() == prevId) {
+                        if (newId != -1)
+                            slotBuilder.setGroupId(newId);
+                        else
+                            slotBuilder.clearGroupId();
+                    }
                     updatedSlots.add(slotBuilder.build());
                 }
                 Proto.Schedule.Builder scheduleBuilder = schedule.toBuilder().clearSlot().addAllSlot(updatedSlots);
@@ -488,12 +499,11 @@ public class Model {
     }
 
     /**
-     * Deletes a skill group from the database.  All references to the group are replaced
-     * by references to another group.  Throws IllegalArgumentException if either ID is invalid.
+     * Deletes a skill group from the database.  Throws IllegalArgumentException if the ID is invalid.
      */
 
-    public synchronized void deleteSkillGroup(long idToDelete, long replacementId) throws IllegalArgumentException {
-        replaceSkillGroup(idToDelete, replacementId);
+    public synchronized void deleteSkillGroup(long idToDelete) throws IllegalArgumentException {
+        replaceSkillGroup(idToDelete, -1);
         // Delete the old ID.
         String selection = DatabaseContract.SkillGroupEntry._ID + " = " + idToDelete;
         final int numDeleted = db.delete(DatabaseContract.SkillGroupEntry.TABLE_NAME, selection, null);
@@ -681,8 +691,8 @@ public class Model {
             if (!slot.hasDurationInSecs() || slot.getDurationInSecs() <= 0) {
                 throw new IllegalArgumentException("non-positive schedule_slot duration");
             }
-            if (!slot.hasGroupId() || !isValidSkillGroupId(slot.getGroupId())) {
-                throw new IllegalArgumentException("schedule_slot has missing/invalid group id");
+            if (slot.hasGroupId() && !isValidSkillGroupId(slot.getGroupId())) {
+                throw new IllegalArgumentException("schedule_slot has invalid group id");
             }
         }
     }

@@ -258,7 +258,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 TextView groupName = slotGroupNameTextViews.get(position);
                 groupName.setText(model.getSkillGroupById(slotBuilder.getGroupId()).getName());
                 groupName.setTypeface(null, Typeface.NORMAL);
-                groupName.setBackgroundColor(getResources().getColor(R.color.background));
                 Toast.makeText(getApplicationContext(), R.string.updated_skill_group, Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -342,9 +341,8 @@ public class ScheduleDetailActivity extends AppCompatActivity {
             groupName.setText(skillGroup.getName());
         } else {
             // Newly added schedule_slot without initialized group.
-            groupName.setText(R.string.choose_skill_group);
+            groupName.setText(R.string.slot_without_group_label);
             groupName.setTypeface(null, Typeface.ITALIC);
-            groupName.setBackgroundColor(getResources().getColor(R.color.highlight_background));
         }
         groupName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -484,18 +482,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                     .setPositiveButton(R.string.ok, null)
                     .show();
             return false;
-        } else {
-            for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
-                if (!slotBuilder.hasGroupId()) {
-                    new AlertDialog.Builder(this)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle(R.string.no_slot_group_title)
-                            .setMessage(R.string.no_slot_group_detail)
-                            .setPositiveButton(R.string.ok, null)
-                            .show();
-                    return false;
-                }
-            }
         }
         return true;
     }

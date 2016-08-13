@@ -403,15 +403,6 @@ public class SkillDetailActivity extends AppCompatActivity {
                     .show();
             return false;
         }
-        if (skillBuilder.getGroupIdList().isEmpty()) {
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.no_skill_groups_title)
-                    .setMessage(R.string.no_skill_groups_detail)
-                    .setPositiveButton(R.string.ok, null)
-                    .show();
-            return false;
-        }
         return true;
     }
 

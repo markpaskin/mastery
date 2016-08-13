@@ -45,7 +45,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      * These codes are used to identify results from child intents.
      */
     public static final int SELECT_PARENT_GROUP_TO_ADD = 1;
-    public static final int SELECT_REPLACEMENT_SKILL_GROUP = 2;
 
     /**
      * A handle on the model model.
@@ -230,18 +229,8 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
     }
 
-    private void tryReplaceGroupWith(long replacementId) {
-        if (replacementId == skillGroupId) return;
-        if (model.isAncestorOf(skillGroupId, replacementId)) {
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.skill_group_cycle_title)
-                    .setMessage(R.string.skill_group_cycle_detail)
-                    .setPositiveButton(R.string.ok, null)
-                    .show();
-            return;
-        }
-        model.deleteSkillGroup(skillGroupId, replacementId);
+    private void deleteSkillGroup() {
+        model.deleteSkillGroup(skillGroupId);
         Toast.makeText(getApplicationContext(), R.string.deleted_skill_group, Toast.LENGTH_SHORT).show();
 
         skillGroupId = -1;
@@ -259,9 +248,6 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         if (requestCode == SELECT_PARENT_GROUP_TO_ADD) {
             final long parentGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
             tryAddParentGroup(parentGroupId);
-        } else if (requestCode == SELECT_REPLACEMENT_SKILL_GROUP) {
-            final long replacementGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
-            tryReplaceGroupWith(replacementGroupId);
         }
     }
 
@@ -359,14 +345,12 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         if (addingSkillGroup && !savedChanges) finish();
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(R.string.delete_skill_confirm_title)
+                .setTitle(R.string.delete_skill_group_confirm_title)
                 .setMessage(R.string.delete_skill_group_confirm_detail)
-                .setPositiveButton(R.string.select_skill_group_replacement, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.delete_skill_group, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(getBaseContext(), SkillGroupListActivity.class);
-                        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
-                        SkillGroupDetailActivity.this.startActivityForResult(intent, SELECT_REPLACEMENT_SKILL_GROUP);
+                        SkillGroupDetailActivity.this.deleteSkillGroup();
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)
