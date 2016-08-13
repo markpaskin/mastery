@@ -450,8 +450,9 @@ public class Model {
                 final long skillId = cursor.getLong(0);
                 Skill.Builder skillBuilder = Skill.parseFrom(cursor.getBlob(1)).toBuilder();
                 HashSet<Long> groups = new HashSet<>(skillBuilder.getGroupIdList());
-                groups.remove(prevId);
-                groups.add(newId);
+                if (groups.remove(prevId)) {
+                    groups.add(newId);
+                }
                 skillBuilder.clearGroupId().addAllGroupId(groups);
                 updateSkill(skillId, skillBuilder.build());
             }
@@ -460,8 +461,9 @@ public class Model {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 Proto.SkillGroup.Builder skillGroupBuilder = Proto.SkillGroup.parseFrom(cursor.getBlob(1)).toBuilder();
                 HashSet<Long> parents = new HashSet<>(skillGroupBuilder.getParentIdList());
-                parents.remove(prevId);
-                parents.add(newId);
+                if (parents.remove(prevId)) {
+                    parents.add(newId);
+                }
                 skillGroupBuilder.clearParentId().addAllParentId(parents);
                 updateSkillGroup(skillGroupBuilder.build());
             }
