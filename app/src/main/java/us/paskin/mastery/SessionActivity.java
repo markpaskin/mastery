@@ -605,7 +605,10 @@ public class SessionActivity extends AppCompatActivity {
                 skillNameTextView.setBackgroundColor(getResources().getColor(R.color.error_background));
             }
             TextView groupNameTextView = (TextView) slotView.findViewById(R.id.group_name);
-            groupNameTextView.setText(model.getSkillGroupById(slot.getGroupId()).getName());
+            if (slot.hasGroupId())
+                groupNameTextView.setText(model.getSkillGroupById(slot.getGroupId()).getName());
+            else
+                groupNameTextView.setText(R.string.slot_without_group_label);
             container.addView(slotView);
             setSlotEmphasis(slotIndex, slotIndex == curSlotIndex);
         }

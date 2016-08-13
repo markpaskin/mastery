@@ -169,12 +169,13 @@ public class Model {
      */
     public synchronized boolean hasSkillWithName(String name) {
         String[] projection = {DatabaseContract.SkillEntry._ID};
-        String selection = DatabaseContract.SkillEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        String selection = DatabaseContract.SkillEntry.COLUMN_NAME_NAME + " = ?";
+        String selectionArgs[] = {name};
         Cursor c = db.query(
                 DatabaseContract.SkillEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
-                null,                                     // The values for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
@@ -377,12 +378,13 @@ public class Model {
      */
     public synchronized boolean hasSkillGroupWithName(String name) {
         String[] projection = {DatabaseContract.SkillGroupEntry._ID};
-        String selection = DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        String selection = DatabaseContract.SkillGroupEntry.COLUMN_NAME_NAME + " = ?";
+        String selectionArgs[] = {name};
         Cursor c = db.query(
                 DatabaseContract.SkillGroupEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
-                null,                                     // The values for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
@@ -703,12 +705,13 @@ public class Model {
      */
     public synchronized boolean hasScheduleWithName(String name) {
         String[] projection = {DatabaseContract.ScheduleEntry._ID};
-        String selection = DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME + " = \'" + name + "\'";
+        String selection = DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME + " = ?";
+        String selectionArgs[] = {name};
         Cursor c = db.query(
                 DatabaseContract.ScheduleEntry.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
                 selection,                                // The columns for the WHERE clause
-                null,                                     // The values for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
                 null                                      // The sort order

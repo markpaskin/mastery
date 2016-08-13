@@ -41,9 +41,13 @@ public class Session {
             final float weight = weight(skill, stalenessWeight);
             for (int slotIndex = 0; slotIndex < numSlots; ++slotIndex) {
                 if (!slotCanBeFilledBy(schedule.getSlot(slotIndex), skill, model)) continue;
+                boolean selected = false;
                 if (session[slotIndex] == -1 || random.nextFloat() < (weight / sumWeight[slotIndex])) {
                     session[slotIndex] = skillId;
+                    selected = true;
                 }
+                sumWeight[slotIndex] += weight;
+                if (selected) break;  // don't allow the same skill in two slots
             }
         }
         return session;

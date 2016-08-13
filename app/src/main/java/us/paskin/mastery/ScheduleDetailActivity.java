@@ -256,7 +256,7 @@ public class ScheduleDetailActivity extends AppCompatActivity {
                 slotBuilder.setGroupId(skillGroupId);
                 noteUnsavedChanges();
                 TextView groupName = slotGroupNameTextViews.get(position);
-                groupName.setText(model.getSkillGroupById(slotBuilder.getGroupId()).getName());
+                groupName.setText(model.getSkillGroupById(skillGroupId).getName());
                 groupName.setTypeface(null, Typeface.NORMAL);
                 Toast.makeText(getApplicationContext(), R.string.updated_skill_group, Toast.LENGTH_SHORT).show();
                 break;
