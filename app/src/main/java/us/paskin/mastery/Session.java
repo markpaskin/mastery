@@ -1,16 +1,9 @@
 package us.paskin.mastery;
 
-import android.app.ProgressDialog;
 import android.database.Cursor;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import java.lang.reflect.Array;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 

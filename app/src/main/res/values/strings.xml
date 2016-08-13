@@ -4,7 +4,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
     <string name="Skills">Skills</string>
     <string name="SkillGroups">Skill Groups</string>
     <string name="Schedules">Practice Schedules</string>
@@ -17,11 +16,9 @@
     <string name="name">Name:</string>
     <string name="saved_skill">Skill updated</string>
     <string name="added_skill">Skill added</string>
-    <string name="skill_name">Skill name</string>
 
     <string name="saved_schedule">Schedule updated</string>
     <string name="added_schedule">Schedule added</string>
-    <string name="schedule_name">Schedule name</string>
 
     <string name="title_skill_group_list">Skill groups</string>
     <string name="select_skill_group_title">Select skill group</string>
@@ -29,7 +26,6 @@
     <string name="add_skill_group">Add Skill Group</string>
     <string name="saved_skill_group">Skill group updated</string>
     <string name="added_skill_group">Skill group added</string>
-    <string name="skill_group_name">Skill group name</string>
 
     <string name="last_practiced_never">Not practiced yet</string>
     <string name="last_practiced_recently">Recently practiced</string>
@@ -115,7 +111,6 @@
     <string name="duration_practiced_text">Total practice time: %1s"</string>
 
     <string name="play_button_text">Start</string>
-    <string name="pause_button_text">Pause</string>
     <string name="next_button_text">Next</string>
     <string name="prev_button_text">Previous</string>
 
@@ -148,6 +143,9 @@
     <string name="duplicate_name_detail">This name is already in use.  Please choose another.</string>
 
     <string name="slots_in_schedule_title">Slots</string>
+
+    <string name="add">add</string>
+    <string name="remove">remove</string>
 
     <!-- Strings related to Settings -->
 

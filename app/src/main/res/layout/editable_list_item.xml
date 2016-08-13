@@ -4,11 +4,13 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
+        android:orientation="horizontal"
         android:id="@+id/item"
         android:layout_margin="@dimen/text_margin"
         android:layout_gravity="center_vertical|start" />
 
     <ImageButton
+        android:contentDescription="@string/remove"
         android:layout_weight="1"
         android:id="@+id/remove_button"
         android:src="@android:drawable/ic_input_delete"

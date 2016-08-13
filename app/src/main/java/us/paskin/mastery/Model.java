@@ -15,11 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import java.util.function.UnaryOperator;
 
 import us.paskin.mastery.Proto.Skill;
 
@@ -42,7 +40,7 @@ public class Model {
     /**
      * Maps a group ID to the IDs of its parents.  If there are no parents, the value is null.
      */
-    private HashMap<Long, Set<Long>> parentGroups = new HashMap<Long, Set<Long>>();
+    private HashMap<Long, Set<Long>> parentGroups = new HashMap<>();
 
     private static Model singleton;
 
@@ -87,7 +85,7 @@ public class Model {
                 throw new InternalError("cannot parse protocol buffer");
             }
             if (skillGroup.getParentIdCount() > 0) {
-                parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+                parentGroups.put(skillGroup.getId(), new TreeSet<>(skillGroup.getParentIdList()));
             } else {
                 parentGroups.put(skillGroup.getId(), null);
             }
@@ -181,7 +179,9 @@ public class Model {
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
         );
-        return c.getCount() > 0;
+        int count = c.getCount();
+        c.close();
+        return count > 0;
     }
 
     // The ID of the skill is returned.
@@ -190,8 +190,7 @@ public class Model {
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_NAME, skill.getName());
         values.put(DatabaseContract.SkillEntry.COLUMN_NAME_PROTO, skill.toByteArray());
-        long id = db.insert(DatabaseContract.SkillEntry.TABLE_NAME, null, values);
-        return id;
+        return db.insert(DatabaseContract.SkillEntry.TABLE_NAME, null, values);
     }
 
     /**
@@ -300,7 +299,6 @@ public class Model {
         if (!skill.hasSecondsPracticed()) {
             return null;
         } else {
-            DateUtils dateUtils = new DateUtils();
             return String.format(resources.getString(R.string.duration_practiced_text),
                     DateUtils.formatElapsedTime(skill.getSecondsPracticed()));
         }
@@ -368,7 +366,7 @@ public class Model {
 
     private synchronized void updateSkillGroupParents(Proto.SkillGroup skillGroup) {
         if (skillGroup.getParentIdCount() > 0)
-            parentGroups.put(skillGroup.getId(), new TreeSet<Long>(skillGroup.getParentIdList()));
+            parentGroups.put(skillGroup.getId(), new TreeSet<>(skillGroup.getParentIdList()));
         else
             parentGroups.put(skillGroup.getId(), null);
     }
@@ -389,7 +387,9 @@ public class Model {
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
         );
-        return c.getCount() > 0;
+        int count = c.getCount();
+        c.close();
+        return count > 0;
     }
 
     public synchronized void addSkillGroup(Proto.SkillGroup skillGroup) {
@@ -449,20 +449,19 @@ public class Model {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 final long skillId = cursor.getLong(0);
                 Skill.Builder skillBuilder = Skill.parseFrom(cursor.getBlob(1)).toBuilder();
-                HashSet<Long> groups = new HashSet<Long>(skillBuilder.getGroupIdList());
-                groups.remove(Long.valueOf(prevId));
-                groups.add(Long.valueOf(newId));
+                HashSet<Long> groups = new HashSet<>(skillBuilder.getGroupIdList());
+                groups.remove(prevId);
+                groups.add(newId);
                 skillBuilder.clearGroupId().addAllGroupId(groups);
                 updateSkill(skillId, skillBuilder.build());
             }
             // Go through the skill group table, performing the replacement in parent groups.
             cursor = getSkillGroupList();
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                final long skillGroupId = cursor.getLong(0);
                 Proto.SkillGroup.Builder skillGroupBuilder = Proto.SkillGroup.parseFrom(cursor.getBlob(1)).toBuilder();
-                HashSet<Long> parents = new HashSet<Long>(skillGroupBuilder.getParentIdList());
-                parents.remove(Long.valueOf(prevId));
-                parents.add(Long.valueOf(newId));
+                HashSet<Long> parents = new HashSet<>(skillGroupBuilder.getParentIdList());
+                parents.remove(prevId);
+                parents.add(newId);
                 skillGroupBuilder.clearParentId().addAllParentId(parents);
                 updateSkillGroup(skillGroupBuilder.build());
             }
@@ -472,7 +471,7 @@ public class Model {
                 final long scheduleId = cursor.getLong(0);
                 Proto.Schedule schedule = Proto.Schedule.parseFrom(cursor.getBlob(1));
                 List<Proto.Schedule.Slot> slots = schedule.getSlotList();
-                List<Proto.Schedule.Slot> updatedSlots = new LinkedList<Proto.Schedule.Slot>();
+                List<Proto.Schedule.Slot> updatedSlots = new LinkedList<>();
                 for (Proto.Schedule.Slot slot : slots) {
                     Proto.Schedule.Slot.Builder slotBuilder = slot.toBuilder();
                     if (slotBuilder.getGroupId() == prevId) slotBuilder.setGroupId(newId);
@@ -517,8 +516,8 @@ public class Model {
     Set<Long> getAncestorGroups(long groupId) {
         Set<Long> parents = parentGroups.get(groupId);
         if (parents == null) return null;
-        LinkedList<Long> toProcess = new LinkedList<Long>(parents);
-        Set<Long> ancestors = new HashSet<Long>();
+        LinkedList<Long> toProcess = new LinkedList<>(parents);
+        Set<Long> ancestors = new HashSet<>();
         while (!toProcess.isEmpty()) {
             final long ancestor = toProcess.removeFirst();
             if (ancestor == groupId) throw new InternalError("parent cycle");
@@ -536,8 +535,8 @@ public class Model {
     public synchronized boolean isAncestorOf(long ancestorGroupId, long groupId) {
         Set<Long> parents = parentGroups.get(groupId);
         if (parents == null) return false;
-        LinkedList<Long> toProcess = new LinkedList<Long>(parents);
-        Set<Long> ancestors = new HashSet<Long>();
+        LinkedList<Long> toProcess = new LinkedList<>(parents);
+        Set<Long> ancestors = new HashSet<>();
         while (!toProcess.isEmpty()) {
             final long ancestor = toProcess.removeFirst();
             if (ancestor == groupId) throw new InternalError("parent cycle");
@@ -554,7 +553,7 @@ public class Model {
      * Returns a list of the IDs of all skill groups this skill is in, directly or indirectly.
      */
     public synchronized Set<Long> getAllSkillGroupIds(Skill skill) {
-        Set<Long> result = new TreeSet<Long>();
+        Set<Long> result = new TreeSet<>();
         for (long directGroupId : skill.getGroupIdList()) {
             result.add(directGroupId);
             Set<Long> ancestors = getAncestorGroups(directGroupId);
@@ -702,7 +701,9 @@ public class Model {
                 null,                                     // don't filter by row groups
                 null                                      // The sort order
         );
-        return c.getCount() > 0;
+        int count = c.getCount();
+        c.close();
+        return count > 0;
     }
 
     // The ID of the skill is returned.
@@ -711,8 +712,7 @@ public class Model {
         ContentValues values = new ContentValues();
         values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_NAME, schedule.getName());
         values.put(DatabaseContract.ScheduleEntry.COLUMN_NAME_PROTO, schedule.toByteArray());
-        long id = db.insert(DatabaseContract.ScheduleEntry.TABLE_NAME, null, values);
-        return id;
+        return db.insert(DatabaseContract.ScheduleEntry.TABLE_NAME, null, values);
     }
 
     /**

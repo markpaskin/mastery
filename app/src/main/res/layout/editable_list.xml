@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/parent_group_list"
@@ -10,14 +11,17 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:ignore="UselessParent">
 
+        <!-- This is an empty layout to align with the items. -->
         <TextView
             android:layout_gravity="center_vertical|start"
             android:layout_margin="@dimen/text_margin" />
 
         <ImageButton
             android:layout_weight="1"
+            android:contentDescription="@string/add"
             android:id="@+id/add_button"
             android:src="@android:drawable/ic_input_add"
             android:layout_gravity="center_vertical|end"

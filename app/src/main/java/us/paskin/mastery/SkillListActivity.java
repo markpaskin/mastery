@@ -83,9 +83,6 @@ public class SkillListActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
-        final long skillId = data.getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
-        final boolean deleted = skillId == -1;
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
@@ -94,6 +91,9 @@ public class SkillListActivity extends DrawerActivity {
 /*
         switch (requestCode) {
             case SkillDetailActivity.REQ_EDIT_SKILL:
+                final int skillIndex = data.getIntExtra(SkillDetailActivity.ARG_SKILL_POSITION, -1);
+                final long skillId = data.getLongExtra(SkillDetailActivity.ARG_SKILL_ID, -1);
+                final boolean deleted = skillId == -1;
                 System.out.println("notify for position " + skillIndex);
                 if (deleted) adaptor.notifyItemRemoved(skillIndex);
                 else adaptor.notifyItemChanged(skillIndex);
@@ -136,7 +136,7 @@ public class SkillListActivity extends DrawerActivity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, final int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             cursor.moveToPosition(position);
             final long id = cursor.getLong(0);
             try {
@@ -150,7 +150,7 @@ public class SkillListActivity extends DrawerActivity {
                 public void onClick(View v) {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillDetailActivity.class);
-                    intent.putExtra(SkillDetailActivity.ARG_SKILL_POSITION, position);
+                    intent.putExtra(SkillDetailActivity.ARG_SKILL_POSITION, holder.getAdapterPosition());
                     intent.putExtra(SkillDetailActivity.ARG_SKILL_ID, id);
                     SkillListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL);
                 }

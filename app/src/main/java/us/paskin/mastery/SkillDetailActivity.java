@@ -273,7 +273,7 @@ public class SkillDetailActivity extends AppCompatActivity {
 
     private void removeFromSkillGroup(long skillGroupId) {
         noteUnsavedChanges();
-        LinkedList<Long> groupIds = new LinkedList<Long>(skillBuilder.getGroupIdList());
+        LinkedList<Long> groupIds = new LinkedList<>(skillBuilder.getGroupIdList());
         if (!groupIds.remove(skillGroupId)) {
             throw new InternalError("Could not remove " + skillGroupId);
         }

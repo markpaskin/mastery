@@ -129,11 +129,6 @@ public class SessionActivity extends AppCompatActivity {
     private ArrayList<View> slotViewList;
 
     /**
-     * Used to format durations.
-     */
-    final DateUtils dateUtils = new DateUtils();
-
-    /**
      * Used to update the display while practicing.
      */
     private Timer durationDisplayUpdateTimer;
@@ -183,7 +178,7 @@ public class SessionActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         controlsContainer = findViewById(R.id.controls_container);
         controlsContainer.setVisibility(View.INVISIBLE);
 
@@ -191,7 +186,7 @@ public class SessionActivity extends AppCompatActivity {
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handlePlayPauseButtonClick(view);
+                handlePlayPauseButtonClick();
             }
         });
         prevButton = (ImageButton) findViewById(R.id.prev_button);
@@ -199,14 +194,14 @@ public class SessionActivity extends AppCompatActivity {
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handlePrevButtonClick(view);
+                handlePrevButtonClick();
             }
         });
         nextButton = (ImageButton) findViewById(R.id.next_button);
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                handleNextButtonClick(view);
+                handleNextButtonClick();
             }
         });
 
@@ -283,7 +278,7 @@ public class SessionActivity extends AppCompatActivity {
         clearCurrentNotifications();
     }
 
-    synchronized void handlePlayPauseButtonClick(View view) {
+    synchronized void handlePlayPauseButtonClick() {
         switch (mode) {
             case PLAY:
                 pause();
@@ -469,7 +464,7 @@ public class SessionActivity extends AppCompatActivity {
         ViewCompat.setElevation(view, emphasize ? 25.0f : 5.0f);
     }
 
-    synchronized void handlePrevButtonClick(View view) {
+    synchronized void handlePrevButtonClick() {
         if (curSlotIndex < 1) throw new InternalError("prev from first");
         pause();
         setSlotEmphasis(curSlotIndex, false);
@@ -480,7 +475,7 @@ public class SessionActivity extends AppCompatActivity {
         playPauseButton.setEnabled(session[curSlotIndex] != -1);
     }
 
-    synchronized void handleNextButtonClick(View view) {
+    synchronized void handleNextButtonClick() {
         int numSlots = session.length;
         if (curSlotIndex >= numSlots) throw new InternalError("next from last");
         pause();
@@ -579,8 +574,8 @@ public class SessionActivity extends AppCompatActivity {
         container.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
         int totalDurationInSecs = 0;
-        slotDurationTextViewList = new ArrayList<TextView>();
-        slotViewList = new ArrayList<View>();
+        slotDurationTextViewList = new ArrayList<>();
+        slotViewList = new ArrayList<>();
         for (int slotIndex = 0; slotIndex < session.length; ++slotIndex) {
             View slotView = inflater.inflate(R.layout.session_slot, container, false);
             slotViewList.add(slotView);

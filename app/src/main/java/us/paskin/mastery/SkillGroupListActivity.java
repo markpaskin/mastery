@@ -135,7 +135,6 @@ public class SkillGroupListActivity extends DrawerActivity {
             return;
         }
 
-        final int skillGroupIndex = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.skill_group_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
@@ -144,6 +143,7 @@ public class SkillGroupListActivity extends DrawerActivity {
 /*
         switch (requestCode) {
             case SkillGroupDetailActivity.REQ_EDIT_SKILL_GROUP:
+                final int skillGroupIndex = data.getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
                 adaptor.notifyItemChanged(skillGroupIndex);
                 break;
             case SkillGroupDetailActivity.REQ_ADD_SKILL_GROUP:
@@ -197,7 +197,7 @@ public class SkillGroupListActivity extends DrawerActivity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, final int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             cursor.moveToPosition(position);
             final long id = cursor.getLong(0);
             try {
@@ -215,7 +215,7 @@ public class SkillGroupListActivity extends DrawerActivity {
                     }
                     Context context = v.getContext();
                     Intent intent = new Intent(context, SkillGroupDetailActivity.class);
-                    intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, position);
+                    intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, holder.getAdapterPosition());
                     intent.putExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, id);
                     SkillGroupListActivity.this.startActivityForResult(intent, REQ_EDIT_SKILL_GROUP);
                 }

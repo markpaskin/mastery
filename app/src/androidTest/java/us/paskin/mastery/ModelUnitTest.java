@@ -14,8 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.HashSet;
-
 /**
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
  */
@@ -282,37 +280,6 @@ public class ModelUnitTest extends ActivityInstrumentationTestCase2<SkillDetailA
         Proto.Schedule schedule = model.getScheduleById(scheduleId);
         assertEquals(replacementGroupId, schedule.getSlot(0).getGroupId());
     }
-
-    private void addFakeData() {
-        // Add skill groups.  Note these must be done in reverse dependency order.
-        model.addSkillGroup(Proto.SkillGroup.newBuilder()
-                .setId(0)
-                .setName("Warm-ups")
-                .build());
-        model.addSkillGroup(Proto.SkillGroup.newBuilder()
-                .setId(-1)
-                .setName("Scales")
-                .addParentId(0)
-                .build());
-        model.addSkillGroup(Proto.SkillGroup.newBuilder()
-                .setId(1)
-                .setName("Etudes")
-                .build());
-
-        // Add skills
-        model.addSkill(Proto.Skill.newBuilder()
-                .setName("Carcassi Op. 60 No. 7")
-                .setPriority(6)
-                .addGroupId(1)
-                .build());
-        model.addSkill(Proto.Skill.newBuilder()
-                .setName("Shearer Scale p. 253")
-                .setPriority(2)
-                .addGroupId(-1)
-                .build());
-    }
-
-    ////
 
     @Test
     public void testGetScheduleById() {

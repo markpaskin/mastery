@@ -26,21 +26,24 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@+id/duration_picker"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        style="?android:attr/buttonBarStyle">
 
         <Button
             android:id="@+id/cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle" />
 
         <Button
             android:id="@+id/set_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/done"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle" />
 
     </LinearLayout>
 

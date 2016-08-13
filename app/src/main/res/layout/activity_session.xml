@@ -46,12 +46,12 @@
 
             <ImageButton
                 android:id="@+id/prev_button"
+                android:contentDescription="@string/prev_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_margin="@dimen/control_margin"
-                android:layout_weight="1"
                 android:background="@drawable/control_background"
                 android:elevation="@dimen/control_elevation"
                 android:padding="@dimen/control_padding"
@@ -64,12 +64,12 @@
 
             <ImageButton
                 android:id="@+id/play_pause_button"
+                android:contentDescription="@string/play_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
                 android:layout_margin="@dimen/control_margin"
                 android:layout_toEndOf="@+id/prev_button"
                 android:layout_toRightOf="@+id/prev_button"
-                android:layout_weight="1"
                 android:background="@drawable/control_background"
                 android:elevation="@dimen/control_elevation"
                 android:padding="@dimen/control_padding"
@@ -81,12 +81,12 @@
 
             <ImageButton
                 android:id="@+id/next_button"
+                android:contentDescription="@string/next_button_text"
                 android:layout_width="@dimen/control_side"
                 android:layout_height="@dimen/control_side"
                 android:layout_margin="@dimen/control_margin"
                 android:layout_toEndOf="@+id/play_pause_button"
                 android:layout_toRightOf="@+id/play_pause_button"
-                android:layout_weight="1"
                 android:background="@drawable/control_background"
                 android:elevation="@dimen/control_elevation"
                 android:padding="@dimen/control_padding"

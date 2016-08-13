@@ -238,7 +238,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
 
     private void removeParentGroup(long skillGroupId) {
         noteUnsavedChanges();
-        LinkedList<Long> groupIds = new LinkedList<Long>(skillGroupBuilder.getParentIdList());
+        LinkedList<Long> groupIds = new LinkedList<>(skillGroupBuilder.getParentIdList());
         if (!groupIds.remove(skillGroupId)) {
             throw new InternalError("Could not remove " + skillGroupId);
         }

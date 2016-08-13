@@ -86,9 +86,6 @@ public class ScheduleListActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
-        final int scheduleIndex = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
-        final long scheduleId = data.getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
-        final boolean deleted = scheduleId == -1;
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.schedule_list);
         SimpleItemRecyclerViewAdapter adaptor =
                 (SimpleItemRecyclerViewAdapter) recyclerView.getAdapter();
@@ -97,6 +94,9 @@ public class ScheduleListActivity extends DrawerActivity {
 /*
         switch (requestCode) {
             case ScheduleDetailActivity.REQ_EDIT_SCHEDULE:
+                final int scheduleIndex = data.getIntExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, -1);
+                final long scheduleId = data.getLongExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, -1);
+                final boolean deleted = scheduleId == -1;
                 System.out.println("notify for position " + scheduleIndex);
                 if (deleted) adaptor.notifyItemRemoved(scheduleIndex);
                 else adaptor.notifyItemChanged(scheduleIndex);
@@ -139,7 +139,7 @@ public class ScheduleListActivity extends DrawerActivity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, final int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             cursor.moveToPosition(position);
             final long id = cursor.getLong(0);
             try {
@@ -153,7 +153,7 @@ public class ScheduleListActivity extends DrawerActivity {
                 public void onClick(View v) {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, ScheduleDetailActivity.class);
-                    intent.putExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, position);
+                    intent.putExtra(ScheduleDetailActivity.ARG_SCHEDULE_POSITION, holder.getAdapterPosition());
                     intent.putExtra(ScheduleDetailActivity.ARG_SCHEDULE_ID, id);
                     ScheduleListActivity.this.startActivityForResult(intent, REQ_EDIT_SCHEDULE);
                 }

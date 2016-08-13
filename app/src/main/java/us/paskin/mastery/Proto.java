@@ -3,6 +3,7 @@
 
 package us.paskin.mastery;
 
+@SuppressWarnings("ALL")
 public final class Proto {
   private Proto() {
   }

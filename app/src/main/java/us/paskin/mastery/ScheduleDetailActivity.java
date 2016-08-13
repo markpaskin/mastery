@@ -83,12 +83,12 @@ public class ScheduleDetailActivity extends AppCompatActivity {
     /**
      * Builders for each of the slots in the schedule.
      */
-    private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList<Proto.Schedule.Slot.Builder>();
+    private LinkedList<Proto.Schedule.Slot.Builder> slotBuilders = new LinkedList<>();
 
     /**
      * A map from schedule_slot index to a TextView rendering the skill group name.
      */
-    private ArrayList<TextView> slotGroupNameTextViews = new ArrayList<TextView>();
+    private ArrayList<TextView> slotGroupNameTextViews = new ArrayList<>();
 
     /**
      * This is true if there have been changes that weren't committed.
@@ -512,7 +512,6 @@ public class ScheduleDetailActivity extends AppCompatActivity {
         for (Proto.Schedule.Slot.Builder slotBuilder : slotBuilders) {
             scheduleBuilder.addSlot(slotBuilder);
         }
-        Proto.Schedule newSchedule = scheduleBuilder.build();
         if (!addingSchedule) {
             model.updateSchedule(scheduleId, scheduleBuilder.build());
             Toast.makeText(getApplicationContext(), R.string.saved_schedule, Toast.LENGTH_SHORT).show();

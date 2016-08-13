@@ -1,8 +1,6 @@
 package us.paskin.mastery;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 /**
- * Created by baq on 8/8/16.
+ * A sort-of widget to manage a list with rows that can be added/removed.
  */
 public class EditableList {
     final private TableLayout tableLayout;
@@ -28,7 +26,6 @@ public class EditableList {
         this.tableLayout = tableLayout;
         this.onItemRemovedListener = onRemoved;
         tableLayout.findViewById(R.id.add_button).setOnClickListener(onAdd);
-        LayoutInflater inflater = LayoutInflater.from(tableLayout.getContext());
     }
 
     public interface OnItemRemovedListener {
