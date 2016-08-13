@@ -72,12 +72,21 @@
     <string name="skill_self_parent">Skill group cannot be its own parent.</string>
     <string name="skill_group_already_present">Skill already in selected group.</string>
     <string name="skill_group_removed">Skill group removed.</string>
-    <string name="skill_group_cycle_title">Skill Group Cycle</string>
-    <string name="skill_group_cycle_detail">Skill groups must be arranged in a hierarchy; the requested action would create a cycle.</string>
+    <string name="skill_group_cycle_title">Skill Group Cycle Error</string>
+    <string name="skill_group_cycle_detail">The requested action would create a parenthood cycle.</string>
 
     <string name="delete_skill">Delete skill</string>
     <string name="delete_skill_confirm_title">Delete skill?</string>
     <string name="cannot_undo_detail">This action cannot be undone.</string>
+
+    <string name="delete_skill_group">Delete skill group</string>
+    <string name="delete_skill_group_confirm_title">Delete skill group?</string>
+    <string name="delete_skill_group_confirm_detail">
+        To delete this skill group, you must select another group for its skills and slots.
+    </string>
+    <string name="select_skill_group_replacement">Choose Replacement</string>
+    <string name="deleted_skill_group">Deleted skill group.</string>
+
 
     <string name="title_schedule_list">Practice Schedules</string>
     <string name="title_schedule_detail">Schedule Details</string>

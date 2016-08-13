@@ -1,6 +1,7 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,9 +37,15 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
     public static final String ARG_SKILL_GROUP_POSITION = "skill_group_pos";
 
     /**
-     * This intent type is used to identify results from child intents.
+     * If supplied and true, then the skill cannot be deleted.
+     */
+    public static final String ARG_DISABLE_DELETE = "disable_delete";
+
+    /**
+     * These codes are used to identify results from child intents.
      */
     public static final int SELECT_PARENT_GROUP_TO_ADD = 1;
+    public static final int SELECT_REPLACEMENT_SKILL_GROUP = 2;
 
     /**
      * A handle on the model model.
@@ -49,6 +56,11 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
      * True if we're adding a new skill group; false if we're editing one.
      */
     private boolean addingSkillGroup;
+
+    /**
+     * True if ARG_DELETE_DISABLED was part of the launching intent.
+     */
+    private boolean deleteDisabled;
 
     /**
      * The ID of the skill being edited (or -1 if one is being created).
@@ -110,6 +122,9 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
             skillGroupPosition = getIntent().getIntExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_POSITION, -1);
             skillGroupId = getIntent().getLongExtra(SkillGroupDetailActivity.ARG_SKILL_GROUP_ID, -1);
         }
+
+        deleteDisabled = getIntent().getBooleanExtra(ARG_DISABLE_DELETE, false);
+
         // Initialize the state variables.
         if (savedInstanceState != null) {
             unsavedChanges = savedInstanceState.getBoolean(STATE_unsavedChanges);
@@ -190,7 +205,7 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         unsavedChanges = true;
         if (revertMenuItem != null) revertMenuItem.setVisible(true);
     }
-    
+
     private void tryAddParentGroup(long parentGroupId) {
         if (!addingSkillGroup && parentGroupId == skillGroupId) {
             Toast.makeText(getApplicationContext(), R.string.skill_self_parent, Toast.LENGTH_SHORT).show();
@@ -215,6 +230,26 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), R.string.added_skill_group, Toast.LENGTH_SHORT).show();
     }
 
+    private void tryReplaceGroupWith(long replacementId) {
+        if (replacementId == skillGroupId) return;
+        if (model.isAncestorOf(skillGroupId, replacementId)) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(R.string.skill_group_cycle_title)
+                    .setMessage(R.string.skill_group_cycle_detail)
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
+            return;
+        }
+        model.deleteSkillGroup(skillGroupId, replacementId);
+        Toast.makeText(getApplicationContext(), R.string.deleted_skill_group, Toast.LENGTH_SHORT).show();
+
+        skillGroupId = -1;
+        unsavedChanges = false;
+        savedChanges = true;
+        finish();
+    }
+
     /**
      * Handles results from intents launched by this activity.
      */
@@ -224,6 +259,9 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         if (requestCode == SELECT_PARENT_GROUP_TO_ADD) {
             final long parentGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
             tryAddParentGroup(parentGroupId);
+        } else if (requestCode == SELECT_REPLACEMENT_SKILL_GROUP) {
+            final long replacementGroupId = data.getLongExtra(SkillGroupListActivity.ARG_SELECTED_SKILL_GROUP_ID, -1);
+            tryReplaceGroupWith(replacementGroupId);
         }
     }
 
@@ -233,6 +271,8 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.skill_group_detail, menu);
         revertMenuItem = menu.findItem(R.id.revert_changes);
         revertMenuItem.setVisible(unsavedChanges);
+        if (addingSkillGroup || deleteDisabled)
+            menu.findItem(R.id.delete_skill_group).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -282,6 +322,9 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
         } else if (id == R.id.revert_changes) {
             handleRevertChanges();
             return true;
+        } else if (id == R.id.delete_skill_group) {
+            handleDeleteSkillGroup();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -305,6 +348,28 @@ public class SkillGroupDetailActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton(R.string.no, null)
+                .show();
+    }
+
+
+    /**
+     * Called if the user requests to delete this skill group.
+     */
+    void handleDeleteSkillGroup() {
+        if (addingSkillGroup && !savedChanges) finish();
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.delete_skill_confirm_title)
+                .setMessage(R.string.delete_skill_group_confirm_detail)
+                .setPositiveButton(R.string.select_skill_group_replacement, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(getBaseContext(), SkillGroupListActivity.class);
+                        intent.putExtra(SkillGroupListActivity.ARG_MODE_SELECT, true);
+                        SkillGroupDetailActivity.this.startActivityForResult(intent, SELECT_REPLACEMENT_SKILL_GROUP);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
