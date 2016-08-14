@@ -360,9 +360,9 @@ public class SkillDetailActivity extends AppCompatActivity {
         practicingSince = new Date();
         playPauseButton.setImageResource(R.drawable.pause);
         startDurationUpdates();
+        lastPracticedText.setText(getResources().getString(R.string.last_practiced_recently));
         lastPracticedText.setVisibility(View.VISIBLE);
         durationPracticedText.setVisibility(View.VISIBLE);
-        lastPracticedText.setVisibility(View.GONE);
     }
 
     void startDurationUpdates() {
