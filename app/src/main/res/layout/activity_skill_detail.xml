@@ -56,6 +56,7 @@
         android:src="@drawable/play"
         android:tint="@android:color/white"
         app:layout_anchor="@+id/skill_detail_container"
-        app:layout_anchorGravity="top|end" />
+        app:layout_anchorGravity="top|end"
+        app:layout_behavior="us.paskin.mastery.ScrollAwareFABBehavior" />
 
 </android.support.design.widget.CoordinatorLayout>
