@@ -1,14 +1,22 @@
 package us.paskin.mastery;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +30,11 @@ import android.widget.Toast;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An activity representing a single Skill detail screen. This
@@ -50,6 +62,12 @@ public class SkillDetailActivity extends AppCompatActivity {
      * This intent type is used to identify results from child intents.
      */
     public static final int SELECT_SKILL_GROUP_TO_ADD = 1;
+
+    /**
+     * The ID of the notification posted by this activity to show the current skill, or when the
+     * user should move to the next slot or stop practicing.
+     */
+    public static int STATUS_NOTIFICATION_ID = 1;
 
     /**
      * True if we're adding a new skill; false if we're editing one.
@@ -95,12 +113,52 @@ public class SkillDetailActivity extends AppCompatActivity {
     private static final String STATE_savedChanges = "savedChanges";
 
     /**
+     * The keys for the notification preferences.
+     */
+    public static String PREF_ENABLE_NOTIFICATIONS = "enable_practice_notifications";
+
+    /**
+     * Cached preferences.
+     */
+    private boolean enableNotifications;
+
+    /**
+     * The current mode.
+     */
+    private static final int PAUSE = 1;
+    private static final int PLAY = 2;
+
+    private int mode = PAUSE;
+    private static final String STATE_mode = "mode";
+
+    /**
+     * If the mode is PLAY, then this is when we entered that mode.
+     */
+    private Date practicingSince;
+    private static final String STATE_practicingSince = "practicingSince";
+
+    /**
+     * The total number of seconds the skill has been practiced, excluding the current play interval.
+     */
+    private long prevPracticeSecs;
+
+    /**
+     * Used to update the display while practicing.
+     */
+    private Timer durationDisplayUpdateTimer;
+
+    /**
      * This is the table used to render the skill groups this skill is in.
      */
     EditableList skillGroupList;
 
     MenuItem revertMenuItem;
-    
+
+    FloatingActionButton playPauseButton;
+
+    TextView lastPracticedText;
+    TextView durationPracticedText;
+
     /**
      * Called to save the activity's state.
      */
@@ -110,6 +168,10 @@ public class SkillDetailActivity extends AppCompatActivity {
         outState.putByteArray(STATE_skillBuilder, skillBuilder.build().toByteArray());
         outState.putBoolean(STATE_unsavedChanges, unsavedChanges);
         outState.putBoolean(STATE_savedChanges, savedChanges);
+        outState.putInt(STATE_mode, mode);
+        if (mode == PLAY) {
+            outState.putLong(STATE_practicingSince, practicingSince.getTime());
+        }
     }
 
     /**
@@ -131,8 +193,13 @@ public class SkillDetailActivity extends AppCompatActivity {
 
         deleteDisabled = getIntent().getBooleanExtra(ARG_DISABLE_DELETE, false);
 
+        // Cache the preferences.
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        enableNotifications = sharedPreferences.getBoolean(PREF_ENABLE_NOTIFICATIONS, true);
+
         // Initialize the state.
         Proto.Skill skill = null;  // null if addingSkill
+        mode = PAUSE;
         if (savedInstanceState != null) {
             unsavedChanges = savedInstanceState.getBoolean(STATE_unsavedChanges);
             savedChanges = savedInstanceState.getBoolean(STATE_savedChanges);
@@ -142,12 +209,17 @@ public class SkillDetailActivity extends AppCompatActivity {
                 throw new InternalError("cannot parse protocol buffer");
             }
             skill = skillBuilder.build();
+            mode = savedInstanceState.getInt(STATE_mode);
+            if (mode == PLAY) {
+                practicingSince = new Date(savedInstanceState.getLong(STATE_practicingSince));
+            }
         } else if (addingSkill) {
             skillBuilder = Proto.Skill.newBuilder();
         } else {
             skill = model.getSkillById(skillId);
             skillBuilder = skill.toBuilder();
         }
+        prevPracticeSecs = skillBuilder.getSecondsPracticed();
 
         setContentView(R.layout.activity_skill_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -160,8 +232,8 @@ public class SkillDetailActivity extends AppCompatActivity {
         }
 
         EditText nameEditText = ((EditText) findViewById(R.id.skill_name_edit_text));
-        TextView lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
-        TextView durationPracticedText = ((TextView) findViewById(R.id.duration_practiced));
+        lastPracticedText = ((TextView) findViewById(R.id.last_practiced));
+        durationPracticedText = ((TextView) findViewById(R.id.duration_practiced));
 
         // Hide the last practiced text if we're adding a new skill.
         if (addingSkill) {
@@ -245,6 +317,147 @@ public class SkillDetailActivity extends AppCompatActivity {
                 addParentGroupToTable(groupId);
             }
         }
+
+        // Initialize the play/pause button.
+        playPauseButton = (FloatingActionButton) findViewById(R.id.fab);
+        playPauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handlePlayPauseButtonClick();
+            }
+        });
+        if (mode == PLAY) {
+            playPauseButton.setImageResource(R.drawable.pause);
+        } else {
+            playPauseButton.setImageResource(R.drawable.play);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mode == PLAY) startDurationUpdates();
+        clearCurrentNotifications();
+    }
+
+    synchronized void handlePlayPauseButtonClick() {
+        switch (mode) {
+            case PLAY:
+                pause();
+                break;
+            case PAUSE:
+                play();
+                break;
+        }
+    }
+
+    /**
+     * Called to start PLAY mode.
+     */
+    void play() {
+        if (!saveSkill()) return;
+        mode = PLAY;
+        practicingSince = new Date();
+        playPauseButton.setImageResource(R.drawable.pause);
+        startDurationUpdates();
+        lastPracticedText.setVisibility(View.VISIBLE);
+        durationPracticedText.setVisibility(View.VISIBLE);
+        lastPracticedText.setVisibility(View.GONE);
+    }
+
+    void startDurationUpdates() {
+        durationDisplayUpdateTimer = new Timer();
+        final long msInSec = TimeUnit.SECONDS.toMillis(1);
+        durationDisplayUpdateTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SkillDetailActivity.this.updateDuration();
+                    }
+                });
+            }
+        }, msInSec, msInSec);
+    }
+
+    void stopDurationUpdates() {
+        if (durationDisplayUpdateTimer == null) return;
+        durationDisplayUpdateTimer.cancel();
+        durationDisplayUpdateTimer.purge();
+    }
+
+    /**
+     * Returns the number of seconds that the skill has been practiced.
+     */
+    long getTotalSecondsPracticed() {
+        int secondsPracticed = 0;
+        if (practicingSince != null) {
+            Date now = new Date();
+            final long millisPracticed = now.getTime() - practicingSince.getTime();
+            secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
+        }
+        return secondsPracticed + prevPracticeSecs;
+    }
+
+    synchronized void updateDuration() {
+        if (practicingSince == null) return;
+        durationPracticedText.setTypeface(null, Typeface.BOLD);
+        durationPracticedText.setText(String.format(getResources().getString(R.string.duration_practiced_text),
+                DateUtils.formatElapsedTime(getTotalSecondsPracticed())));
+    }
+
+    /**
+     * Cancels any existing or scheduled notifications.
+     */
+    void clearCurrentNotifications() {
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(STATUS_NOTIFICATION_ID);
+    }
+
+    /**
+     * Generates a notification that shows that a practice is ongoing.
+     */
+    private void startPracticingNotification() {
+        if (!enableNotifications) return;
+        Intent notificationIntent = new Intent(this, SkillDetailActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        NotificationCompat.Builder mBuilder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.play)
+                        .setContentTitle(getResources().getString(R.string.status_notification_title))
+                        .setContentText(skillBuilder.getName())
+                        .setContentIntent(intent)
+                        .setAutoCancel(false);
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(STATUS_NOTIFICATION_ID, mBuilder.build());
+    }
+
+    /**
+     * Called to start PAUSE mode.  (This has nothing to do with onPause.)
+     */
+    synchronized void pause() {
+        mode = PAUSE;
+        accumulatePracticeTime();
+        playPauseButton.setImageResource(R.drawable.play);
+        durationPracticedText.setTypeface(null, Typeface.NORMAL);
+        stopDurationUpdates();
+        clearCurrentNotifications();
+    }
+
+    synchronized void accumulatePracticeTime() {
+        if (practicingSince != null) {
+            Date now = new Date();
+            final long millisPracticed = now.getTime() - practicingSince.getTime();
+            final int secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
+            prevPracticeSecs += secondsPracticed;
+            model.addPracticeSecondsToSkill(secondsPracticed, skillId);
+            saveSkill();
+        }
+        practicingSince = null;
     }
 
     void noteUnsavedChanges() {
@@ -391,6 +604,16 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
+     *
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        stopDurationUpdates();
+        if (mode == PLAY) startPracticingNotification();
+    }
+
+    /**
      * Validates the current input and shows error dialogs if needed.
      */
     boolean validate() {
@@ -436,10 +659,26 @@ public class SkillDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Finishes if any pending changes can be saved.
+     * Finishes if any pending practice is ended and any pending changes can be saved.
      */
     private void maybeFinish() {
-        if (saveSkill()) finish();
+        if (mode == PLAY) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(R.string.cancel_session_title)
+                    .setMessage(R.string.cancel_session_detail)
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            pause();
+                            if (saveSkill()) finish();
+                        }
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        } else {
+            if (saveSkill()) finish();
+        }
     }
 
     /**
