@@ -17,14 +17,18 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -138,11 +142,6 @@ public class SkillDetailActivity extends AppCompatActivity {
     private static final String STATE_practicingSince = "practicingSince";
 
     /**
-     * The total number of seconds the skill has been practiced, excluding the current play interval.
-     */
-    private long prevPracticeSecs;
-
-    /**
      * Used to update the display while practicing.
      */
     private Timer durationDisplayUpdateTimer;
@@ -219,7 +218,6 @@ public class SkillDetailActivity extends AppCompatActivity {
             skill = model.getSkillById(skillId);
             skillBuilder = skill.toBuilder();
         }
-        prevPracticeSecs = skillBuilder.getSecondsPracticed();
 
         setContentView(R.layout.activity_skill_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
@@ -336,7 +334,10 @@ public class SkillDetailActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        if (mode == PLAY) startDurationUpdates();
+        if (mode == PLAY) {
+            startDurationUpdates();
+            durationPracticedText.setTypeface(null, Typeface.BOLD);
+        }
         clearCurrentNotifications();
     }
 
@@ -363,6 +364,7 @@ public class SkillDetailActivity extends AppCompatActivity {
         lastPracticedText.setText(getResources().getString(R.string.last_practiced_recently));
         lastPracticedText.setVisibility(View.VISIBLE);
         durationPracticedText.setVisibility(View.VISIBLE);
+        durationPracticedText.setTypeface(null, Typeface.BOLD);
     }
 
     void startDurationUpdates() {
@@ -390,19 +392,17 @@ public class SkillDetailActivity extends AppCompatActivity {
     /**
      * Returns the number of seconds that the skill has been practiced.
      */
-    long getTotalSecondsPracticed() {
+    synchronized long getTotalSecondsPracticed() {
         int secondsPracticed = 0;
         if (practicingSince != null) {
             Date now = new Date();
             final long millisPracticed = now.getTime() - practicingSince.getTime();
             secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
         }
-        return secondsPracticed + prevPracticeSecs;
+        return secondsPracticed + skillBuilder.getSecondsPracticed();
     }
 
     synchronized void updateDuration() {
-        if (practicingSince == null) return;
-        durationPracticedText.setTypeface(null, Typeface.BOLD);
         durationPracticedText.setText(String.format(getResources().getString(R.string.duration_practiced_text),
                 DateUtils.formatElapsedTime(getTotalSecondsPracticed())));
     }
@@ -441,10 +441,10 @@ public class SkillDetailActivity extends AppCompatActivity {
      */
     synchronized void pause() {
         mode = PAUSE;
+        stopDurationUpdates();
         accumulatePracticeTime();
         playPauseButton.setImageResource(R.drawable.play);
         durationPracticedText.setTypeface(null, Typeface.NORMAL);
-        stopDurationUpdates();
         clearCurrentNotifications();
     }
 
@@ -453,11 +453,14 @@ public class SkillDetailActivity extends AppCompatActivity {
             Date now = new Date();
             final long millisPracticed = now.getTime() - practicingSince.getTime();
             final int secondsPracticed = (int) TimeUnit.MILLISECONDS.toSeconds(millisPracticed);
-            prevPracticeSecs += secondsPracticed;
-            model.addPracticeSecondsToSkill(secondsPracticed, skillId);
-            saveSkill();
+            practicingSince = null;
+            accumulatePracticeTime(secondsPracticed);
         }
-        practicingSince = null;
+    }
+
+    synchronized void accumulatePracticeTime(int secondsPracticed) {
+        skillBuilder = model.addPracticeSecondsToSkill(secondsPracticed, skillId);
+        updateDuration();
     }
 
     void noteUnsavedChanges() {
@@ -543,6 +546,9 @@ public class SkillDetailActivity extends AppCompatActivity {
         } else if (id == R.id.revert_changes) {
             handleRevertChanges();
             return true;
+        } else if (id == R.id.add_practice) {
+            handleAddPractice();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -593,6 +599,33 @@ public class SkillDetailActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
+    }
+
+    /**
+     * Called if the user requests to add a practice.
+     */
+    void handleAddPractice() {
+        if (!saveSkill()) return;
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.add_practice)
+                .setMessage(R.string.add_practice_detail)
+                .setView(R.layout.previous_practice)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.add, null)
+                .create();
+        dialog.show();
+        final NumberPicker durationPicker = (NumberPicker) dialog.findViewById(R.id.duration_picker);
+        durationPicker.setMinValue(0);
+        durationPicker.setMaxValue(60);
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SkillDetailActivity.this.accumulatePracticeTime((int) TimeUnit.MINUTES.toSeconds(durationPicker.getValue()));
+                Toast.makeText(getApplicationContext(), R.string.added_practice, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
     }
 
     /**

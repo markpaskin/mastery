@@ -220,8 +220,9 @@ public class Model {
 
     /**
      * Updates the model to reflect that the skill has been practiced for an additional amount of time.
+     * Returns a builder reflecting the skill's post-update state.
      */
-    public synchronized void addPracticeSecondsToSkill(int seconds, long skillId) {
+    public synchronized Skill.Builder addPracticeSecondsToSkill(int seconds, long skillId) {
         Skill.Builder skillBuilder = getSkillById(skillId).toBuilder();
         final long curDateInSecs = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());
         skillBuilder.setSecondsPracticed(skillBuilder.getSecondsPracticed() + seconds)
@@ -239,6 +240,7 @@ public class Model {
             skillBuilder.setEstSecondsPracticed100Days(seconds);
         }
         updateSkill(skillId, skillBuilder.build());
+        return skillBuilder;
     }
 
     /**

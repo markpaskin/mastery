@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/add_practice"
+        android:title="@string/add_practice"
+        android:icon="@android:drawable/ic_input_add"
+        app:showAsAction="never"
+        android:orderInCategory="1" />
+    <item
         android:id="@+id/revert_changes"
         android:title="@string/revert_changes"
         android:icon="@android:drawable/ic_menu_revert"

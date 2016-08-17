@@ -153,6 +153,10 @@
     <string name="add">add</string>
     <string name="remove">remove</string>
 
+    <string name="add_practice">Add Practice</string>
+    <string name="added_practice">Added practice.</string>
+    <string name="add_practice_detail">Enter the number of minutes you practiced this skill:</string>
+
     <!-- Strings related to Settings -->
 
     <string name="pref_header_scheduling">Scheduling</string>
