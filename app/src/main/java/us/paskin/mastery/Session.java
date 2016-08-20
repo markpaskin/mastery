@@ -77,7 +77,7 @@ public class Session {
         // Map the estimated amount of practice time in the past 100 days to a staleness value in [0, 1].
         final long estHoursPracticed = TimeUnit.SECONDS.toHours(skill.getEstSecondsPracticed100Days());
         final long halfPoint = 5;
-        final double stalenessZeroOne = ((double) estHoursPracticed / (double) (estHoursPracticed + halfPoint));
+        final double stalenessZeroOne = 1.0 - ((double) estHoursPracticed / (double) (estHoursPracticed + halfPoint));
         // Compute a weighted sum.
         final float priorityWeight = 1.0f - stalenessWeight;
         return stalenessWeight * (float) stalenessZeroOne + priorityWeight * priorityZeroOne;
